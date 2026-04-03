@@ -358,7 +358,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
 Every slide is a `<section data-slide="">` containing a single `<div>` that controls the layout. The CSS rule `[data-slide] > * { min-height: 100%; width: 100%; }` ensures the inner div always fills the slide.
 
-**Top-left anchored** (DEFAULT -- use for most slides: charts, tables, text, timelines, dashboards, diagrams, teams, process flows):
+**Top-left anchored with text content** (DEFAULT for: bullet lists, numbered lists, text paragraphs, tables):
 
 ```tsx
 <section data-slide="">
@@ -366,12 +366,34 @@ Every slide is a `<section data-slide="">` containing a single `<div>` that cont
     style={{ padding: '4rem 6rem' }}>
     <p className="section-label mb-3">Section name</p>
     <h2 className="text-[2.5rem] font-bold mb-10">Slide title</h2>
-    {/* Content flows downward from the title */}
+    {/* Text content anchored below the title, flows downward */}
+    <ul className="space-y-4 text-lg">
+      <li data-step="" className="step-fade">First point</li>
+      <li data-step="" className="step-fade">Second point</li>
+    </ul>
   </div>
 </section>
 ```
 
-Do NOT add `justify-center` or `items-center` to content slides. Content starts near the top and flows down. The bottom portion of the slide is breathing room.
+Text, bullets, and tables stay anchored below the title. The bottom of the slide is breathing room. Do NOT vertically center text content.
+
+**Top-left title with centered visual** (for: diagrams, charts, process flows, shapes, frameworks, team grids, icon grids):
+
+```tsx
+<section data-slide="">
+  <div className="flex flex-col w-full"
+    style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Section name</p>
+    <h2 className="text-[2.5rem] font-bold mb-8">Slide title</h2>
+    {/* Visual content centered in the remaining space below the title */}
+    <div className="flex-1 flex items-center justify-center">
+      {/* Diagram, chart, shape layout, framework, etc. */}
+    </div>
+  </div>
+</section>
+```
+
+The title stays top-left anchored. The visual fills and centers within the remaining space below it. Use `flex-1 flex items-center justify-center` on the visual container.
 
 **Centered** (ONLY for: big stat, section divider, quote, closing):
 
@@ -443,23 +465,25 @@ Give elements the same `data-magic-id` on two consecutive slides. When navigatin
 
 | Type | Layout | Key elements |
 |------|--------|-------------|
-| Title | **Bottom-left** | accent-line, h1, subtitle, metadata row. Top 55% is empty breathing room. |
+| Title | **Bottom-left** | accent-line, h1, subtitle, metadata row. Top 55% is empty. |
 | Section divider | **Centered** | Section number label, h2. bg-section background. |
-| Big stat | **Centered** | Large number with stat-glow, label, delta badge. Only type where the number dominates. |
-| Chart | **Top-left** | section-label, h2, card-surface with chart, annotation below chart. |
-| Text / bullet list | **Top-left** | section-label, h2, body text or list with data-step reveals. |
-| Comparison table | **Top-left** | section-label, h2, card-surface with slide-table, rows reveal via data-step. |
-| Timeline | **Top-left** | section-label, h2, timeline-track with dots below. |
-| Team | **Top-left** | section-label, h2, grid of circle shapes with images below. |
-| Dashboard | **Top-left** | section-label, h2, 3x2 grid of card-surface KPI cards. |
-| Process flow | **Top-left** | section-label, h2, shapes connected by chevrons below title. |
-| Diagram | **Top-left** | section-label, h2, Mermaid or HTML/CSS diagram below. |
-| Icon grid | **Top-left** | section-label, h2, 3x2 grid of shape+label+description. |
-| Before/after | **Split** | grid-cols-2 with different backgrounds per side. Title in each half. |
-| Quote | **Centered** | Open-quote glyph, blockquote (max-w-3xl), avatar + attribution. |
+| Big stat | **Centered** | Large number with stat-glow, label, delta badge. |
+| Text / bullet list | **Top-left text** | section-label, h2, bullets anchored below title. |
+| Comparison table | **Top-left text** | section-label, h2, card-surface with slide-table. |
+| Chart | **Top-left + centered visual** | section-label, h2 anchored top-left. Chart centered in remaining space. |
+| Diagram | **Top-left + centered visual** | section-label, h2 anchored top-left. Diagram centered below. |
+| Process flow | **Top-left + centered visual** | section-label, h2. Shapes centered in remaining space. |
+| Team | **Top-left + centered visual** | section-label, h2. Avatar grid centered below. |
+| Icon grid | **Top-left + centered visual** | section-label, h2. 3x2 grid centered below. |
+| Dashboard | **Top-left text** | section-label, h2, 3x2 grid of KPI cards below title. |
+| Timeline | **Top-left text** | section-label, h2, timeline-track below title. |
+| Before/after | **Split** | grid-cols-2 with different backgrounds per side. |
+| Quote | **Centered** | Open-quote glyph, blockquote (max-w-3xl), attribution. |
 | Closing | **Centered** | accent-line, h2, contact info. |
 
-Most slides are top-left anchored. Only 3 types (big stat, section divider, quote/closing) use centered layout. If you are unsure, use top-left.
+**Two layout sub-types for top-left anchored slides:**
+- **Top-left text**: Text, bullets, tables, KPIs stay anchored directly below the title. No vertical centering.
+- **Top-left + centered visual**: Title stays top-left. The visual (chart, diagram, shapes) is centered both horizontally and vertically in the remaining space below the title using `flex-1 flex items-center justify-center`.
 
 ## Tips
 

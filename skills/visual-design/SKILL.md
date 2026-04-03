@@ -42,7 +42,7 @@ This is the most important layout rule. The majority of slides in any profession
 Every other slide type -- charts, tables, text, timelines, dashboards, diagrams, team slides, process flows, comparisons, icon grids -- uses top-left anchored layout. The title starts near the top of the slide at a consistent Y position across all content slides. This consistency is what makes a deck feel like a designed system rather than a collection of individual slides.
 
 ```
-WRONG (centered -- looks like a default template):
+WRONG (everything centered -- looks like a default template):
 +-------------------------------------------+
 |                                           |
 |                                           |
@@ -52,17 +52,33 @@ WRONG (centered -- looks like a default template):
 |                                           |
 +-------------------------------------------+
 
-RIGHT (top-left anchored -- looks professional):
+RIGHT for text/bullets/tables (anchored below title):
 +-------------------------------------------+
 |  SECTION LABEL                            |
 |  Title                                    |
 |                                           |
-|  Content here                             |
-|  (chart, table, text, diagram, etc.)      |
+|  - Bullet point one                       |
+|  - Bullet point two                       |
+|  - Bullet point three                     |
 |                                           |
 |                    [breathing room]       |
 +-------------------------------------------+
+
+RIGHT for diagrams/charts/shapes (title top-left, visual centered):
++-------------------------------------------+
+|  SECTION LABEL                            |
+|  Title                                    |
+|                                           |
+|         [diagram or chart centered        |
+|          in the remaining space]          |
+|                                           |
++-------------------------------------------+
 ```
+
+There are two sub-patterns for top-left anchored slides:
+
+1. **Text content** (bullets, numbered lists, tables, KPI grids): Content flows directly below the title, anchored to the left. The bottom is breathing room.
+2. **Visual content** (diagrams, charts, shapes, process flows, icon grids, team avatars): Title stays top-left. The visual centers both horizontally and vertically in the remaining space below the title. Use `flex-1 flex items-center justify-center` on the visual container.
 
 ## The one-thing rule
 

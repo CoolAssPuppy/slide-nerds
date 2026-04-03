@@ -188,13 +188,25 @@ Every slide is a `<section data-slide="">`. Inside it, you can use:
 The default layout is **top-left anchored**. Title and content start near the top and flow downward. Do NOT vertically center content on most slides. Centered layout is only for big stat, section divider, quote, and closing slides.
 
 ```tsx
-{/* TOP-LEFT ANCHORED (default -- charts, tables, text, timelines, dashboards, diagrams) */}
+{/* TOP-LEFT WITH TEXT (bullets, lists, tables -- content anchored below title) */}
 <section data-slide="">
   <div className="bg-mesh-cool flex flex-col w-full"
     style={{ padding: '4rem 6rem' }}>
     <p className="section-label mb-3">Section name</p>
     <h2 className="text-[2.5rem] font-bold mb-10">Slide title</h2>
-    {/* Content flows downward. Bottom of the slide is breathing room. */}
+    {/* Text content flows downward. Bottom is breathing room. */}
+  </div>
+</section>
+
+{/* TOP-LEFT TITLE + CENTERED VISUAL (diagrams, charts, shapes, process flows) */}
+<section data-slide="">
+  <div className="flex flex-col w-full"
+    style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Section name</p>
+    <h2 className="text-[2.5rem] font-bold mb-8">Slide title</h2>
+    <div className="flex-1 flex items-center justify-center">
+      {/* Visual centered in remaining space below the title */}
+    </div>
   </div>
 </section>
 
