@@ -13,7 +13,7 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
 
   const handleSlideChange = useCallback(
     (slide: number) => navigation.goToSlide(slide),
-    [navigation],
+    [navigation.goToSlide],
   )
 
   const presenter = usePresenterMode({
@@ -57,16 +57,12 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [navigation, presenter])
+  }, [navigation.nextStep, navigation.previousStep, presenter.openPresenterWindow])
 
   useEffect(() => {
-    const handleDoubleClick = () => {
-      navigation.previousStep()
-    }
-
-    window.addEventListener('dblclick', handleDoubleClick)
-    return () => window.removeEventListener('dblclick', handleDoubleClick)
-  }, [navigation])
+    window.addEventListener('dblclick', navigation.previousStep)
+    return () => window.removeEventListener('dblclick', navigation.previousStep)
+  }, [navigation.previousStep])
 
   useEffect(() => {
     registerExportApi()

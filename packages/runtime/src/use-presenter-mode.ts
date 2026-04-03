@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 type PresenterMessage = {
   type: 'slide-change' | 'step-change'
@@ -25,6 +25,7 @@ export const usePresenterMode = (options: PresenterModeOptions): PresenterModeRe
   const { currentSlide, currentStep, onSlideChange, onStepChange } = options
   const channelRef = useRef<BroadcastChannel | null>(null)
   const presenterWindowRef = useRef<Window | null>(null)
+  const [isPresenterOpen, setIsPresenterOpen] = useState(false)
 
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return
@@ -63,16 +64,18 @@ export const usePresenterMode = (options: PresenterModeOptions): PresenterModeRe
       'slidenerds-presenter',
       'width=1024,height=768',
     )
+    setIsPresenterOpen(true)
   }, [])
 
   const closePresenterWindow = useCallback(() => {
     presenterWindowRef.current?.close()
     presenterWindowRef.current = null
+    setIsPresenterOpen(false)
   }, [])
 
   return {
     openPresenterWindow,
     closePresenterWindow,
-    isPresenterOpen: presenterWindowRef.current !== null,
+    isPresenterOpen,
   }
 }

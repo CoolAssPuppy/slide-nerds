@@ -41,11 +41,11 @@ export const useSlideNavigation = (): SlideNavigationState => {
   const [currentStep, setCurrentStep] = useState(0)
   const [totalSlides, setTotalSlides] = useState(0)
   const [stepsForCurrentSlide, setStepsForCurrentSlide] = useState(0)
-  const slideCountRef = useRef(0)
+  const totalSlidesRef = useRef(0)
 
   useEffect(() => {
     const count = getSlideElements().length
-    slideCountRef.current = count
+    totalSlidesRef.current = count
     setTotalSlides(count)
   }, [])
 
@@ -55,11 +55,11 @@ export const useSlideNavigation = (): SlideNavigationState => {
 
   const goToSlide = useCallback(
     (index: number) => {
-      const total = slideCountRef.current || getSlideElements().length
+      const total = totalSlidesRef.current
+      if (total === 0) return
       const clamped = Math.max(0, Math.min(index, total - 1))
       setCurrentSlide(clamped)
       setCurrentStep(0)
-      syncUrlToSlide(clamped)
     },
     [],
   )
@@ -68,22 +68,15 @@ export const useSlideNavigation = (): SlideNavigationState => {
     const totalSteps = getStepElements(currentSlide).length
 
     if (currentStep < totalSteps) {
-      const next = currentStep + 1
-      setCurrentStep(next)
-      applyStepVisibility(currentSlide, next)
-    } else {
-      const total = slideCountRef.current || getSlideElements().length
-      if (currentSlide < total - 1) {
-        goToSlide(currentSlide + 1)
-      }
+      setCurrentStep(currentStep + 1)
+    } else if (currentSlide < totalSlidesRef.current - 1) {
+      goToSlide(currentSlide + 1)
     }
   }, [currentSlide, currentStep, goToSlide])
 
   const previousStep = useCallback(() => {
     if (currentStep > 0) {
-      const prev = currentStep - 1
-      setCurrentStep(prev)
-      applyStepVisibility(currentSlide, prev)
+      setCurrentStep(currentStep - 1)
     } else if (currentSlide > 0) {
       goToSlide(currentSlide - 1)
     }

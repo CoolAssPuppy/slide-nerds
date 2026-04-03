@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSlideState } from './slide-context'
 import { getNotesForSlide } from './slide-dom'
 
@@ -23,7 +23,7 @@ export const PresenterView: React.FC<PresenterViewProps> = ({ className }) => {
     return () => clearInterval(interval)
   }, [])
 
-  const notes = getNotesForSlide(currentSlide)
+  const notes = useMemo(() => getNotesForSlide(currentSlide), [currentSlide])
 
   return (
     <div className={className} data-testid="presenter-view">
