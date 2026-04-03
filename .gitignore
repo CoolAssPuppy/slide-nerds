@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Claude Code and MCP configuration
+.claude/settings.local.json
+CLAUDE.local.md
+mcp.json
+.mcp.json
+
+# Test coverage
+coverage/
+
+# Temp
+tmp/
+temp/

@@ -1,0 +1,28 @@
+{
+  "name": "@slidenerds/cli",
+  "version": "0.1.0",
+  "description": "CLI for creating, exporting, and configuring slidenerds decks",
+  "type": "module",
+  "bin": {
+    "slidenerds": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "fs-extra": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.0"
+  }
+}
