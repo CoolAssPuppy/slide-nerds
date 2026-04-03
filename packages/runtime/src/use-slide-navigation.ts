@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getSlideElements, getStepElements } from './slide-dom'
 
@@ -30,9 +32,11 @@ const syncUrlToSlide = (slideIndex: number): void => {
 const applyStepVisibility = (slideIndex: number, visibleSteps: number): void => {
   const steps = getStepElements(slideIndex)
   steps.forEach((step, index) => {
-    const el = step as HTMLElement
-    el.style.visibility = index < visibleSteps ? 'visible' : 'hidden'
-    el.style.opacity = index < visibleSteps ? '1' : '0'
+    if (index < visibleSteps) {
+      step.classList.add('step-visible')
+    } else {
+      step.classList.remove('step-visible')
+    }
   })
 }
 
@@ -81,6 +85,64 @@ export const useSlideNavigation = (): SlideNavigationState => {
       goToSlide(currentSlide - 1)
     }
   }, [currentSlide, currentStep, goToSlide])
+
+  const prevSlideRef = useRef<number>(-1)
+
+  useEffect(() => {
+    const slides = getSlideElements()
+    const prevSlide = prevSlideRef.current
+    const prevEl = prevSlide >= 0 ? slides[prevSlide] : null
+    const nextEl = slides[currentSlide]
+
+    const capturedPositions = new Map<string, DOMRect>()
+    if (prevEl) {
+      prevEl.querySelectorAll('[data-magic-id]').forEach((el) => {
+        const id = el.getAttribute('data-magic-id')
+        if (id) capturedPositions.set(id, el.getBoundingClientRect())
+      })
+    }
+
+    slides.forEach((slide, index) => {
+      if (index === currentSlide) {
+        slide.classList.add('active')
+      } else {
+        slide.classList.remove('active')
+      }
+    })
+
+    if (nextEl && capturedPositions.size > 0) {
+      nextEl.querySelectorAll('[data-magic-id]').forEach((el) => {
+        const id = el.getAttribute('data-magic-id')
+        if (!id) return
+        const from = capturedPositions.get(id)
+        if (!from) return
+        const to = el.getBoundingClientRect()
+        const dx = from.left - to.left
+        const dy = from.top - to.top
+        const sx = from.width / (to.width || 1)
+        const sy = from.height / (to.height || 1)
+        const htmlEl = el as HTMLElement
+        htmlEl.style.transition = 'none'
+        htmlEl.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`
+        htmlEl.style.transformOrigin = 'top left'
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            htmlEl.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)'
+            htmlEl.style.transform = 'translate(0, 0) scale(1, 1)'
+            const cleanup = () => {
+              htmlEl.style.transition = ''
+              htmlEl.style.transform = ''
+              htmlEl.style.transformOrigin = ''
+              htmlEl.removeEventListener('transitionend', cleanup)
+            }
+            htmlEl.addEventListener('transitionend', cleanup)
+          })
+        })
+      })
+    }
+
+    prevSlideRef.current = currentSlide
+  }, [currentSlide])
 
   useEffect(() => {
     applyStepVisibility(currentSlide, currentStep)
