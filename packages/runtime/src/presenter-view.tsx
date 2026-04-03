@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useSlideState } from './slide-context'
+import { getNotesForSlide } from './slide-dom'
 
 type PresenterViewProps = {
   className?: string
@@ -9,15 +10,6 @@ const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-}
-
-const getNotesForSlide = (slideIndex: number): string[] => {
-  if (typeof document === 'undefined') return []
-  const slides = document.querySelectorAll('[data-slide]')
-  const slide = slides[slideIndex]
-  if (!slide) return []
-  const noteElements = slide.querySelectorAll('[data-notes]')
-  return Array.from(noteElements).map((el) => el.textContent ?? '')
 }
 
 export const PresenterView: React.FC<PresenterViewProps> = ({ className }) => {

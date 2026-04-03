@@ -16,18 +16,10 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
     [navigation],
   )
 
-  const handleStepChange = useCallback(
-    (_step: number) => {
-      // Step changes are handled via slide-change messages that include step
-    },
-    [],
-  )
-
   const presenter = usePresenterMode({
     currentSlide: navigation.currentSlide,
     currentStep: navigation.currentStep,
     onSlideChange: handleSlideChange,
-    onStepChange: handleStepChange,
   })
 
   useEffect(() => {

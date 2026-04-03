@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { getSlideElements, getStepElements } from './slide-dom'
 
 type SlideNavigationState = {
   currentSlide: number
@@ -8,17 +9,6 @@ type SlideNavigationState = {
   goToSlide: (index: number) => void
   nextStep: () => void
   previousStep: () => void
-}
-
-const getSlideElements = (): NodeListOf<Element> => {
-  return document.querySelectorAll('[data-slide]')
-}
-
-const getStepElements = (slideIndex: number): NodeListOf<Element> => {
-  const slides = getSlideElements()
-  const slide = slides[slideIndex]
-  if (!slide) return document.querySelectorAll('.nonexistent')
-  return slide.querySelectorAll('[data-step]')
 }
 
 const parseSlideFromUrl = (): number => {

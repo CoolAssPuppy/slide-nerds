@@ -10,7 +10,7 @@ type PresenterModeOptions = {
   currentSlide: number
   currentStep: number
   onSlideChange: (slide: number) => void
-  onStepChange: (step: number) => void
+  onStepChange?: (step: number) => void
 }
 
 type PresenterModeResult = {
@@ -37,7 +37,7 @@ export const usePresenterMode = (options: PresenterModeOptions): PresenterModeRe
       if (type === 'slide-change') {
         onSlideChange(slide)
       } else if (type === 'step-change') {
-        onStepChange(step)
+        onStepChange?.(step)
       }
     }
 

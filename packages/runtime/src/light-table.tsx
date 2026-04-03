@@ -1,23 +1,10 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useSlideState } from './slide-context'
+import { getSlidesInfo } from './slide-dom'
 
 type LightTableProps = {
   className?: string
   onReorder?: (fromIndex: number, toIndex: number) => void
-}
-
-type SlideInfo = {
-  index: number
-  textContent: string
-}
-
-const getSlidesInfo = (): SlideInfo[] => {
-  if (typeof document === 'undefined') return []
-  const slides = document.querySelectorAll('[data-slide]')
-  return Array.from(slides).map((slide, index) => ({
-    index,
-    textContent: slide.textContent?.slice(0, 100) ?? '',
-  }))
 }
 
 export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) => {
