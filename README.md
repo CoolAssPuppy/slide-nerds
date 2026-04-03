@@ -35,12 +35,19 @@ slidenerds/
   skills/
     slidenerds-runtime/    # Core runtime conventions
     layout/                # Alignment, grids, arrangements
-    animation/             # Step reveals, transitions
+    advanced-layouts/      # Dashboard, comparison, logo wall, before/after
+    visual-design/         # Typography scale, spacing, composition rules
+    animation/             # Step reveals, Magic Move, transitions
     slide-types/           # Title, big stat, quote, code, table, etc.
+    data-visualization/    # 13 chart types with Recharts
+    strategic-frameworks/  # SWOT, 2x2, TAM/SAM/SOM, chevrons, pyramid
+    diagrams/              # Flowcharts, org charts, sequence, journey, Venn
+    narrative-frameworks/  # SCQA, Minto Pyramid, PAS, BAB, Sparkline
     deck-templates/        # Investor pitch, product launch, etc.
+    brand/                 # brand.config.ts, rebranding workflow
     speaker-notes/         # Speaker notes conventions
-    brand/                 # Apply brand.config.ts, rebranding workflow
-    visual-design/         # Layout, spacing, typography, composition rules
+    accessibility/         # WCAG contrast, motion reduction, screen reader
+    interactive/           # Video, QR codes, links, iframes, polls
     analytics/             # GTM, GA4, PostHog, Plausible
     export/                # PDF, PPTX, Google Slides
 ```
@@ -107,6 +114,136 @@ Available shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `
 
 Edit `brand.config.ts` to set your colors, fonts, and spacing. The layout injects these as CSS custom properties. One file change rebrands the entire deck. See the `brand` skill for details.
 
+### CSS variables
+
+These are set by `brand.config.ts` via the layout and available in every slide:
+
+| Variable | Usage |
+|----------|-------|
+| `--color-primary` | Section divider backgrounds, darkest surfaces |
+| `--color-accent` | Highlights, stats, labels, shape strokes, chart fills |
+| `--color-background` | Slide canvas background |
+| `--color-surface` | Card backgrounds (charts, tables, code blocks) |
+| `--color-text` | Primary text color |
+| `--slide-padding` | Outer slide padding |
+| `--font-heading` | Heading font stack |
+| `--font-body` | Body text font stack |
+| `--font-mono` | Monospace font stack |
+
+Derived variables (set in `globals.css`):
+
+| Variable | Usage |
+|----------|-------|
+| `--color-accent-dim` | Pill backgrounds, badges, shape fills (accent at 12% opacity) |
+| `--color-text-secondary` | Body text, descriptions (text at 60% opacity) |
+| `--color-text-tertiary` | Captions, metadata (text at 40% opacity) |
+| `--color-border` | Card borders, dividers, table rules (white at 6% opacity) |
+| `--color-surface-elevated` | Table headers, elevated cards |
+
+### Animation classes
+
+Add to `data-step` elements for entrance animations:
+
+| Class | Effect | Duration |
+|-------|--------|----------|
+| `step-fade` | Opacity 0 to 1 | 350ms |
+| `step-move-up` | Slide up 24px + fade | 420ms |
+| `step-scale-in` | Scale 0.92 to 1 + fade | 350ms |
+| `step-emphasis` | Spring scale entrance | 500ms |
+
+### Utility CSS classes
+
+| Class | What it does |
+|-------|-------------|
+| `section-label` | Small uppercase accent-colored text with wide tracking |
+| `card-surface` | Rounded container with surface background and subtle border |
+| `accent-line` | 40x3px decorative accent line |
+| `stat-glow` | Text shadow glow in accent color for large numbers |
+| `bg-mesh-warm` | Subtle warm radial gradient background |
+| `bg-mesh-cool` | Subtle cool radial gradient background |
+| `bg-section` | Linear gradient for section divider slides |
+| `slide-table` | Styled table with uppercase headers and border rules |
+| `timeline-track` | Horizontal connector line for timelines |
+| `timeline-dot` | Accent circle with glow for timeline nodes |
+| `sr-only` | Visually hidden, screen-reader accessible |
+
+### What can go on a slide
+
+Every slide is a `<section data-slide="">`. Inside it, you can use:
+
+- **Text**: headings, paragraphs, lists, blockquotes with Tailwind typography classes
+- **Images**: `<img>` with `object-cover` or `object-contain`
+- **Charts**: Recharts components (bar, line, area, pie, radar, scatter, combo, treemap, funnel) inside `card-surface` containers with fixed-height `ResponsiveContainer`
+- **Shapes**: `SlideShape` component with 16 SVG shape types, supporting text content, image masking, and Magic Move
+- **Tables**: HTML tables with `slide-table` class, rows revealed progressively via `data-step`
+- **Diagrams**: Mermaid charts (flowcharts, sequence, journey, mind map, state, C4) or custom SVG (Venn, cycle, swim lane)
+- **Video**: YouTube/Vimeo iframes or `<video>` in `card-surface` with 16:9 aspect ratio
+- **QR codes**: `qrcode.react` component for audience links
+- **Links**: Styled as pill buttons with external-link icon
+- **Strategic frameworks**: SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix (all HTML/CSS)
+- **Custom SVG**: Gauge charts, Venn diagrams, cycle diagrams, any visualization not covered above
+
+### Slide layout patterns
+
+```tsx
+{/* Full-width (charts, tables) */}
+<section data-slide="">
+  <div className="bg-mesh-cool flex flex-col justify-center w-full min-h-screen"
+    style={{ padding: '4rem 6rem' }}>
+    {/* Content */}
+  </div>
+</section>
+
+{/* Centered (big stats, quotes) */}
+<section data-slide="">
+  <div className="flex flex-col items-center justify-center w-full min-h-screen">
+    {/* Content */}
+  </div>
+</section>
+
+{/* Bottom-aligned (title slides) */}
+<section data-slide="">
+  <div className="flex flex-col justify-end w-full min-h-screen"
+    style={{ padding: '5rem 5.5rem' }}>
+    {/* Content */}
+  </div>
+</section>
+
+{/* Two-column split */}
+<section data-slide="">
+  <div className="grid grid-cols-2 w-full min-h-screen">
+    <div style={{ padding: '4rem' }}>{/* Left */}</div>
+    <div style={{ padding: '4rem' }}>{/* Right */}</div>
+  </div>
+</section>
+
+{/* Asymmetric split (5:7) */}
+<section data-slide="">
+  <div className="grid grid-cols-12 gap-8 items-center w-full min-h-screen"
+    style={{ padding: '4rem 6rem' }}>
+    <div className="col-span-5">{/* Text */}</div>
+    <div className="col-span-7">{/* Visual */}</div>
+  </div>
+</section>
+```
+
+### Magic Move
+
+Give elements the same `data-magic-id` on consecutive slides. The runtime animates position and scale between them using FLIP.
+
+```tsx
+{/* Slide A: large centered metrics */}
+<section data-slide="">
+  <div data-magic-id="revenue" className="text-6xl">$4.2M</div>
+</section>
+
+{/* Slide B: same metric, small, top-left -- runtime animates the move */}
+<section data-slide="">
+  <div data-magic-id="revenue" className="text-xl">$4.2M</div>
+  <div data-step="" className="step-fade">{/* New content below */}</div>
+</section>
+```
+
 ## The CLI
 
 ```bash
@@ -155,7 +292,7 @@ npm test
 
 | Command | Description |
 |---------|-------------|
-| `npm test` | Run all tests (97 tests across packages and skills) |
+| `npm test` | Run all tests (125 tests across packages and skills) |
 | `npm run build` | Build all packages |
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format with Prettier |
