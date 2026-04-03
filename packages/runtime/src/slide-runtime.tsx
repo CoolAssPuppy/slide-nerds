@@ -1,16 +1,32 @@
+'use client'
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { SlideContext } from './slide-context'
 import { useSlideNavigation } from './use-slide-navigation'
 import { usePresenterMode } from './use-presenter-mode'
 import { registerExportApi } from './export-api'
+import { SlideControls } from './slide-controls'
+import { PresenterView } from './presenter-view'
+import { LightTable } from './light-table'
 
 type SlideRuntimeProps = {
   children: React.ReactNode
 }
 
+const isPresenterWindow = (): boolean => {
+  if (typeof window === 'undefined') return false
+  const params = new URLSearchParams(window.location.search)
+  return params.get('presenter') === 'true'
+}
+
 export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
   const navigation = useSlideNavigation()
   const [isLightTable, setIsLightTable] = useState(false)
+  const [isPresenter, setIsPresenter] = useState(false)
+
+  useEffect(() => {
+    setIsPresenter(isPresenterWindow())
+  }, [])
 
   const handleSlideChange = useCallback(
     (slide: number) => navigation.goToSlide(slide),
@@ -28,6 +44,8 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
   }, [])
 
   useEffect(() => {
+    if (isPresenter) return
+
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
@@ -77,12 +95,14 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
     presenter.openPresenterWindow,
     toggleLightTable,
     isLightTable,
+    isPresenter,
   ])
 
   useEffect(() => {
+    if (isPresenter) return
     window.addEventListener('dblclick', navigation.previousStep)
     return () => window.removeEventListener('dblclick', navigation.previousStep)
-  }, [navigation.previousStep])
+  }, [navigation.previousStep, isPresenter])
 
   useEffect(() => {
     registerExportApi()
@@ -115,5 +135,20 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
     ],
   )
 
-  return <SlideContext.Provider value={contextValue}>{children}</SlideContext.Provider>
+  if (isPresenter) {
+    return (
+      <SlideContext.Provider value={contextValue}>
+        <div style={{ display: 'none' }}>{children}</div>
+        <PresenterView />
+      </SlideContext.Provider>
+    )
+  }
+
+  return (
+    <SlideContext.Provider value={contextValue}>
+      {children}
+      {isLightTable && <LightTable />}
+      <SlideControls />
+    </SlideContext.Provider>
+  )
 }

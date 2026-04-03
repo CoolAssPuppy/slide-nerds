@@ -1,26 +1,28 @@
 import type { BrandConfig } from '@slidenerds/runtime'
 
+/**
+ * Brand configuration for {{PROJECT_NAME}}.
+ *
+ * Change these values to match your brand. The layout template reads
+ * these and injects them as CSS custom properties on the <html> element,
+ * so every slide automatically picks up your palette, fonts, and spacing.
+ */
 export default {
   colors: {
-    primary: '#1a1a2e',
-    accent: '#e94560',
-    background: '#0f3460',
-    surface: '#16213e',
-    text: '#eaeaea',
+    primary: '#0d0d0f',
+    accent: '#f59e0b',
+    background: '#111114',
+    surface: '#1a1a1f',
+    text: '#e8e6e3',
   },
   fonts: {
-    heading: 'Inter',
-    body: 'Inter',
-    mono: 'JetBrains Mono',
+    heading: 'system-ui, -apple-system, sans-serif',
+    body: 'system-ui, -apple-system, sans-serif',
+    mono: 'ui-monospace, monospace',
   },
   spacing: {
-    slide: '4rem',
+    slide: '5rem',
     section: '2rem',
     element: '1rem',
-  },
-  tailwind: {
-    extend: {
-      colors: { brand: '#e94560' },
-    },
   },
 } satisfies BrandConfig

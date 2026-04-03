@@ -69,8 +69,8 @@ describe('PresenterView', () => {
 
   it('should display step counter', () => {
     createSlideWithNotes()
-    renderPresenter({ currentStep: 3 })
-    expect(screen.getByTestId('step-counter').textContent).toBe('Step: 3')
+    renderPresenter({ currentStep: 3, stepsForCurrentSlide: 5 })
+    expect(screen.getByTestId('step-counter').textContent).toBe('Step 3 of 5')
   })
 
   it('should display running timer', () => {

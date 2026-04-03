@@ -85,7 +85,8 @@ describe('LightTable', () => {
     renderLightTable({ currentSlide: 1, totalSlides: 3 })
 
     const activeSlide = screen.getByTestId('light-table-slide-1')
-    expect(activeSlide.style.border).toContain('2px solid')
+    const thumbnail = activeSlide.querySelector('div')
+    expect(thumbnail?.style.border).toContain('2px solid')
   })
 
   it('should support drag and drop reordering', () => {

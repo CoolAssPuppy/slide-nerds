@@ -78,17 +78,29 @@ Use these classes globally in deck CSS.
 }
 ```
 
-The runtime sets visible state when the step is active. Add visible-state overrides in your deck CSS where needed:
+The runtime toggles the `.step-visible` class when the step is active. The visible state override:
 
 ```css
-[data-step][data-step-visible='true'] {
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0) scale(1);
+[data-step].step-visible {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateY(0) translateX(0) scale(1) !important;
 }
 ```
 
-If your app does not expose `data-step-visible`, mirror the same effect with the runtime's default visible selectors.
+For emphasis entrance on big stats, combine with the `step-emphasis` class:
+
+```css
+[data-step].step-emphasis.step-visible {
+  animation: emphasis-land 500ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+@keyframes emphasis-land {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+```
 
 ## Build in patterns
 
@@ -163,17 +175,17 @@ Use paired layers. First step shows current object, next step shows replacement 
 </div>
 ```
 
-## Magic Move emulation (slide to slide)
+## Magic Move (slide to slide)
 
-True Keynote Magic Move interpolates identical objects between slides. The runtime does not perform cross-slide tweening by default, so use this repeatable emulation protocol.
+The runtime performs automatic FLIP animation between slides for elements that share a `data-magic-id`. When navigating from one slide to the next, elements with matching IDs animate smoothly from their old position, size, and scale to their new position.
 
 ### Protocol
 
-1. Duplicate the source slide into the destination slide.
-2. Keep object identity stable with `data-magic-id` per object.
-3. Keep typography tokens and brand colors identical.
-4. Change only geometry and opacity between source and destination.
-5. Put destination-only objects behind `data-step` on the destination slide.
+1. Give shared elements the same `data-magic-id` value on both slides.
+2. Keep typography tokens and brand colors identical across source and destination.
+3. Change geometry (position, size) between source and destination -- the runtime animates the difference.
+4. Put destination-only objects behind `data-step` on the destination slide.
+5. The FLIP animation runs at 500ms with a cubic-bezier(0.4, 0, 0.2, 1) easing.
 
 ### Source slide
 
