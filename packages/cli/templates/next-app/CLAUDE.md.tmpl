@@ -377,7 +377,7 @@ Every slide is a `<section data-slide="">` containing a single `<div>` that cont
 
 Text, bullets, and tables stay anchored below the title. The bottom of the slide is breathing room. Do NOT vertically center text content.
 
-**Top-left title with centered visual** (for: diagrams, charts, process flows, shapes, frameworks, team grids, icon grids):
+**Top-left title with centered visual** (for: diagrams, charts, process flows, shapes, frameworks, team grids, icon grids, timelines, dashboards/KPIs):
 
 ```tsx
 <section data-slide="">
@@ -475,8 +475,8 @@ Give elements the same `data-magic-id` on two consecutive slides. When navigatin
 | Process flow | **Top-left + centered visual** | section-label, h2. Shapes centered in remaining space. |
 | Team | **Top-left + centered visual** | section-label, h2. Avatar grid centered below. |
 | Icon grid | **Top-left + centered visual** | section-label, h2. 3x2 grid centered below. |
-| Dashboard | **Top-left text** | section-label, h2, 3x2 grid of KPI cards below title. |
-| Timeline | **Top-left text** | section-label, h2, timeline-track below title. |
+| Dashboard | **Top-left + centered visual** | section-label, h2. KPI grid centered in remaining space. |
+| Timeline | **Top-left + centered visual** | section-label, h2. Timeline track centered in remaining space. |
 | Before/after | **Split** | grid-cols-2 with different backgrounds per side. |
 | Quote | **Centered** | Open-quote glyph, blockquote (max-w-3xl), attribution. |
 | Closing | **Centered** | accent-line, h2, contact info. |

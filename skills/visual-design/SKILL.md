@@ -313,17 +313,18 @@ Constrain the quote to `max-w-3xl` for comfortable line length. The open-quote g
 ### Timeline / roadmap
 
 ```
-Left-aligned layout:
-  section label + title          top section, mb-12 to mb-16
-  horizontal connector line      thin, muted, full width
-  timeline nodes                 grid cols, each with:
-    dot (accent, with glow)
-    quarter label (bold, mt-4)
-    milestone name (medium, mt-1)
-    detail (small, muted, mt-1)
+Top-left title + centered visual layout:
+  section label + title          top-left anchored
+  visual container               flex-1 flex items-center justify-center
+    horizontal connector line    thin, muted, full width within container
+    timeline nodes               grid cols, each with:
+      dot (accent, with glow)
+      quarter label (bold, mt-4)
+      milestone name (medium, mt-1)
+      detail (small, muted, mt-1)
 ```
 
-Completed milestones use full accent color. Future milestones use dimmed dot (muted background, no glow).
+The title stays top-left. The timeline itself centers vertically and horizontally in the remaining space below the title. Completed milestones use full accent color. Future milestones use dimmed dot (muted background, no glow).
 
 ## Background treatments
 

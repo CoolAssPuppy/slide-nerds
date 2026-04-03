@@ -13,30 +13,32 @@ Use for: board decks, QBRs, metrics reviews. Shows 4-6 KPIs on one slide.
 
 ```tsx
 <section data-slide="">
-  <div className="flex flex-col justify-center w-full min-h-screen"
+  <div className="flex flex-col w-full"
     style={{ padding: '4rem 6rem' }}>
     <p className="section-label mb-3">Performance</p>
-    <h2 className="text-[2.5rem] font-bold mb-10">Q1 dashboard</h2>
-    <div className="grid grid-cols-3 gap-4">
-      {[
-        { label: 'ARR', value: '$4.2M', delta: '+142%', up: true },
-        { label: 'MRR', value: '$350K', delta: '+12%', up: true },
-        { label: 'Churn', value: '2.1%', delta: '-0.3%', up: false },
-        { label: 'NPS', value: '72', delta: '+8', up: true },
-        { label: 'CAC', value: '$148', delta: '-22%', up: false },
-        { label: 'LTV:CAC', value: '5.2x', delta: '+0.8', up: true },
-      ].map((metric) => (
-        <div key={metric.label} data-step="" className="step-fade card-surface p-5">
-          <p className="text-xs font-semibold tracking-[0.15em] uppercase"
-            style={{ color: 'var(--color-text-tertiary)' }}>{metric.label}</p>
-          <p className="text-3xl font-bold mt-2"
-            style={{ fontFamily: 'var(--font-heading)' }}>{metric.value}</p>
-          <p className="text-sm mt-1"
-            style={{ color: metric.up ? '#22c55e' : 'var(--color-accent)' }}>
-            {metric.delta}
-          </p>
-        </div>
-      ))}
+    <h2 className="text-[2.5rem] font-bold mb-4">Q1 dashboard</h2>
+    <div className="flex-1 flex items-center justify-center">
+      <div className="grid grid-cols-3 gap-4 w-full">
+        {[
+          { label: 'ARR', value: '$4.2M', delta: '+142%', up: true },
+          { label: 'MRR', value: '$350K', delta: '+12%', up: true },
+          { label: 'Churn', value: '2.1%', delta: '-0.3%', up: false },
+          { label: 'NPS', value: '72', delta: '+8', up: true },
+          { label: 'CAC', value: '$148', delta: '-22%', up: false },
+          { label: 'LTV:CAC', value: '5.2x', delta: '+0.8', up: true },
+        ].map((metric) => (
+          <div key={metric.label} data-step="" className="step-fade card-surface p-5">
+            <p className="text-xs font-semibold tracking-[0.15em] uppercase"
+              style={{ color: 'var(--color-text-tertiary)' }}>{metric.label}</p>
+            <p className="text-3xl font-bold mt-2"
+              style={{ fontFamily: 'var(--font-heading)' }}>{metric.value}</p>
+            <p className="text-sm mt-1"
+              style={{ color: metric.up ? '#22c55e' : 'var(--color-accent)' }}>
+              {metric.delta}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>
@@ -414,7 +416,7 @@ Use for: showing "you are here" in a multi-section presentation.
 
 | Need | Layout | Key property |
 |---|---|---|
-| Multiple KPIs | Dashboard (3x2 grid) | `grid grid-cols-3` |
+| Multiple KPIs | Dashboard (3x2 grid) | Top-left title + centered `grid grid-cols-3` |
 | Pricing / plan options | Three-option comparison | Center card highlighted |
 | Transformation story | Before/after split | `grid grid-cols-2`, different backgrounds |
 | Features / capabilities | Icon + text grid (3x2) | Shape icon + label + description |
