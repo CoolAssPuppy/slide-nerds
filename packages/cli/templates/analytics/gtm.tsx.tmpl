@@ -1,0 +1,9 @@
+import Script from 'next/script'
+
+export const GTMAnalytics = () => (
+  <Script
+    id="gtm-script"
+    strategy="afterInteractive"
+    src={`https://www.googletagmanager.com/gtm.js?id={{ANALYTICS_ID}}`}
+  />
+)

@@ -1,0 +1,35 @@
+# {{PROJECT_NAME}}
+
+A presentation built with [slidenerds](https://github.com/strategicnerds/slidenerds).
+
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see your deck.
+
+## How to build slides
+
+Open a second terminal and talk to Claude Code (or your preferred LLM). The CLAUDE.md file in this project teaches the LLM the slidenerds conventions. Hot reload updates your browser as the LLM writes code.
+
+## Keyboard shortcuts
+
+| Key | Action |
+|-----|--------|
+| Space / Right arrow | Next step or slide |
+| Left arrow / Backspace | Previous step or slide |
+| P | Presenter mode |
+| L | Light table |
+| F | Fullscreen |
+| Escape | Exit fullscreen |
+
+## Deploy
+
+```bash
+vercel --prod
+```
+
+Or deploy to any platform that supports Next.js.

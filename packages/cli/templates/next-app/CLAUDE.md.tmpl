@@ -1,0 +1,54 @@
+# {{PROJECT_NAME}}
+
+This is a slidenerds deck. You are building presentation slides using Next.js and the `@slidenerds/runtime` package.
+
+## Data conventions
+
+The runtime recognizes these HTML attributes:
+
+| Attribute | Purpose |
+|-----------|---------|
+| `data-slide` | Marks an element as a slide. The runtime tracks these for navigation and the light table. |
+| `data-step` | Marks an element for progressive reveal. Hidden until clicked into view, in order. |
+| `data-notes` | Speaker notes. Hidden in presentation mode, rendered in the presenter window. |
+
+## Keyboard controls
+
+| Key | Action |
+|-----|--------|
+| Space / Right arrow | Advance (next step or next slide) |
+| Left arrow / Backspace | Go back |
+| Double-click | Previous slide |
+| P | Open presenter mode |
+| L | Open light table |
+| F | Fullscreen |
+| Escape | Exit fullscreen |
+
+## Brand config
+
+Read `brand.config.ts` before generating any layout or applying any color. Never hardcode hex values. Use CSS custom properties from the brand config.
+
+## File structure
+
+- `app/page.tsx` - Main slide deck
+- `app/layout.tsx` - Root layout with SlideRuntime wrapper
+- `app/globals.css` - Global styles with CSS custom properties from brand config
+- `brand.config.ts` - Brand configuration (colors, fonts, spacing)
+
+## Slide types
+
+When building slides, use these patterns:
+- **Title slide**: Large heading, subtitle, full viewport
+- **Content slide**: Heading + body content with `data-step` for reveals
+- **Big stat**: Single large number with label and context
+- **Quote**: Pull quote with attribution
+- **Code**: Syntax highlighted code block
+- **Two-up**: Side by side content
+
+## Tips
+
+- Each `<section data-slide="">` is one slide
+- Use `data-step` on elements for progressive reveal
+- Add `data-notes` elements for speaker notes (hidden during presentation)
+- Run `npm run dev` for hot reload while editing
+- Press P to preview in presenter mode with notes and timer

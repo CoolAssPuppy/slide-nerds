@@ -1,0 +1,10 @@
+import Script from 'next/script'
+
+export const PlausibleAnalytics = () => (
+  <Script
+    defer
+    data-domain="{{ANALYTICS_ID}}"
+    src="https://plausible.io/js/script.js"
+    strategy="afterInteractive"
+  />
+)

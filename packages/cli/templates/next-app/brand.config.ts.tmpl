@@ -1,0 +1,26 @@
+import type { BrandConfig } from '@slidenerds/runtime'
+
+export default {
+  colors: {
+    primary: '#1a1a2e',
+    accent: '#e94560',
+    background: '#0f3460',
+    surface: '#16213e',
+    text: '#eaeaea',
+  },
+  fonts: {
+    heading: 'Inter',
+    body: 'Inter',
+    mono: 'JetBrains Mono',
+  },
+  spacing: {
+    slide: '4rem',
+    section: '2rem',
+    element: '1rem',
+  },
+  tailwind: {
+    extend: {
+      colors: { brand: '#e94560' },
+    },
+  },
+} satisfies BrandConfig
