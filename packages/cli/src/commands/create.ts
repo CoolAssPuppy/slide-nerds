@@ -1,14 +1,9 @@
 import { Command } from 'commander'
 import path from 'node:path'
 import fs from 'fs-extra'
-import { fileURLToPath } from 'node:url'
+import { getTemplatePath } from '../template-path.js'
 
 const TEMPLATE_PLACEHOLDER = '{{PROJECT_NAME}}'
-
-const getTemplatesDir = (): string => {
-  const currentDir = path.dirname(fileURLToPath(import.meta.url))
-  return path.resolve(currentDir, '..', '..', 'templates', 'next-app')
-}
 
 const processTemplate = (content: string, projectName: string): string => {
   return content.replaceAll(TEMPLATE_PLACEHOLDER, projectName)
@@ -18,7 +13,7 @@ export const scaffoldProject = async (
   projectName: string,
   targetDir: string,
 ): Promise<string[]> => {
-  const templatesDir = getTemplatesDir()
+  const templatesDir = getTemplatePath('next-app')
   const createdFiles: string[] = []
 
   const templateFiles = await getTemplateFiles(templatesDir)

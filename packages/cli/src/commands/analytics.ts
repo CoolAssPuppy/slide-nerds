@@ -1,23 +1,18 @@
 import { Command } from 'commander'
 import path from 'node:path'
 import fs from 'fs-extra'
-import { fileURLToPath } from 'node:url'
+import { getTemplatePath } from '../template-path.js'
 
 type AnalyticsProvider = 'gtm' | 'ga4' | 'posthog' | 'plausible' | 'custom'
 
 const ANALYTICS_ID_PLACEHOLDER = '{{ANALYTICS_ID}}'
-
-const getAnalyticsTemplatesDir = (): string => {
-  const currentDir = path.dirname(fileURLToPath(import.meta.url))
-  return path.resolve(currentDir, '..', '..', 'templates', 'analytics')
-}
 
 export const injectAnalytics = async (
   provider: AnalyticsProvider,
   analyticsId: string,
   targetDir: string,
 ): Promise<string> => {
-  const templatesDir = getAnalyticsTemplatesDir()
+  const templatesDir = getTemplatePath('analytics')
   const templatePath = path.join(templatesDir, `${provider}.tsx.tmpl`)
 
   if (!(await fs.pathExists(templatePath))) {
@@ -45,26 +40,20 @@ export const registerAnalyticsCommand = (program: Command): void => {
     .option('--plausible <domain>', 'Plausible domain (yourdomain.com)')
     .option('--custom', 'Drop a blank analytics component for manual wiring')
     .action(async (options: Record<string, string | boolean | undefined>) => {
-      const providers: Array<{ flag: string; provider: AnalyticsProvider }> = [
-        { flag: 'gtm', provider: 'gtm' },
-        { flag: 'ga4', provider: 'ga4' },
-        { flag: 'posthog', provider: 'posthog' },
-        { flag: 'plausible', provider: 'plausible' },
-        { flag: 'custom', provider: 'custom' },
-      ]
+      const PROVIDERS: AnalyticsProvider[] = ['gtm', 'ga4', 'posthog', 'plausible', 'custom']
 
-      const matched = providers.find((p) => options[p.flag] !== undefined)
+      const matched = PROVIDERS.find((p) => options[p] !== undefined)
       if (!matched) {
         console.error('Specify a provider: --gtm, --ga4, --posthog, --plausible, or --custom')
         process.exit(1)
       }
 
-      const analyticsId = typeof options[matched.flag] === 'string'
-        ? options[matched.flag]
+      const analyticsId = typeof options[matched] === 'string'
+        ? options[matched]
         : ''
 
       const targetDir = process.cwd()
-      const outputPath = await injectAnalytics(matched.provider, analyticsId, targetDir)
+      const outputPath = await injectAnalytics(matched, analyticsId, targetDir)
       console.log(`Analytics component created: ${path.relative(targetDir, outputPath)}`)
       console.log('Import this component in your root layout to activate analytics.')
     })

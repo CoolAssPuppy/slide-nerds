@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useSlideState } from './slide-context'
 import { getSlidesInfo } from './slide-dom'
 
@@ -11,7 +11,6 @@ export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) 
   const { currentSlide, goToSlide } = useSlideState()
   const [dragSource, setDragSource] = useState<number | null>(null)
   const [dragTarget, setDragTarget] = useState<number | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const slides = useMemo(() => getSlidesInfo(), [])
 
@@ -49,7 +48,6 @@ export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) 
 
   return (
     <div
-      ref={containerRef}
       className={className}
       data-testid="light-table"
       role="grid"

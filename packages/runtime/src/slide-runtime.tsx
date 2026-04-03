@@ -84,7 +84,15 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
       nextStep: navigation.nextStep,
       previousStep: navigation.previousStep,
     }),
-    [navigation],
+    [
+      navigation.currentSlide,
+      navigation.currentStep,
+      navigation.totalSlides,
+      navigation.stepsForCurrentSlide,
+      navigation.goToSlide,
+      navigation.nextStep,
+      navigation.previousStep,
+    ],
   )
 
   return <SlideContext.Provider value={contextValue}>{children}</SlideContext.Provider>
