@@ -120,31 +120,50 @@ These skills guide slide construction. Read them before building slides.
 
 Everything that can go inside a slide lives within a `<section data-slide="">` element in `app/page.tsx`. This is the complete reference.
 
-### Slide structure
+### Critical layout rule
+
+**The default layout for every content slide is top-left anchored.** Title and content start from a consistent position near the top of the slide and flow downward. Content is NOT vertically centered.
+
+Only these specific slide types use centered layout:
+- Big stat (single number, centered)
+- Section divider (section name, centered)
+- Quote (blockquote, centered, max-w-3xl)
+- Closing (contact info, centered)
+
+Everything else -- charts, tables, text slides, timelines, dashboards, diagrams, team slides, process flows, comparisons -- anchors content to the top-left with the title at a consistent position across all slides.
+
+### Default slide structure (top-left anchored)
 
 ```tsx
 <section data-slide="">
-  <div className="bg-mesh-warm flex flex-col justify-center w-full min-h-screen"
+  <div className="bg-mesh-warm flex flex-col w-full"
     style={{ padding: '4rem 6rem' }}>
 
-    {/* Section label */}
+    {/* Section label -- same position on every content slide */}
     <p className="section-label mb-3">Revenue</p>
 
-    {/* Title */}
+    {/* Title -- same Y position on every content slide */}
     <h2 className="text-[2.5rem] font-bold mb-10">ARR trajectory</h2>
 
-    {/* Content with progressive reveal */}
+    {/* Content flows below the title */}
     <div data-step="" className="step-fade">
-      {/* Any content: text, chart, shape, image, table, diagram */}
+      {/* Charts, tables, text, shapes, diagrams -- whatever the slide needs */}
     </div>
 
-    {/* Speaker notes (hidden in presentation) */}
-    <div data-notes="">
-      Walk through each quarter. Point out Q3 inflection.
+    {/* Annotation below the content */}
+    <div data-step="" className="step-move-up mt-5 flex items-center gap-3">
+      <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-accent)' }} />
+      <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
+        Key insight or annotation about the content above.
+      </p>
     </div>
+
+    <div data-notes="">Speaker notes here.</div>
   </div>
 </section>
 ```
+
+The section-label, title, and content start from the same top-left position on every content slide. This consistency is what makes a deck feel designed rather than assembled.
 
 ### Data attributes
 
@@ -337,37 +356,41 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
 ### Slide layout patterns
 
-Every slide is a `<section data-slide="">` containing a single `<div>` that controls the layout.
+Every slide is a `<section data-slide="">` containing a single `<div>` that controls the layout. The CSS rule `[data-slide] > * { min-height: 100%; width: 100%; }` ensures the inner div always fills the slide.
 
-**Full-width content** (charts, tables, timelines):
+**Top-left anchored** (DEFAULT -- use for most slides: charts, tables, text, timelines, dashboards, diagrams, teams, process flows):
 
 ```tsx
 <section data-slide="">
-  <div className="bg-mesh-cool flex flex-col justify-center w-full min-h-screen"
+  <div className="bg-mesh-cool flex flex-col w-full"
     style={{ padding: '4rem 6rem' }}>
-    {/* Content fills the available width */}
+    <p className="section-label mb-3">Section name</p>
+    <h2 className="text-[2.5rem] font-bold mb-10">Slide title</h2>
+    {/* Content flows downward from the title */}
   </div>
 </section>
 ```
 
-**Centered content** (big stats, quotes, closing):
+Do NOT add `justify-center` or `items-center` to content slides. Content starts near the top and flows down. The bottom portion of the slide is breathing room.
+
+**Centered** (ONLY for: big stat, section divider, quote, closing):
 
 ```tsx
 <section data-slide="">
-  <div className="flex flex-col items-center justify-center w-full min-h-screen"
+  <div className="flex flex-col items-center justify-center w-full"
     style={{ paddingBottom: '4rem' }}>
     {/* Content is centered horizontally and vertically */}
   </div>
 </section>
 ```
 
-**Bottom-aligned content** (title slides):
+**Bottom-aligned** (ONLY for: title slide):
 
 ```tsx
 <section data-slide="">
-  <div className="flex flex-col justify-end w-full min-h-screen"
+  <div className="flex flex-col justify-end w-full"
     style={{ padding: '5rem 5.5rem' }}>
-    {/* Content anchored to the bottom */}
+    {/* Content anchored to the bottom-left */}
   </div>
 </section>
 ```
@@ -376,7 +399,7 @@ Every slide is a `<section data-slide="">` containing a single `<div>` that cont
 
 ```tsx
 <section data-slide="">
-  <div className="grid grid-cols-2 w-full min-h-screen">
+  <div className="grid grid-cols-2 w-full">
     <div style={{ padding: '4rem' }}>{/* Left column */}</div>
     <div style={{ padding: '4rem' }}>{/* Right column */}</div>
   </div>
@@ -387,7 +410,7 @@ Every slide is a `<section data-slide="">` containing a single `<div>` that cont
 
 ```tsx
 <section data-slide="">
-  <div className="grid grid-cols-12 gap-8 items-center w-full min-h-screen"
+  <div className="grid grid-cols-12 gap-8 items-center w-full"
     style={{ padding: '4rem 6rem' }}>
     <div className="col-span-5">{/* Text */}</div>
     <div className="col-span-7">{/* Visual */}</div>
@@ -418,20 +441,25 @@ Give elements the same `data-magic-id` on two consecutive slides. When navigatin
 
 ### Slide type recipes
 
-| Type | Key elements | Background |
-|------|-------------|------------|
-| Title | accent-line, h1, subtitle, metadata row | bg-mesh-warm, bottom-aligned |
-| Section divider | section number, h2 | bg-section, centered |
-| Big stat | Large number with stat-glow, label, delta badge | bg-mesh-warm, centered |
-| Chart | section-label, h2, card-surface with chart, annotation | bg-mesh-cool, full-width |
-| Comparison table | section-label, h2, card-surface with slide-table | bg-mesh-cool, full-width |
-| Timeline | section-label, h2, timeline-track with timeline-dots | bg-mesh-warm, full-width |
-| Quote | Open-quote glyph, blockquote, avatar + attribution | bg-mesh-warm, centered, max-w-3xl |
-| Team | section-label, h2, circle shapes with images | bg-mesh-warm, centered |
-| Dashboard | section-label, h2, 3x2 grid of card-surface KPI cards | bg-mesh-cool, full-width |
-| Before/after | grid-cols-2 with different backgrounds per side | No mesh, split |
-| Process flow | Shapes connected by chevrons | bg-mesh-cool, centered |
-| Closing | accent-line, h2, contact info | bg-mesh-warm, centered |
+| Type | Layout | Key elements |
+|------|--------|-------------|
+| Title | **Bottom-left** | accent-line, h1, subtitle, metadata row. Top 55% is empty breathing room. |
+| Section divider | **Centered** | Section number label, h2. bg-section background. |
+| Big stat | **Centered** | Large number with stat-glow, label, delta badge. Only type where the number dominates. |
+| Chart | **Top-left** | section-label, h2, card-surface with chart, annotation below chart. |
+| Text / bullet list | **Top-left** | section-label, h2, body text or list with data-step reveals. |
+| Comparison table | **Top-left** | section-label, h2, card-surface with slide-table, rows reveal via data-step. |
+| Timeline | **Top-left** | section-label, h2, timeline-track with dots below. |
+| Team | **Top-left** | section-label, h2, grid of circle shapes with images below. |
+| Dashboard | **Top-left** | section-label, h2, 3x2 grid of card-surface KPI cards. |
+| Process flow | **Top-left** | section-label, h2, shapes connected by chevrons below title. |
+| Diagram | **Top-left** | section-label, h2, Mermaid or HTML/CSS diagram below. |
+| Icon grid | **Top-left** | section-label, h2, 3x2 grid of shape+label+description. |
+| Before/after | **Split** | grid-cols-2 with different backgrounds per side. Title in each half. |
+| Quote | **Centered** | Open-quote glyph, blockquote (max-w-3xl), avatar + attribution. |
+| Closing | **Centered** | accent-line, h2, contact info. |
+
+Most slides are top-left anchored. Only 3 types (big stat, section divider, quote/closing) use centered layout. If you are unsure, use top-left.
 
 ## Tips
 

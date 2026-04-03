@@ -185,44 +185,39 @@ Every slide is a `<section data-slide="">`. Inside it, you can use:
 
 ### Slide layout patterns
 
+The default layout is **top-left anchored**. Title and content start near the top and flow downward. Do NOT vertically center content on most slides. Centered layout is only for big stat, section divider, quote, and closing slides.
+
 ```tsx
-{/* Full-width (charts, tables) */}
+{/* TOP-LEFT ANCHORED (default -- charts, tables, text, timelines, dashboards, diagrams) */}
 <section data-slide="">
-  <div className="bg-mesh-cool flex flex-col justify-center w-full min-h-screen"
+  <div className="bg-mesh-cool flex flex-col w-full"
     style={{ padding: '4rem 6rem' }}>
-    {/* Content */}
+    <p className="section-label mb-3">Section name</p>
+    <h2 className="text-[2.5rem] font-bold mb-10">Slide title</h2>
+    {/* Content flows downward. Bottom of the slide is breathing room. */}
   </div>
 </section>
 
-{/* Centered (big stats, quotes) */}
+{/* CENTERED (only for: big stat, section divider, quote, closing) */}
 <section data-slide="">
-  <div className="flex flex-col items-center justify-center w-full min-h-screen">
-    {/* Content */}
+  <div className="flex flex-col items-center justify-center w-full">
+    {/* Content centered horizontally and vertically */}
   </div>
 </section>
 
-{/* Bottom-aligned (title slides) */}
+{/* BOTTOM-ALIGNED (only for: title slide) */}
 <section data-slide="">
-  <div className="flex flex-col justify-end w-full min-h-screen"
+  <div className="flex flex-col justify-end w-full"
     style={{ padding: '5rem 5.5rem' }}>
-    {/* Content */}
+    {/* Content anchored to bottom-left. Top 55% is empty. */}
   </div>
 </section>
 
-{/* Two-column split */}
+{/* TWO-COLUMN SPLIT (before/after, quote + data) */}
 <section data-slide="">
-  <div className="grid grid-cols-2 w-full min-h-screen">
+  <div className="grid grid-cols-2 w-full">
     <div style={{ padding: '4rem' }}>{/* Left */}</div>
     <div style={{ padding: '4rem' }}>{/* Right */}</div>
-  </div>
-</section>
-
-{/* Asymmetric split (5:7) */}
-<section data-slide="">
-  <div className="grid grid-cols-12 gap-8 items-center w-full min-h-screen"
-    style={{ padding: '4rem 6rem' }}>
-    <div className="col-span-5">{/* Text */}</div>
-    <div className="col-span-7">{/* Visual */}</div>
   </div>
 </section>
 ```

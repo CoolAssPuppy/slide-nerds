@@ -28,6 +28,42 @@ For slidenerds, `--slide-padding` controls the outer margin. Set it to 5-8% of t
 +-------------------------------------------+
 ```
 
+## The default layout is top-left anchored
+
+This is the most important layout rule. The majority of slides in any professional deck anchor content to the top-left corner, with the title at a fixed position and content flowing downward. The bottom portion of the slide is breathing room.
+
+**Do NOT vertically center content on most slides.** Vertically centered content is only appropriate for these specific slide types:
+
+- **Big stat**: A single number that dominates the slide
+- **Section divider**: A section name between major parts of the deck
+- **Quote**: A blockquote with attribution
+- **Closing**: Contact info or "Questions?"
+
+Every other slide type -- charts, tables, text, timelines, dashboards, diagrams, team slides, process flows, comparisons, icon grids -- uses top-left anchored layout. The title starts near the top of the slide at a consistent Y position across all content slides. This consistency is what makes a deck feel like a designed system rather than a collection of individual slides.
+
+```
+WRONG (centered -- looks like a default template):
++-------------------------------------------+
+|                                           |
+|                                           |
+|           Title                           |
+|           Content here                    |
+|                                           |
+|                                           |
++-------------------------------------------+
+
+RIGHT (top-left anchored -- looks professional):
++-------------------------------------------+
+|  SECTION LABEL                            |
+|  Title                                    |
+|                                           |
+|  Content here                             |
+|  (chart, table, text, diagram, etc.)      |
+|                                           |
+|                    [breathing room]       |
++-------------------------------------------+
+```
+
 ## The one-thing rule
 
 Each slide communicates exactly one idea. One stat. One chart. One comparison. One quote. The moment a slide tries to say two things, it stops feeling designed and starts feeling assembled.
@@ -309,7 +345,7 @@ Cards create depth and separation. They are the visual equivalent of a frame aro
 
 ## What to avoid
 
-- Centering everything. Reserve center alignment for hero moments.
+- Centering everything. Most slides are top-left anchored. Only big stat, section divider, quote, and closing use centered layout. If you are unsure, use top-left.
 - More than one chart per slide.
 - Text below 16pt.
 - More than 3 type sizes on one slide.
