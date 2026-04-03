@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { SlideContext } from './slide-context'
 import { useSlideNavigation } from './use-slide-navigation'
 import { usePresenterMode } from './use-presenter-mode'
@@ -10,6 +10,7 @@ type SlideRuntimeProps = {
 
 export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
   const navigation = useSlideNavigation()
+  const [isLightTable, setIsLightTable] = useState(false)
 
   const handleSlideChange = useCallback(
     (slide: number) => navigation.goToSlide(slide),
@@ -21,6 +22,10 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
     currentStep: navigation.currentStep,
     onSlideChange: handleSlideChange,
   })
+
+  const toggleLightTable = useCallback(() => {
+    setIsLightTable((prev) => !prev)
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -43,6 +48,11 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
           event.preventDefault()
           presenter.openPresenterWindow()
           break
+        case 'l':
+        case 'L':
+          event.preventDefault()
+          toggleLightTable()
+          break
         case 'f':
         case 'F':
           event.preventDefault()
@@ -50,14 +60,24 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
           break
         case 'Escape':
           event.preventDefault()
-          document.exitFullscreen?.()
+          if (isLightTable) {
+            setIsLightTable(false)
+          } else {
+            document.exitFullscreen?.()
+          }
           break
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [navigation.nextStep, navigation.previousStep, presenter.openPresenterWindow])
+  }, [
+    navigation.nextStep,
+    navigation.previousStep,
+    presenter.openPresenterWindow,
+    toggleLightTable,
+    isLightTable,
+  ])
 
   useEffect(() => {
     window.addEventListener('dblclick', navigation.previousStep)
@@ -74,8 +94,9 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
       currentStep: navigation.currentStep,
       totalSlides: navigation.totalSlides,
       stepsForCurrentSlide: navigation.stepsForCurrentSlide,
-      isPresenterMode: false,
-      isLightTable: false,
+      isPresenterMode: presenter.isPresenterOpen,
+      isLightTable,
+      toggleLightTable,
       goToSlide: navigation.goToSlide,
       nextStep: navigation.nextStep,
       previousStep: navigation.previousStep,
@@ -88,6 +109,9 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
       navigation.goToSlide,
       navigation.nextStep,
       navigation.previousStep,
+      presenter.isPresenterOpen,
+      isLightTable,
+      toggleLightTable,
     ],
   )
 

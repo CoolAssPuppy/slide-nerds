@@ -1,5 +1,7 @@
 export { SlideRuntime } from './slide-runtime'
 export { PresenterView } from './presenter-view'
 export { LightTable } from './light-table'
+export { useSlideState } from './slide-context'
+export type { SlideState } from './slide-context'
 export type { BrandConfig } from './types'
 export { BrandConfigSchema } from './types'

@@ -2,6 +2,7 @@
   "name": "slidenerds",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "A presentation runtime for Next.js with an LLM skill library",
   "workspaces": [
     "packages/*"
@@ -10,7 +11,7 @@
     "build": "npm run build --workspaces",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint 'packages/**/*.{ts,tsx}' 'skills/**/*.ts'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --build"

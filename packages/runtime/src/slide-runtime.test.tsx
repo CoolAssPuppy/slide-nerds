@@ -17,6 +17,7 @@ const SlideStateDisplay: React.FC = () => {
     <div>
       <span data-testid="current-slide">{state.currentSlide}</span>
       <span data-testid="total-slides">{state.totalSlides}</span>
+      <span data-testid="is-light-table">{String(state.isLightTable)}</span>
     </div>
   )
 }
@@ -81,6 +82,27 @@ describe('SlideRuntime', () => {
 
     await user.keyboard(' ')
     expect(screen.getByTestId('current-slide').textContent).toBe('1')
+  })
+
+  it('should toggle light table on L key', async () => {
+    const user = userEvent.setup()
+    render(<TestDeck />)
+
+    expect(screen.getByTestId('is-light-table').textContent).toBe('false')
+    await user.keyboard('l')
+    expect(screen.getByTestId('is-light-table').textContent).toBe('true')
+    await user.keyboard('l')
+    expect(screen.getByTestId('is-light-table').textContent).toBe('false')
+  })
+
+  it('should close light table on Escape', async () => {
+    const user = userEvent.setup()
+    render(<TestDeck />)
+
+    await user.keyboard('l')
+    expect(screen.getByTestId('is-light-table').textContent).toBe('true')
+    await user.keyboard('{Escape}')
+    expect(screen.getByTestId('is-light-table').textContent).toBe('false')
   })
 
   it('should register export API on window', () => {
