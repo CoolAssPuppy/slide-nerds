@@ -1,54 +1,125 @@
 # {{PROJECT_NAME}}
 
-This is a slidenerds deck. You are building presentation slides using Next.js and the `@slidenerds/runtime` package.
+A slidenerds presentation deck. Built with Next.js and `@slidenerds/runtime`.
+
+## First steps when starting a new deck
+
+1. **Ask what kind of presentation this is.** Use the `narrative-frameworks` skill to pick the right structure (SCQA for board decks, PAS for sales, Sparkline for keynotes, etc.).
+2. **Set the brand.** Edit `brand.config.ts` with the user's colors, fonts, and spacing. Then update derived colors in `app/globals.css`. See the `brand` skill for the exact workflow.
+3. **Build slides in `app/page.tsx`.** Each `<section data-slide="">` is one slide.
+
+## Branding workflow
+
+`brand.config.ts` is the single source of truth. The layout reads it and injects CSS custom properties on `<html>`. Change this file to rebrand the entire deck.
+
+After editing `brand.config.ts`, update these derived CSS variables in `app/globals.css`:
+
+```css
+:root {
+  --color-accent-dim: rgba(R, G, B, 0.12);       /* accent at 12% opacity */
+  --color-text-secondary: rgba(R, G, B, 0.6);    /* text at 60% opacity */
+  --color-text-tertiary: rgba(R, G, B, 0.4);     /* text at 40% opacity */
+  --color-border: rgba(255, 255, 255, 0.06);      /* white at 6% for dark themes */
+  --color-surface-elevated: #222228;               /* one step above surface */
+}
+```
+
+If using custom web fonts, add `@import` rules at the top of `globals.css` before `@import 'tailwindcss'`.
+
+Never hardcode hex colors in slide content. Always use `var(--color-accent)`, `var(--color-text)`, etc.
+
+## File structure
+
+| File | Purpose |
+|------|---------|
+| `brand.config.ts` | Colors, fonts, spacing. Single source of truth for brand. |
+| `app/layout.tsx` | Root layout. Reads brand.config.ts and injects CSS variables. |
+| `app/globals.css` | Structural CSS, animations, derived color tokens, font imports. |
+| `app/page.tsx` | The slide deck. All slides live here. |
 
 ## Data conventions
 
-The runtime recognizes these HTML attributes:
-
 | Attribute | Purpose |
 |-----------|---------|
-| `data-slide` | Marks an element as a slide. The runtime tracks these for navigation and the light table. |
-| `data-step` | Marks an element for progressive reveal. Hidden until clicked into view, in order. |
-| `data-notes` | Speaker notes. Hidden in presentation mode, rendered in the presenter window. |
+| `data-slide` | Marks a `<section>` as a slide |
+| `data-step` | Progressive reveal. Hidden until the presenter advances. |
+| `data-notes` | Speaker notes. Hidden in presentation, shown in Speaker Notes window. |
+| `data-magic-id` | Shared identity for Magic Move animation between consecutive slides. |
 
 ## Keyboard controls
 
 | Key | Action |
 |-----|--------|
-| Space / Right arrow | Advance (next step or next slide) |
-| Left arrow / Backspace | Go back |
-| Double-click | Previous slide |
-| P | Open presenter mode |
-| L | Open light table |
+| Space / Right arrow | Next step or slide |
+| Left arrow / Backspace | Previous step or slide |
+| P | Speaker Notes (opens new window with notes, timer, slide count) |
+| L | Light Table (thumbnail overview of all slides) |
 | F | Fullscreen |
-| Escape | Exit fullscreen |
+| Escape | Exit Light Table or fullscreen |
 
-## Brand config
+## Animation classes
 
-Read `brand.config.ts` before generating any layout or applying any color. Never hardcode hex values. Use CSS custom properties from the brand config.
+Add these to `data-step` elements for entrance animations:
 
-## File structure
+| Class | Effect |
+|-------|--------|
+| `step-fade` | Fade in (350ms) |
+| `step-move-up` | Slide up + fade in (420ms) |
+| `step-scale-in` | Scale up + fade in (350ms) |
+| `step-emphasis` | Spring-scale entrance for big stats (500ms) |
 
-- `app/page.tsx` - Main slide deck
-- `app/layout.tsx` - Root layout with SlideRuntime wrapper
-- `app/globals.css` - Global styles with CSS custom properties from brand config
-- `brand.config.ts` - Brand configuration (colors, fonts, spacing)
+## Shape system
 
-## Slide types
+```tsx
+import { SlideShape } from '@slidenerds/runtime'
 
-When building slides, use these patterns:
-- **Title slide**: Large heading, subtitle, full viewport
-- **Content slide**: Heading + body content with `data-step` for reveals
-- **Big stat**: Single large number with label and context
-- **Quote**: Pull quote with attribution
-- **Code**: Syntax highlighted code block
-- **Two-up**: Side by side content
+<SlideShape shape="hexagon" size={100}
+  fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth={1.5}>
+  <p>Text inside</p>
+</SlideShape>
+
+<SlideShape shape="circle" size={140}
+  imageSrc="/photo.jpg" stroke="var(--color-accent)" strokeWidth={2} />
+```
+
+Available shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
+
+## Skills reference
+
+These skills guide slide construction. Read them before building slides.
+
+### Structure and narrative
+- **narrative-frameworks**: SCQA, Minto Pyramid, PAS, BAB, Sparkline, Monroe's. Pick one per deck.
+- **deck-templates**: Complete slide sequences for investor pitch, product launch, board deck, sales deck, conference talk.
+
+### Visual design
+- **visual-design**: Typography scale, spacing hierarchy, composition rules, content density limits.
+- **brand**: How to edit brand.config.ts and globals.css. Palette derivation, font pairing, rebranding checklist.
+- **layout**: Basic alignment, grids, centering, two-up, hero+body.
+- **advanced-layouts**: Dashboard (KPI grid), pricing comparison, before/after, icon grid, logo wall, agenda, appendix.
+
+### Content types
+- **slide-types**: Title, big stat, quote, code, table, chart, team, timeline, image, two-up.
+- **data-visualization**: 13 chart types with Recharts. Bar, line, area, pie, radar, waterfall, funnel, gauge, sparkline, combo.
+- **strategic-frameworks**: SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix, maturity model.
+- **diagrams**: Flowcharts, org charts, sequence diagrams, journey maps, mind maps, state diagrams, Venn, swim lanes.
+
+### Animation and interaction
+- **animation**: Step reveals, Magic Move, transition overlays, emphasis pulse.
+- **interactive**: Video embeds, QR codes, clickable links, iframe embeds, click-to-zoom.
+
+### Quality
+- **accessibility**: WCAG contrast, prefers-reduced-motion, screen reader support, color-blind safe palettes.
+- **speaker-notes**: How to write and place speaker notes.
+
+### Output
+- **analytics**: GTM, GA4, PostHog, Plausible integration.
+- **export**: PDF, PPTX, Google Slides export.
 
 ## Tips
 
-- Each `<section data-slide="">` is one slide
-- Use `data-step` on elements for progressive reveal
-- Add `data-notes` elements for speaker notes (hidden during presentation)
-- Run `npm run dev` for hot reload while editing
-- Press P to preview in presenter mode with notes and timer
+- Run `npm run dev` for hot reload while editing.
+- One idea per slide. If a slide says two things, make two slides.
+- Reveal content progressively with `data-step` to control pacing.
+- Charts go inside `card-surface` containers. Use fixed pixel heights (300-420px) on `ResponsiveContainer`.
+- Test at projection distance: if you cannot read it from 2 meters on a laptop, it fails on a projector.
