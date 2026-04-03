@@ -28,6 +28,10 @@ slidenerds/
   packages/
     runtime/               # @slidenerds/runtime npm package
     cli/                   # npx slidenerds CLI
+  apps/
+    web/                   # slidenerds.com (Next.js, Supabase, Vercel)
+    supabase/              # Database schema, migrations, seed data
+    ios/                   # Native iOS companion app
   skills/
     slidenerds-runtime/    # Core runtime conventions
     layout/                # Alignment, grids, arrangements
