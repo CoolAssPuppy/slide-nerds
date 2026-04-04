@@ -33,18 +33,39 @@ const rasterizeSvg = (
     const width = origSvg.getBoundingClientRect().width || 24
     const height = origSvg.getBoundingClientRect().height || 24
 
-    cloneSvg.querySelectorAll('*').forEach((el) => {
-      if (el.getAttribute('fill') === 'currentColor') el.setAttribute('fill', color)
-      if (el.getAttribute('stroke') === 'currentColor') el.setAttribute('stroke', color)
-      if (!el.getAttribute('fill') && el.tagName !== 'svg') {
-        const elColor = window.getComputedStyle(origSvg).color
-        if (el.tagName === 'path' || el.tagName === 'circle' || el.tagName === 'rect' ||
-            el.tagName === 'polygon' || el.tagName === 'polyline' || el.tagName === 'line' ||
-            el.tagName === 'ellipse') {
-          el.setAttribute('fill', elColor)
-        }
+    const originalNodes = Array.from(origSvg.querySelectorAll('*'))
+    const clonedNodes = Array.from(cloneSvg.querySelectorAll('*'))
+
+    clonedNodes.forEach((clonedNode, idx) => {
+      const originalNode = originalNodes[idx] as Element | undefined
+      if (!originalNode) return
+
+      const originalNodeStyle = window.getComputedStyle(originalNode)
+      const fill = originalNodeStyle.fill
+      const stroke = originalNodeStyle.stroke
+
+      if (clonedNode.getAttribute('fill') === 'currentColor') {
+        clonedNode.setAttribute('fill', color)
+      } else if (fill && fill !== 'none') {
+        clonedNode.setAttribute('fill', fill)
+      }
+
+      if (clonedNode.getAttribute('stroke') === 'currentColor') {
+        clonedNode.setAttribute('stroke', color)
+      } else if (stroke && stroke !== 'none') {
+        clonedNode.setAttribute('stroke', stroke)
+      }
+
+      const fillOpacity = originalNodeStyle.fillOpacity
+      const strokeOpacity = originalNodeStyle.strokeOpacity
+      if (fillOpacity && fillOpacity !== '1') {
+        clonedNode.setAttribute('fill-opacity', fillOpacity)
+      }
+      if (strokeOpacity && strokeOpacity !== '1') {
+        clonedNode.setAttribute('stroke-opacity', strokeOpacity)
       }
     })
+
     if (!cloneSvg.getAttribute('fill') || cloneSvg.getAttribute('fill') === 'currentColor') {
       cloneSvg.setAttribute('fill', color)
     }
@@ -239,9 +260,11 @@ const exportPdf = async (): Promise<void> => {
 }
 
 const exportPptx = async (): Promise<void> => {
+  const PPTX_WIDTH_IN = 13.333
+  const PPTX_HEIGHT_IN = 7.5
   const progress = showProgress()
   try {
-    const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
+    const PptxGenJS = (await import('pptxgenjs')).default
     const images = await captureSlides(progress.update)
     if (images.length === 0) return
 
@@ -254,8 +277,8 @@ const exportPptx = async (): Promise<void> => {
         data: imgData,
         x: 0,
         y: 0,
-        w: '100%',
-        h: '100%',
+        w: PPTX_WIDTH_IN,
+        h: PPTX_HEIGHT_IN,
       })
     }
 
