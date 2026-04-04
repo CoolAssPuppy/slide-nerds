@@ -55,7 +55,21 @@ const captureSlides = async (
     clone.classList.add('active')
 
     clone.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      step.classList.add('step-visible')
+      const el = step as HTMLElement
+      el.style.setProperty('visibility', 'visible', 'important')
+      el.style.setProperty('opacity', '1', 'important')
+      el.style.setProperty('transform', 'none', 'important')
+      el.style.setProperty('clip-path', 'none', 'important')
+      el.style.setProperty('transition', 'none', 'important')
+      el.style.setProperty('animation', 'none', 'important')
+    })
+
+    clone.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
+      const htmlEl = el as HTMLElement
+      htmlEl.style.setProperty('opacity', '1', 'important')
+      htmlEl.style.setProperty('transform', 'none', 'important')
+      htmlEl.style.setProperty('clip-path', 'none', 'important')
+      htmlEl.style.setProperty('animation', 'none', 'important')
     })
 
     clone.querySelectorAll('[data-notes]').forEach((note) => {
