@@ -316,7 +316,11 @@ export const SlideControls: React.FC = () => {
             e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+            style={{
+              transition: 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+            }}>
             <circle cx="12" cy="6" r="2" />
             <circle cx="12" cy="12" r="2" />
             <circle cx="12" cy="18" r="2" />
