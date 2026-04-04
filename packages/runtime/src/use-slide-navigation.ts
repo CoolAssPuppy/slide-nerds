@@ -94,11 +94,11 @@ export const useSlideNavigation = (): SlideNavigationState => {
     const prevEl = prevSlide >= 0 ? slides[prevSlide] : null
     const nextEl = slides[currentSlide]
 
-    const capturedPositions = new Map<string, DOMRect>()
+    const previousMagicIds = new Set<string>()
     if (prevEl) {
       prevEl.querySelectorAll('[data-magic-id]').forEach((el) => {
         const id = el.getAttribute('data-magic-id')
-        if (id) capturedPositions.set(id, el.getBoundingClientRect())
+        if (id) previousMagicIds.add(id)
       })
     }
 
@@ -110,29 +110,25 @@ export const useSlideNavigation = (): SlideNavigationState => {
       }
     })
 
-    if (nextEl && capturedPositions.size > 0) {
+    if (nextEl && previousMagicIds.size > 0) {
       nextEl.querySelectorAll('[data-magic-id]').forEach((el) => {
         const id = el.getAttribute('data-magic-id')
         if (!id) return
-        const from = capturedPositions.get(id)
-        if (!from) return
-        const to = el.getBoundingClientRect()
-        const dx = from.left - to.left
-        const dy = from.top - to.top
-        const sx = from.width / (to.width || 1)
-        const sy = from.height / (to.height || 1)
+        if (!previousMagicIds.has(id)) return
         const htmlEl = el as HTMLElement
         htmlEl.style.transition = 'none'
-        htmlEl.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`
-        htmlEl.style.transformOrigin = 'top left'
+        htmlEl.style.opacity = '0'
+        htmlEl.style.transform = 'scale(0.96)'
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            htmlEl.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)'
-            htmlEl.style.transform = 'translate(0, 0) scale(1, 1)'
+            htmlEl.style.transition =
+              'opacity 420ms cubic-bezier(0.4, 0, 0.2, 1), transform 420ms cubic-bezier(0.4, 0, 0.2, 1)'
+            htmlEl.style.opacity = '1'
+            htmlEl.style.transform = 'scale(1)'
             const cleanup = () => {
               htmlEl.style.transition = ''
+              htmlEl.style.opacity = ''
               htmlEl.style.transform = ''
-              htmlEl.style.transformOrigin = ''
               htmlEl.removeEventListener('transitionend', cleanup)
             }
             htmlEl.addEventListener('transitionend', cleanup)

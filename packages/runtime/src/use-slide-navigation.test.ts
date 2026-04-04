@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useSlideNavigation } from './use-slide-navigation'
 
@@ -180,5 +180,37 @@ describe('useSlideNavigation', () => {
     const { result } = renderHook(() => useSlideNavigation())
 
     expect(result.current.stepsForCurrentSlide).toBe(3)
+  })
+
+  it('should animate matching magic move elements without FLIP measurements', () => {
+    clearDOM()
+    const container = document.createElement('div')
+
+    const slideOne = document.createElement('section')
+    slideOne.setAttribute('data-slide', '')
+    const source = document.createElement('div')
+    source.setAttribute('data-magic-id', 'metric')
+    source.textContent = 'Revenue'
+    slideOne.appendChild(source)
+
+    const slideTwo = document.createElement('section')
+    slideTwo.setAttribute('data-slide', '')
+    const target = document.createElement('div')
+    target.setAttribute('data-magic-id', 'metric')
+    target.textContent = 'Revenue'
+    slideTwo.appendChild(target)
+
+    container.append(slideOne, slideTwo)
+    document.body.appendChild(container)
+
+    const rectSpy = vi.spyOn(Element.prototype, 'getBoundingClientRect')
+    const { result } = renderHook(() => useSlideNavigation())
+
+    act(() => {
+      result.current.goToSlide(1)
+    })
+
+    expect(rectSpy).not.toHaveBeenCalled()
+    rectSpy.mockRestore()
   })
 })

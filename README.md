@@ -48,6 +48,7 @@ slidenerds/
     speaker-notes/         # Speaker notes conventions
     accessibility/         # WCAG contrast, motion reduction, screen reader
     interactive/           # Video, QR codes, links, iframes, polls
+    react-component-embeds/ # Embed real React components and live demos in slides
     analytics/             # GTM, GA4, PostHog, Plausible
     export/                # PDF, PPTX, Google Slides
 ```
@@ -182,6 +183,25 @@ Every slide is a `<section data-slide="">`. Inside it, you can use:
 - **Links**: Styled as pill buttons with external-link icon
 - **Strategic frameworks**: SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix (all HTML/CSS)
 - **Custom SVG**: Gauge charts, Venn diagrams, cycle diagrams, any visualization not covered above
+- **React components**: Any reusable component from your Next.js app, including live demos with local state and event handlers
+
+### Embedding React components in slides
+
+Slides are standard React/Next.js UI. If a component works in your app, it can be rendered inside a slide.
+
+```tsx
+import { ProductSearchDemo } from '@/components/product-search-demo'
+
+<section data-slide="">
+  <div className="flex flex-col w-full" style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Live demo</p>
+    <h2 className="text-[2.5rem] font-bold mb-8">Search UX in production</h2>
+    <ProductSearchDemo />
+  </div>
+</section>
+```
+
+Use the `react-component-embeds` skill when you want a repeatable pattern for integrating interactive demos into slides.
 
 ### Slide layout patterns
 
@@ -236,7 +256,7 @@ The default layout is **top-left anchored**. Title and content start near the to
 
 ### Magic Move
 
-Give elements the same `data-magic-id` on consecutive slides. The runtime animates position and scale between them using FLIP.
+Give elements the same `data-magic-id` on consecutive slides. The runtime applies a clean cross-slide entrance animation for the matching element on the next slide.
 
 ```tsx
 {/* Slide A: large centered metrics */}
