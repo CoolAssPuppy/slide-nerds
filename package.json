@@ -5,7 +5,6 @@
   "type": "module",
   "description": "A presentation runtime for Next.js with an LLM skill library",
   "workspaces": [
-    "packages/slide-nerds",
     "packages/runtime",
     "packages/cli"
   ],

@@ -1,33 +1,31 @@
-# slidenerds
+# slide-nerds
 
-Monorepo for the slidenerds presentation runtime, CLI, skill library, and platform.
+Monorepo for the `@strategicnerds/slide-nerds` npm package: a presentation runtime, CLI, and LLM skill library for Next.js.
 
 ## Project structure
 
 ```
-slidenerds/
+slide-nerds/
   packages/
-    runtime/         # @slidenerds/runtime -- React component library (npm)
-    cli/             # @slidenerds/cli -- npx slidenerds CLI (npm)
+    slide-nerds/       # @strategicnerds/slide-nerds (the npm package)
+      src/
+        runtime/       # React components (SlideRuntime, SlideShape, etc.)
+        cli/           # CLI commands (create, analytics, export)
+      templates/       # Scaffold templates (.tmpl files)
+      skills/          # 18 SKILL.md files (bundled in package, copied on create)
+  skills/              # Source skills (development copies, changes sync to packages/slide-nerds/skills/)
   apps/
-    web/             # slidenerds.com -- Next.js 15, Supabase, deployed to Vercel
-    supabase/        # Database schema, migrations, seed data
-    ios/             # Native iOS companion app (Swift, SwiftUI)
-  skills/            # 9 SKILL.md files following skills.sh format
+    web/               # slidenerds.com (Next.js 15, Supabase, Vercel)
+    supabase/          # Database schema, migrations, seed data
+    ios/               # Native iOS companion app (Swift, SwiftUI)
 ```
 
-- `packages/` contains code published to npm. Open source.
-- `apps/web/` is the paid platform (auth, analytics, team features, billing).
-- `apps/supabase/` is the database layer (Postgres, RLS, migrations).
-- `apps/ios/` is the native iOS companion (presenter remote, offline notes).
-- `skills/` contains LLM skill files. Open source.
-
-Each directory has its own CLAUDE.md with specific context for that area.
+The single published package is `packages/slide-nerds/`. The `packages/runtime/` and `packages/cli/` directories contain the original source and tests -- the unified package re-uses this code.
 
 ## Commands
 
 ```bash
-npm test              # Run all 93 tests (Vitest)
+npm test              # Run all 131 tests (Vitest)
 npm run build         # Build all packages
 npm run lint          # ESLint
 npm run format        # Prettier
@@ -36,30 +34,29 @@ npm run typecheck     # TypeScript strict mode check
 
 ## Key conventions
 
-- npm workspaces monorepo (`packages/*` and `apps/*`)
+- npm workspaces monorepo
+- Single published package: `@strategicnerds/slide-nerds`
 - Vitest for all testing; test files live next to source files
 - TypeScript strict mode, no `any`
 - React 19, Next.js 15 App Router
-- Supabase for auth, database, and storage
-- RLS on every table, auth.uid() in all policies
-- Data attributes: `data-slide`, `data-step`, `data-notes`
+- Data attributes: `data-slide`, `data-step`, `data-notes`, `data-magic-id`
 - Brand tokens via CSS custom properties from `brand.config.ts`
 - Skills follow skills.sh SKILL.md format (YAML frontmatter + markdown)
+- 18 skills covering layout, animation, data viz, frameworks, diagrams, accessibility, and more
 
 ## Boundaries for parallel work
 
-When working on one area, do not modify files in another:
-
 | Area | Scope | Safe to modify |
 |------|-------|----------------|
-| Runtime | `packages/runtime/` | Runtime source and tests only |
-| CLI | `packages/cli/` | CLI source, tests, and templates only |
+| Runtime | `packages/slide-nerds/src/runtime/` | Runtime source and tests |
+| CLI | `packages/slide-nerds/src/cli/` | CLI source and tests |
+| Templates | `packages/slide-nerds/templates/` | Scaffold templates |
+| Skills | `skills/` and `packages/slide-nerds/skills/` | SKILL.md files |
 | Web | `apps/web/` | Web app source only |
 | Supabase | `apps/supabase/` | Migrations and seed data only |
 | iOS | `apps/ios/` | Swift source and Xcode project only |
-| Skills | `skills/` | SKILL.md files and skill tests only |
 
-The runtime's public API (`index.ts` exports) is the contract between packages. Change it only with coordination across all consumers.
+The runtime's public API (`src/runtime/index.ts` exports) is the contract. Change it with care.
 
 ---
 

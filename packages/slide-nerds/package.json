@@ -19,11 +19,27 @@
     "templates",
     "skills"
   ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strategicnerds/slide-nerds.git",
+    "directory": "packages/slide-nerds"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "nextjs",
+    "react",
+    "keynote",
+    "magic-move",
+    "ai",
+    "llm",
+    "claude"
+  ],
   "scripts": {
     "build": "tsc",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -36,8 +52,8 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.0.0",
     "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.0.0",
     "@types/fs-extra": "^11.0.0",
     "@types/puppeteer": "^5.4.7",

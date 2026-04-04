@@ -1,56 +1,45 @@
-# slidenerds
+# slide-nerds
 
 A presentation runtime for Next.js and a skill library that teaches LLMs to build great slides.
 
-Three things that work together:
+Three things in one package:
 
-**The runtime** (`@slidenerds/runtime`) turns any Next.js app into a full presentation environment. Navigation, speaker notes, Light Table with slide thumbnails, Magic Move transitions, step animations, SVG shape system, floating controls, URL sync, fullscreen.
+**The runtime** turns any Next.js app into a full presentation environment. Navigation, speaker notes, Light Table with slide thumbnails, Magic Move transitions, step animations, SVG shape system, floating controls, URL sync, fullscreen.
 
-**The skill library** (`skills/`) gives LLMs the procedural knowledge to build slides correctly. Layout alignment, animation sequencing, deck outlines, slide type patterns, speaker notes, brand application, analytics injection, export. The LLM reads these skills and acts on them.
+**The skill library** gives LLMs the procedural knowledge to build slides correctly. 18 skills covering layout, animation, data visualization, strategic frameworks, narrative structure, diagrams, accessibility, and more. The LLM reads these skills and acts on them.
 
-**The CLI** (`npx slidenerds`) scaffolds new decks, exports to PDF/PPTX/Google Slides, and wires up analytics providers.
+**The CLI** scaffolds new decks and wires up analytics providers.
 
 ## Quick start
 
 ```bash
-npx slidenerds create my-talk
+npx @strategicnerds/slide-nerds create my-talk
 cd my-talk
 npm install
 npm run dev
 ```
 
-Open a second terminal, start Claude Code (or your preferred LLM), and talk to it while hot reload updates your browser.
+Open a second terminal, start Claude Code (or your preferred LLM), and talk to it while hot reload updates your browser. The generated `CLAUDE.md` tells the LLM everything it needs to know.
 
-## Repository structure
+## What you get
+
+When you run `create`, you get:
 
 ```
-slidenerds/
-  packages/
-    runtime/               # @slidenerds/runtime npm package
-    cli/                   # npx slidenerds CLI
-  apps/
-    web/                   # slidenerds.com (Next.js, Supabase, Vercel)
-    supabase/              # Database schema, migrations, seed data
-    ios/                   # Native iOS companion app
-  skills/
-    slidenerds-runtime/    # Core runtime conventions
-    layout/                # Alignment, grids, arrangements
-    advanced-layouts/      # Dashboard, comparison, logo wall, before/after
-    visual-design/         # Typography scale, spacing, composition rules
-    animation/             # Step reveals, Magic Move, transitions
-    slide-types/           # Title, big stat, quote, code, table, etc.
-    data-visualization/    # 13 chart types with Recharts
-    strategic-frameworks/  # SWOT, 2x2, TAM/SAM/SOM, chevrons, pyramid
-    diagrams/              # Flowcharts, org charts, sequence, journey, Venn
-    narrative-frameworks/  # SCQA, Minto Pyramid, PAS, BAB, Sparkline
-    deck-templates/        # Investor pitch, product launch, etc.
-    brand/                 # brand.config.ts, rebranding workflow
-    speaker-notes/         # Speaker notes conventions
-    accessibility/         # WCAG contrast, motion reduction, screen reader
-    interactive/           # Video, QR codes, links, iframes, polls
-    react-component-embeds/ # Embed real React components and live demos in slides
-    analytics/             # GTM, GA4, PostHog, Plausible
-    export/                # PDF, PPTX, Google Slides
+my-talk/
+  app/
+    layout.tsx          # Root layout with SlideRuntime + brand wiring
+    page.tsx            # Your slides
+    globals.css         # Slide engine CSS, animations, utility classes
+  brand.config.ts       # Colors, fonts, spacing (single source of truth)
+  CLAUDE.md             # Complete slide authoring guide for LLMs
+  .slidenerds/
+    skills/             # 18 LLM skill files installed locally
+      animation/
+      brand/
+      data-visualization/
+      diagrams/
+      ...
 ```
 
 ## The runtime
@@ -58,26 +47,73 @@ slidenerds/
 Install in any Next.js app:
 
 ```bash
-npm install @slidenerds/runtime
+npm install @strategicnerds/slide-nerds
 ```
 
 Wrap your layout:
 
 ```tsx
-import { SlideRuntime } from '@slidenerds/runtime'
+import { SlideRuntime } from '@strategicnerds/slide-nerds'
+import brandConfig from '../brand.config'
+
+const brandVars = {
+  '--color-primary': brandConfig.colors.primary,
+  '--color-accent': brandConfig.colors.accent,
+  '--color-background': brandConfig.colors.background,
+  '--color-surface': brandConfig.colors.surface,
+  '--color-text': brandConfig.colors.text,
+  '--slide-padding': brandConfig.spacing.slide,
+  '--font-heading': brandConfig.fonts.heading,
+  '--font-body': brandConfig.fonts.body,
+  '--font-mono': brandConfig.fonts.mono,
+} as React.CSSProperties
 
 export default function RootLayout({ children }) {
-  return <SlideRuntime>{children}</SlideRuntime>
+  return (
+    <html lang="en" style={brandVars}>
+      <body>
+        <SlideRuntime>{children}</SlideRuntime>
+      </body>
+    </html>
+  )
 }
 ```
 
-### Data conventions
+Write slides:
+
+```tsx
+export default function Home() {
+  return (
+    <main>
+      <section data-slide="">
+        <div className="flex flex-col justify-end" style={{ padding: '5rem' }}>
+          <h1 className="text-6xl font-bold">My talk</h1>
+          <p className="mt-4 text-xl opacity-60">Subtitle</p>
+        </div>
+      </section>
+
+      <section data-slide="">
+        <div className="flex flex-col" style={{ padding: '4rem 6rem' }}>
+          <h2 className="text-4xl font-bold mb-10">Key point</h2>
+          <ul>
+            <li data-step="" className="step-fade">First thing</li>
+            <li data-step="" className="step-fade">Second thing</li>
+          </ul>
+          <div data-notes="">Speaker notes go here.</div>
+        </div>
+      </section>
+    </main>
+  )
+}
+```
+
+### Data attributes
 
 | Attribute | Purpose |
 |-----------|---------|
 | `data-slide` | Marks an element as a slide |
-| `data-step` | Progressive reveal (hidden until clicked into view) |
-| `data-notes` | Speaker notes (hidden in presentation, shown in speaker notes window) |
+| `data-step` | Progressive reveal (hidden until presenter advances) |
+| `data-notes` | Speaker notes (hidden in presentation, shown in Speaker Notes window) |
 | `data-magic-id` | Shared identity for Magic Move transitions between slides |
 
 ### Keyboard controls
@@ -86,45 +122,45 @@ export default function RootLayout({ children }) {
 |-----|--------|
 | Space / Right arrow | Next step or slide |
 | Left arrow / Backspace | Previous step or slide |
-| P | Speaker Notes (opens in a new window) |
+| P | Speaker Notes (opens new window) |
 | L | Light Table (slide thumbnail overview) |
 | F | Fullscreen |
 | Escape | Exit Light Table or fullscreen |
 
 ### Shape system
 
-The `SlideShape` component renders SVG shapes that support text content, image masking, brand colors, and Magic Move transitions.
-
 ```tsx
-import { SlideShape } from '@slidenerds/runtime'
+import { SlideShape } from '@strategicnerds/slide-nerds'
 
+// Shape with text
 <SlideShape shape="hexagon" size={100}
   fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth={1.5}>
   <p>Text inside</p>
 </SlideShape>
 
+// Shape with image mask
 <SlideShape shape="circle" size={140}
   imageSrc="/photo.jpg"
   stroke="var(--color-accent)" strokeWidth={2}
   data-magic-id="avatar" />
 ```
 
-Available shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
+16 shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
 
 ### Branding
 
-Edit `brand.config.ts` to set your colors, fonts, and spacing. The layout injects these as CSS custom properties. One file change rebrands the entire deck. See the `brand` skill for details.
+Edit `brand.config.ts` to set your colors, fonts, and spacing. The layout injects these as CSS custom properties. One file change rebrands the entire deck.
 
 ### CSS variables
 
-These are set by `brand.config.ts` via the layout and available in every slide:
+Set by `brand.config.ts` via the layout:
 
 | Variable | Usage |
 |----------|-------|
 | `--color-primary` | Section divider backgrounds, darkest surfaces |
-| `--color-accent` | Highlights, stats, labels, shape strokes, chart fills |
+| `--color-accent` | Highlights, stats, shape strokes, chart fills |
 | `--color-background` | Slide canvas background |
-| `--color-surface` | Card backgrounds (charts, tables, code blocks) |
+| `--color-surface` | Card backgrounds (charts, tables) |
 | `--color-text` | Primary text color |
 | `--slide-padding` | Outer slide padding |
 | `--font-heading` | Heading font stack |
@@ -135,15 +171,13 @@ Derived variables (set in `globals.css`):
 
 | Variable | Usage |
 |----------|-------|
-| `--color-accent-dim` | Pill backgrounds, badges, shape fills (accent at 12% opacity) |
-| `--color-text-secondary` | Body text, descriptions (text at 60% opacity) |
-| `--color-text-tertiary` | Captions, metadata (text at 40% opacity) |
-| `--color-border` | Card borders, dividers, table rules (white at 6% opacity) |
-| `--color-surface-elevated` | Table headers, elevated cards |
+| `--color-accent-dim` | Accent at 12% opacity (badges, pill backgrounds) |
+| `--color-text-secondary` | Text at 60% opacity (body, labels) |
+| `--color-text-tertiary` | Text at 40% opacity (captions, metadata) |
+| `--color-border` | White at 6% opacity (card borders, dividers) |
+| `--color-surface-elevated` | One step above surface (table headers) |
 
 ### Animation classes
-
-Add to `data-step` elements for entrance animations:
 
 | Class | Effect | Duration |
 |-------|--------|----------|
@@ -154,183 +188,181 @@ Add to `data-step` elements for entrance animations:
 
 ### Utility CSS classes
 
-| Class | What it does |
-|-------|-------------|
-| `section-label` | Small uppercase accent-colored text with wide tracking |
-| `card-surface` | Rounded container with surface background and subtle border |
+| Class | Purpose |
+|-------|---------|
+| `section-label` | Small uppercase accent-colored label |
+| `card-surface` | Rounded container with surface background |
 | `accent-line` | 40x3px decorative accent line |
-| `stat-glow` | Text shadow glow in accent color for large numbers |
-| `bg-mesh-warm` | Subtle warm radial gradient background |
-| `bg-mesh-cool` | Subtle cool radial gradient background |
-| `bg-section` | Linear gradient for section divider slides |
-| `slide-table` | Styled table with uppercase headers and border rules |
-| `timeline-track` | Horizontal connector line for timelines |
-| `timeline-dot` | Accent circle with glow for timeline nodes |
+| `stat-glow` | Text shadow glow for large numbers |
+| `bg-mesh-warm` | Subtle warm radial gradient |
+| `bg-mesh-cool` | Subtle cool radial gradient |
+| `bg-section` | Linear gradient for section dividers |
+| `slide-table` | Table with uppercase headers |
+| `timeline-track` | Horizontal connector line |
+| `timeline-dot` | Accent circle with glow |
 | `sr-only` | Visually hidden, screen-reader accessible |
-
-### What can go on a slide
-
-Every slide is a `<section data-slide="">`. Inside it, you can use:
-
-- **Text**: headings, paragraphs, lists, blockquotes with Tailwind typography classes
-- **Images**: `<img>` with `object-cover` or `object-contain`
-- **Charts**: Recharts components (bar, line, area, pie, radar, scatter, combo, treemap, funnel) inside `card-surface` containers with fixed-height `ResponsiveContainer`
-- **Shapes**: `SlideShape` component with 16 SVG shape types, supporting text content, image masking, and Magic Move
-- **Tables**: HTML tables with `slide-table` class, rows revealed progressively via `data-step`
-- **Diagrams**: Mermaid charts (flowcharts, sequence, journey, mind map, state, C4) or custom SVG (Venn, cycle, swim lane)
-- **Video**: YouTube/Vimeo iframes or `<video>` in `card-surface` with 16:9 aspect ratio
-- **QR codes**: `qrcode.react` component for audience links
-- **Links**: Styled as pill buttons with external-link icon
-- **Strategic frameworks**: SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix (all HTML/CSS)
-- **Custom SVG**: Gauge charts, Venn diagrams, cycle diagrams, any visualization not covered above
-- **React components**: Any reusable component from your Next.js app, including live demos with local state and event handlers
-
-### Embedding React components in slides
-
-Slides are standard React/Next.js UI. If a component works in your app, it can be rendered inside a slide.
-
-```tsx
-import { ProductSearchDemo } from '@/components/product-search-demo'
-
-<section data-slide="">
-  <div className="flex flex-col w-full" style={{ padding: '4rem 6rem' }}>
-    <p className="section-label mb-3">Live demo</p>
-    <h2 className="text-[2.5rem] font-bold mb-8">Search UX in production</h2>
-    <ProductSearchDemo />
-  </div>
-</section>
-```
-
-Use the `react-component-embeds` skill when you want a repeatable pattern for integrating interactive demos into slides.
 
 ### Slide layout patterns
 
-The default layout is **top-left anchored**. Title and content start near the top and flow downward. Do NOT vertically center content on most slides. Centered layout is only for big stat, section divider, quote, and closing slides.
+The default layout is **top-left anchored**. Do NOT vertically center content on most slides.
+
+**Two sub-types:**
+- **Top-left text** (bullets, tables): Content anchored below title, flows down.
+- **Top-left + centered visual** (charts, diagrams, shapes, timelines, KPIs): Title top-left, visual centered in remaining space using `flex-1 flex items-center justify-center`.
+
+Only big stat, section divider, quote, and closing use centered layout.
 
 ```tsx
-{/* TOP-LEFT WITH TEXT (bullets, lists, tables -- content anchored below title) */}
+{/* TOP-LEFT TEXT (default) */}
 <section data-slide="">
-  <div className="bg-mesh-cool flex flex-col w-full"
-    style={{ padding: '4rem 6rem' }}>
-    <p className="section-label mb-3">Section name</p>
-    <h2 className="text-[2.5rem] font-bold mb-10">Slide title</h2>
-    {/* Text content flows downward. Bottom is breathing room. */}
+  <div className="flex flex-col" style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Section</p>
+    <h2 className="text-[2.5rem] font-bold mb-10">Title</h2>
+    {/* Content flows down */}
   </div>
 </section>
 
-{/* TOP-LEFT TITLE + CENTERED VISUAL (diagrams, charts, shapes, process flows) */}
+{/* TOP-LEFT + CENTERED VISUAL (charts, diagrams, shapes) */}
 <section data-slide="">
-  <div className="flex flex-col w-full"
-    style={{ padding: '4rem 6rem' }}>
-    <p className="section-label mb-3">Section name</p>
-    <h2 className="text-[2.5rem] font-bold mb-8">Slide title</h2>
+  <div className="flex flex-col" style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Section</p>
+    <h2 className="text-[2.5rem] font-bold mb-8">Title</h2>
     <div className="flex-1 flex items-center justify-center">
-      {/* Visual centered in remaining space below the title */}
+      {/* Chart, diagram, or shapes centered in remaining space */}
     </div>
   </div>
 </section>
 
-{/* CENTERED (only for: big stat, section divider, quote, closing) */}
+{/* CENTERED (only: big stat, section divider, quote, closing) */}
 <section data-slide="">
-  <div className="flex flex-col items-center justify-center w-full">
-    {/* Content centered horizontally and vertically */}
-  </div>
-</section>
-
-{/* BOTTOM-ALIGNED (only for: title slide) */}
-<section data-slide="">
-  <div className="flex flex-col justify-end w-full"
-    style={{ padding: '5rem 5.5rem' }}>
-    {/* Content anchored to bottom-left. Top 55% is empty. */}
-  </div>
-</section>
-
-{/* TWO-COLUMN SPLIT (before/after, quote + data) */}
-<section data-slide="">
-  <div className="grid grid-cols-2 w-full">
-    <div style={{ padding: '4rem' }}>{/* Left */}</div>
-    <div style={{ padding: '4rem' }}>{/* Right */}</div>
+  <div className="flex flex-col items-center justify-center">
+    {/* Content centered */}
   </div>
 </section>
 ```
 
 ### Magic Move
 
-Give elements the same `data-magic-id` on consecutive slides. The runtime applies a clean cross-slide entrance animation for the matching element on the next slide.
+Give elements the same `data-magic-id` on consecutive slides. The runtime animates position and scale between them.
 
 ```tsx
-{/* Slide A: large centered metrics */}
+{/* Slide A: large centered */}
 <section data-slide="">
   <div data-magic-id="revenue" className="text-6xl">$4.2M</div>
 </section>
 
-{/* Slide B: same metric, small, top-left -- runtime animates the move */}
+{/* Slide B: small top-left -- runtime animates the move */}
 <section data-slide="">
   <div data-magic-id="revenue" className="text-xl">$4.2M</div>
-  <div data-step="" className="step-fade">{/* New content below */}</div>
 </section>
 ```
+
+### Content types
+
+Everything that can go on a slide:
+
+- **Text**: headings, paragraphs, lists, blockquotes
+- **Images**: `<img>` with `object-cover` or `object-contain`
+- **Charts**: Recharts (bar, line, area, pie, radar, scatter, combo, waterfall, funnel, gauge, sparkline, treemap)
+- **Shapes**: SlideShape (16 SVG shapes with text or image content)
+- **Tables**: HTML tables with `slide-table` class
+- **Diagrams**: Mermaid (flowcharts, sequence, journey, mind map, state, C4) or custom SVG
+- **Video**: YouTube/Vimeo iframes or `<video>`
+- **QR codes**: `qrcode.react`
+- **Strategic frameworks**: SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix
+- **Custom SVG**: Venn diagrams, gauge charts, cycle diagrams
+
+## The skill library
+
+18 skills installed to `.slidenerds/skills/` when you create a deck:
+
+| Skill | What it covers |
+|-------|---------------|
+| `narrative-frameworks` | SCQA, Minto Pyramid, PAS, BAB, Sparkline, Monroe's, Rule of Three |
+| `deck-templates` | Slide sequences for investor pitch, product launch, board deck, sales deck, conference talk |
+| `visual-design` | Typography scale, spacing, composition, content density |
+| `brand` | brand.config.ts wiring, palette derivation, font pairing, rebranding workflow |
+| `layout` | Alignment, grids, centering, two-up, hero+body |
+| `advanced-layouts` | Dashboard, pricing comparison, before/after, icon grid, logo wall, agenda, appendix |
+| `slide-types` | Title, big stat, quote, code, table, chart, team, timeline, image, two-up |
+| `data-visualization` | 13 chart types with Recharts (bar, line, area, pie, radar, waterfall, funnel, gauge, sparkline, combo, treemap) |
+| `strategic-frameworks` | SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix, maturity model |
+| `diagrams` | Flowcharts, org charts, sequence diagrams, journey maps, mind maps, C4, Venn, swim lanes |
+| `narrative-frameworks` | SCQA, Minto Pyramid, PAS, BAB, Sparkline, Monroe's Motivated Sequence |
+| `animation` | Step reveals, Magic Move, transition overlays, emphasis |
+| `interactive` | Video embeds, QR codes, links, iframes, click-to-zoom, polls |
+| `accessibility` | WCAG contrast, prefers-reduced-motion, screen reader support, color-blind palettes |
+| `speaker-notes` | Speaker notes conventions |
+| `analytics` | GTM, GA4, PostHog, Plausible integration |
+| `export` | PDF, PPTX, Google Slides export |
+| `react-component-embeds` | Embedding React components in slides |
 
 ## The CLI
 
 ```bash
 # Create a new deck
-npx slidenerds create my-talk
-
-# Export
-npx slidenerds export --pdf
-npx slidenerds export --pptx
-npx slidenerds export --gslides
+npx @strategicnerds/slide-nerds create my-talk
 
 # Add analytics
-npx slidenerds analytics --gtm GTM-XXXXXX
-npx slidenerds analytics --ga4 G-XXXXXXXXXX
-npx slidenerds analytics --posthog phc_XXXXXXXXXX
-npx slidenerds analytics --plausible yourdomain.com
-npx slidenerds analytics --custom
+slidenerds analytics --gtm GTM-XXXXXX
+slidenerds analytics --ga4 G-XXXXXXXXXX
+slidenerds analytics --posthog phc_XXXXXXXXXX
+slidenerds analytics --plausible yourdomain.com
+
+# Export
+slidenerds export --pdf
+slidenerds export --pptx
 ```
 
-## The skill library
+## Repository structure
 
-Install all skills:
-
-```bash
-npx skills add strategicnerds/slidenerds
 ```
-
-Install a single skill:
-
-```bash
-npx skills add strategicnerds/slidenerds --skill layout
+slide-nerds/
+  packages/
+    slide-nerds/           # @strategicnerds/slide-nerds (the npm package)
+      src/
+        runtime/           # React components (SlideRuntime, SlideShape, etc.)
+        cli/               # CLI (slidenerds command)
+      templates/           # Scaffold templates (.tmpl files)
+      skills/              # 18 SKILL.md files (bundled in package)
+  skills/                  # Source skills (development copies)
+  apps/
+    web/                   # slidenerds.com (Next.js, Supabase, Vercel)
+    supabase/              # Database schema, migrations, seed data
+    ios/                   # Native iOS companion app
 ```
-
-Skills follow the skills.sh `SKILL.md` format. Each skill is a directory with YAML frontmatter and markdown the agent reads when triggered.
 
 ## Local development
 
 ```bash
-git clone https://github.com/strategicnerds/slidenerds.git
-cd slidenerds
+git clone https://github.com/strategicnerds/slide-nerds.git
+cd slide-nerds
 npm install
 npm test
 ```
 
-### Scripts
-
 | Command | Description |
 |---------|-------------|
-| `npm test` | Run all tests (125 tests across packages and skills) |
+| `npm test` | Run all tests (131 tests across packages and skills) |
 | `npm run build` | Build all packages |
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format with Prettier |
 | `npm run typecheck` | TypeScript type checking |
 
-### Project architecture
+### Testing a local build
 
-- **npm workspaces** for monorepo management
-- **Vitest** for testing across all packages
-- **TypeScript strict mode** everywhere
-- Test files live next to the code they test (`foo.ts` and `foo.test.ts` in the same directory)
+```bash
+cd packages/slide-nerds
+npm run build
+npm link
+
+# In another directory:
+npx slidenerds create test-deck
+cd test-deck
+npm link @strategicnerds/slide-nerds
+npm install
+npm run dev
+```
 
 ## What this is not
 
@@ -339,3 +371,7 @@ Not a slide editor. The LLM is the editor.
 Not a slide host. Decks deploy to Vercel (or anywhere Next.js runs).
 
 Not a content generator. The LLM and the user decide what goes in the deck. The skills make sure it looks right.
+
+## License
+
+MIT
