@@ -106,7 +106,7 @@ const exportPdf = async (): Promise<void> => {
 }
 
 const exportPptx = async (): Promise<void> => {
-  const PptxGenJS = (await import('pptxgenjs')).default
+  const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
   const canvases = await captureSlides()
 
   const pptx = new PptxGenJS()
@@ -124,7 +124,13 @@ const exportPptx = async (): Promise<void> => {
     })
   }
 
-  await pptx.writeFile({ fileName: 'presentation.pptx' })
+  const blob = await pptx.write({ outputType: 'blob' }) as Blob
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'presentation.pptx'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export const registerExportApi = (): void => {
