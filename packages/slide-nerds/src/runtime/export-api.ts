@@ -64,6 +64,33 @@ const captureSlides = async (
       el.style.setProperty('animation', 'none', 'important')
     })
 
+    const originalSlide = slides[i] as HTMLElement
+    const originalSvgs = originalSlide.querySelectorAll('svg')
+    const clonedSvgs = clone.querySelectorAll('svg')
+    originalSvgs.forEach((origSvg, svgIdx) => {
+      const cloneSvg = clonedSvgs[svgIdx]
+      if (!cloneSvg) return
+      const computedColor = window.getComputedStyle(origSvg).color
+      cloneSvg.querySelectorAll('*').forEach((el) => {
+        if (el.getAttribute('fill') === 'currentColor') el.setAttribute('fill', computedColor)
+        if (el.getAttribute('stroke') === 'currentColor') el.setAttribute('stroke', computedColor)
+      })
+      if (cloneSvg.getAttribute('fill') === 'currentColor' || !cloneSvg.getAttribute('fill')) {
+        cloneSvg.setAttribute('fill', computedColor)
+      }
+    })
+
+    const originalImgs = originalSlide.querySelectorAll('img')
+    const clonedImgs = clone.querySelectorAll('img')
+    originalImgs.forEach((origImg, imgIdx) => {
+      const cloneImg = clonedImgs[imgIdx] as HTMLElement | undefined
+      if (!cloneImg) return
+      const computedFilter = window.getComputedStyle(origImg).filter
+      if (computedFilter && computedFilter !== 'none') {
+        cloneImg.style.setProperty('filter', computedFilter, 'important')
+      }
+    })
+
     clone.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
       const htmlEl = el as HTMLElement
       htmlEl.style.setProperty('opacity', '1', 'important')
