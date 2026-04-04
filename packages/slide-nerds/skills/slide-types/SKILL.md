@@ -297,6 +297,45 @@ const data = [
 
 See the `animation` skill for the `MermaidDiagram` component implementation.
 
+## Case study grid
+
+A 3x2 or 3x3 grid of customer proof cards. Each card shows a company logo, a key metric, a label, and a one-line description. Top row slides down, bottom row slides up.
+
+```tsx
+<section data-slide="">
+  <div className="bg-mesh-cool flex flex-col w-full relative"
+    style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Proof</p>
+    <h2 className="text-[2.5rem] font-bold mb-8">Results from companies like yours</h2>
+    <div className="flex-1 flex items-center">
+      <div className="grid grid-cols-3 gap-4 w-full">
+        {[
+          { company: 'Acme', logo: '/logos/light/acme.png', stat: '87%', label: 'cost reduction', desc: 'Migrated from legacy stack in 3 months', row: 0 },
+          { company: 'Globex', logo: '/logos/light/globex.png', stat: '5x', label: 'faster deploys', desc: 'From hours to minutes with zero downtime', row: 0 },
+          { company: 'Initech', logo: '/logos/light/initech.png', stat: '300K', label: 'users at launch', desc: 'Scaled from zero without infrastructure changes', row: 0 },
+          { company: 'Umbrella', logo: '/logos/light/umbrella.png', stat: '<1 week', label: 'SOC 2 compliance', desc: 'Enterprise-ready from day one', row: 1 },
+          { company: 'Wonka', logo: '/logos/light/wonka.png', stat: '4x', label: 'cost savings', desc: 'Replaced three separate vendors', row: 1 },
+          { company: 'Stark', logo: '/logos/light/stark.png', stat: '50+', label: 'tools evaluated', desc: 'Chose us after comprehensive evaluation', row: 1 },
+        ].map((item) => (
+          <div key={item.company}
+            className={`${item.row === 0 ? 'auto-slide-down' : 'auto-slide-up'} card-surface p-5 flex flex-col`}
+            style={{ animationDelay: item.row === 0 ? '300ms' : '500ms' }}>
+            <img src={item.logo} alt={item.company}
+              style={{ height: '1.25rem', objectFit: 'contain', objectPosition: 'left', marginBottom: '1rem', opacity: 0.6 }} />
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>{item.stat}</p>
+            <p className="text-sm font-semibold mt-1">{item.label}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div data-notes="">Walk through the most relevant case study for this prospect.</div>
+  </div>
+</section>
+```
+
+Customer logos must be light (white-on-transparent) variants for dark-themed decks. Store originals in `public/logos/` and light variants in `public/logos/light/`.
+
 ## Image and logo preparation workflow
 
 Use this pipeline when a deck includes photos, partner logos, or brand marks.

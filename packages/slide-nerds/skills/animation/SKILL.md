@@ -246,6 +246,101 @@ To mimic dissolve or wipe feeling, reveal a transition layer as the first step o
 </section>
 ```
 
+## Auto-build animations
+
+Auto-build animations trigger when a slide loads, with no click required. Use them for visual polish on slides where the content doesn't need pacing control.
+
+### Available classes
+
+| Class | Effect | Duration |
+|-------|--------|----------|
+| `auto-fade` | Fade in | 350ms |
+| `auto-pop` | Scale up with overshoot bounce | 400ms |
+| `auto-wipe-right` | Clip-path reveal left to right | 500ms |
+| `auto-slide-down` | Slide down from above + fade | 500ms |
+| `auto-slide-up` | Slide up from below + fade | 500ms |
+
+### Staggering
+
+Control stagger with inline `animationDelay`:
+
+```tsx
+{items.map((item, i) => (
+  <div key={item.id} className="auto-pop card-surface p-5"
+    style={{ animationDelay: `${200 + i * 100}ms` }}>
+    {item.content}
+  </div>
+))}
+```
+
+### Directional grid pattern
+
+For grids, use opposing directions by row for a "closing curtain" effect:
+
+```tsx
+{items.map((item) => (
+  <div key={item.id}
+    className={`${item.row === 0 ? 'auto-slide-down' : 'auto-slide-up'} card-surface`}
+    style={{ animationDelay: '400ms' }}>
+    {item.content}
+  </div>
+))}
+```
+
+### When to use auto-build vs click-to-reveal
+
+- **Auto-build**: KPI grids, case study cards, icon grids, badge lists, product cards. Slides where the visual entrance is the point, not the pacing.
+- **Click-to-reveal**: Bullet lists, table rows, comparison reveals, any content where the presenter wants to control the narrative.
+- **Hybrid**: Use `data-auto-step` for elements that auto-reveal, then `data-step` for elements that wait for clicks. Auto-steps play first, then manual steps take over.
+
+## Exit animations
+
+Exit animations trigger when navigating away from a slide. The runtime adds `.exiting` to the slide and waits 400ms before transitioning.
+
+### Auto exits
+
+Add exit classes directly to elements. They animate when the slide gets `.exiting`:
+
+| Class | Effect | Duration |
+|-------|--------|----------|
+| `exit-fade` | Fade out | 400ms |
+| `exit-scale-out` | Scale down + fade out | 400ms |
+| `exit-slide-up` | Slide up + fade out | 400ms |
+| `exit-slide-down` | Slide down + fade out | 400ms |
+| `exit-wipe-left` | Clip-path collapse right to left | 400ms |
+
+### Author-controlled exits
+
+Use `data-exit-step` for sequenced exits. After all entrance steps are revealed, subsequent clicks reveal exit steps (applying `exit-visible`), then transition to the next slide.
+
+```tsx
+<h2 data-exit-step="" className="exit-fade">This fades out before slide transition</h2>
+<div data-exit-step="" className="exit-slide-up">This slides up after the h2 fades</div>
+```
+
+## Auto-step sequencing
+
+Use `data-auto-step="300ms"` for steps that reveal automatically on a timer. The value is the delay before revealing. Mix with `data-step` for hybrid sequences.
+
+```tsx
+<div data-auto-step="200ms" className="step-fade">Reveals after 200ms</div>
+<div data-auto-step="300ms" className="step-fade">Reveals 300ms after previous</div>
+<div data-step="" className="step-move-up">Waits for click</div>
+```
+
+## Step groups
+
+Use `data-step-group="name"` to reveal multiple elements with a single click. The runtime counts the group as one logical step.
+
+```tsx
+<div data-step="" data-step-group="metrics" className="step-pop"
+  style={{ animationDelay: '0ms' }}>Revenue: $4.2M</div>
+<div data-step="" data-step-group="metrics" className="step-pop"
+  style={{ animationDelay: '100ms' }}>Growth: 142%</div>
+<div data-step="" data-step-group="metrics" className="step-pop"
+  style={{ animationDelay: '200ms' }}>Users: 50K</div>
+```
+
 ## Animation QA checklist
 
 - At least two distinct animation types in a deck: fade plus move, or fade plus scale

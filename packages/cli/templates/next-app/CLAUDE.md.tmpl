@@ -1,6 +1,6 @@
 # {{PROJECT_NAME}}
 
-A slidenerds presentation deck. Built with Next.js and `@slidenerds/runtime`.
+A slidenerds presentation deck. Built with Next.js and `@strategicnerds/slide-nerds`.
 
 ## First steps when starting a new deck
 
@@ -59,19 +59,71 @@ Never hardcode hex colors in slide content. Always use `var(--color-accent)`, `v
 
 ## Animation classes
 
-Add these to `data-step` elements for entrance animations:
+### Step animations (click-to-reveal)
+
+Add these to `data-step` or `data-auto-step` elements. Runtime adds `step-visible` on click (or auto-timer).
 
 | Class | Effect |
 |-------|--------|
 | `step-fade` | Fade in (350ms) |
 | `step-move-up` | Slide up + fade in (420ms) |
 | `step-scale-in` | Scale up + fade in (350ms) |
+| `step-pop` | Scale up with overshoot bounce (400ms) |
+| `step-wipe-right` | Clip-path reveal left to right (500ms) |
 | `step-emphasis` | Spring-scale entrance for big stats (500ms) |
+
+### Auto-build animations (trigger on slide load)
+
+Add these classes directly to elements (no `data-step` needed). They animate when the slide becomes active. Use `style={{ animationDelay: '200ms' }}` for staggered entrances.
+
+| Class | Effect |
+|-------|--------|
+| `auto-fade` | Fade in (350ms) |
+| `auto-pop` | Scale up with overshoot bounce (400ms) |
+| `auto-wipe-right` | Clip-path reveal left to right (500ms) |
+| `auto-slide-down` | Slide down from above + fade (500ms) |
+| `auto-slide-up` | Slide up from below + fade (500ms) |
+
+### Exit animations (trigger when leaving a slide)
+
+Add these classes to elements that should animate out when navigating away. The runtime adds `.exiting` to the slide and waits 400ms before transitioning.
+
+| Class | Effect |
+|-------|--------|
+| `exit-fade` | Fade out (400ms) |
+| `exit-scale-out` | Scale down + fade out (400ms) |
+| `exit-slide-up` | Slide up + fade out (400ms) |
+| `exit-slide-down` | Slide down + fade out (400ms) |
+| `exit-wipe-left` | Clip-path collapse right to left (400ms) |
+
+For sequenced exits, use `data-exit-step` on elements. The runtime reveals exit steps one per click after all entrance steps are done, then transitions to the next slide.
+
+### Auto-step sequencing
+
+Use `data-auto-step="300ms"` instead of `data-step` for steps that should reveal automatically on a timer. Mix with `data-step` for hybrid sequences: auto-steps play first, then manual steps wait for clicks.
+
+```tsx
+<div data-auto-step="200ms" className="step-fade">Auto-reveals after 200ms</div>
+<div data-auto-step="300ms" className="step-fade">Auto-reveals after 300ms more</div>
+<div data-step="" className="step-fade">Waits for click</div>
+```
+
+### Step groups
+
+Use `data-step-group="name"` on consecutive `data-step` elements to reveal them all with a single click. Control stagger with `animationDelay`:
+
+```tsx
+<div data-step="" data-step-group="row1" className="step-fade" style={{ animationDelay: '0ms' }}>A</div>
+<div data-step="" data-step-group="row1" className="step-fade" style={{ animationDelay: '100ms' }}>B</div>
+<div data-step="" data-step-group="row1" className="step-fade" style={{ animationDelay: '200ms' }}>C</div>
+```
+
+One click reveals A, B, and C together with staggered timing.
 
 ## Shape system
 
 ```tsx
-import { SlideShape } from '@slidenerds/runtime'
+import { SlideShape } from '@strategicnerds/slide-nerds'
 
 <SlideShape shape="hexagon" size={100}
   fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth={1.5}>
@@ -86,7 +138,7 @@ Available shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `
 
 ## Skills reference
 
-These skills guide slide construction. Read them before building slides.
+Skills are installed in `.slidenerds/skills/`. Each skill is a directory containing a `SKILL.md` file. Read the relevant skills before building slides.
 
 ### Structure and narrative
 - **narrative-frameworks**: SCQA, Minto Pyramid, PAS, BAB, Sparkline, Monroe's. Pick one per deck.
@@ -238,10 +290,10 @@ These are defined in `globals.css` and available on any slide:
 | `timeline-dot-future` | Muted version of timeline-dot for future milestones. |
 | `sr-only` | Visually hidden but screen-reader accessible. Use for chart data tables. |
 
-### Components from @slidenerds/runtime
+### Components from @strategicnerds/slide-nerds
 
 ```tsx
-import { SlideRuntime, SlideShape, SlideControls, PresenterView, LightTable, useSlideState } from '@slidenerds/runtime'
+import { SlideRuntime, SlideShape, SlideControls, PresenterView, LightTable, useSlideState } from '@strategicnerds/slide-nerds'
 ```
 
 **SlideRuntime** -- wraps the entire app in `layout.tsx`. Provides navigation, keyboard controls, and context.
@@ -395,7 +447,7 @@ Text, bullets, and tables stay anchored below the title. The bottom of the slide
 
 The title stays top-left anchored. The visual fills and centers within the remaining space below it. Use `flex-1 flex items-center justify-center` on the visual container.
 
-**Centered** (ONLY for: big stat, section divider, quote, closing):
+**Centered** (for: big stat, section divider, quote, closing, or any slide with a small centered cluster of content like badges, KPI grids, or short bullet lists):
 
 ```tsx
 <section data-slide="">
@@ -427,6 +479,8 @@ The title stays top-left anchored. The visual fills and centers within the remai
   </div>
 </section>
 ```
+
+For mirrored comparison splits (e.g., "old vs new", "DIY vs product"), right-align the left column and left-align the right column so content faces the center divide. Use fixed-height containers for headers (`flex items-end`, same height on both sides) and fixed-height rows for bullets so content aligns horizontally across the split.
 
 **Asymmetric split** (text + visual, 5:7 ratio):
 
@@ -480,18 +534,41 @@ Give elements the same `data-magic-id` on two consecutive slides. When navigatin
 | Before/after | **Split** | grid-cols-2 with different backgrounds per side. |
 | Quote | **Centered** | Open-quote glyph, blockquote (max-w-3xl), attribution. |
 | Closing | **Centered** | accent-line, h2, contact info. |
+| Case study grid | **Top-left + centered visual** | 3x2 or 3x3 grid of cards. Each card: company logo (light variant), key stat in accent, label, description. Top row `auto-slide-down`, bottom row `auto-slide-up`. |
 
 **Two layout sub-types for top-left anchored slides:**
 - **Top-left text**: Text, bullets, tables, KPIs stay anchored directly below the title. No vertical centering.
 - **Top-left + centered visual**: Title stays top-left. The visual (chart, diagram, shapes) is centered both horizontally and vertically in the remaining space below the title using `flex-1 flex items-center justify-center`.
 
+## Brand logo watermark
+
+Add a subtle brand logo to the corner of each slide using the `.slide-logo` CSS class:
+
+```tsx
+function SlideLogo() {
+  return (
+    <img
+      src="/logo.svg"
+      alt=""
+      className="slide-logo"
+      width={28}
+      height={28}
+      aria-hidden="true"
+    />
+  )
+}
+```
+
+Place `<SlideLogo />` inside each slide's inner div (which must have `className="relative"`). The logo appears at 25% opacity in the bottom-right corner. Omit from title and closing slides where the logo appears prominently.
+
 ## Tips
 
 - Run `npm run dev` for hot reload while editing.
 - One idea per slide. If a slide says two things, make two slides.
-- Reveal content progressively with `data-step` to control pacing.
+- Reveal content progressively with `data-step` to control pacing, or use `auto-*` classes for elements that should animate in without clicks.
 - Charts go inside `card-surface` containers. Use fixed pixel heights (300-420px) on `ResponsiveContainer`.
 - Test at projection distance: if you cannot read it from 2 meters on a laptop, it fails on a projector.
 - Never hardcode hex colors. Always use CSS variables from the brand system.
 - Section labels (`section-label` class) go above every content slide title to show where the audience is in the deck.
 - Keep text above 16pt. Below that it disappears on projectors.
+- Customer logos need light (white-on-transparent) variants for dark-themed decks. Store originals in `public/logos/` and light variants in `public/logos/light/`.

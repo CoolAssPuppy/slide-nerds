@@ -7,6 +7,7 @@ export type SlideState = {
   currentStep: number
   totalSlides: number
   stepsForCurrentSlide: number
+  isExiting: boolean
   isPresenterMode: boolean
   isLightTable: boolean
   toggleLightTable: () => void
@@ -20,6 +21,7 @@ const DEFAULT_STATE: SlideState = {
   currentStep: 0,
   totalSlides: 0,
   stepsForCurrentSlide: 0,
+  isExiting: false,
   isPresenterMode: false,
   isLightTable: false,
   toggleLightTable: () => {},

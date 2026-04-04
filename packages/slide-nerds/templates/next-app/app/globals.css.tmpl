@@ -42,19 +42,23 @@ body {
   display: none;
 }
 
-/* Step animation system */
-[data-step] {
+/* ==========================================================================
+   STEP ANIMATIONS (click-to-reveal, controlled by runtime)
+   Add these classes to data-step elements. Runtime adds step-visible on click.
+   ========================================================================== */
+
+[data-step], [data-auto-step] {
   visibility: hidden;
   opacity: 0;
 }
 
-[data-step].step-fade {
+[data-step].step-fade, [data-auto-step].step-fade {
   transition:
     opacity 350ms cubic-bezier(0.4, 0, 0.2, 1),
     visibility 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-step].step-move-up {
+[data-step].step-move-up, [data-auto-step].step-move-up {
   transform: translateY(24px);
   transition:
     opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -62,7 +66,7 @@ body {
     visibility 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-step].step-scale-in {
+[data-step].step-scale-in, [data-auto-step].step-scale-in {
   transform: scale(0.92);
   transition:
     opacity 350ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -70,7 +74,7 @@ body {
     visibility 350ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-step].step-move-left {
+[data-step].step-move-left, [data-auto-step].step-move-left {
   transform: translateX(-30px);
   transition:
     opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -78,15 +82,35 @@ body {
     visibility 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+[data-step].step-pop, [data-auto-step].step-pop {
+  transform: scale(0.6);
+  transition:
+    opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+[data-step].step-wipe-right, [data-auto-step].step-wipe-right {
+  clip-path: inset(0 100% 0 0);
+  transition:
+    clip-path 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Visible state applied by runtime */
-[data-step].step-visible {
+.step-visible {
   visibility: visible !important;
   opacity: 1 !important;
   transform: translateY(0) translateX(0) scale(1) !important;
 }
 
+.step-wipe-right.step-visible {
+  clip-path: inset(0 0 0 0) !important;
+}
+
 /* Emphasis entrance for big stats */
-[data-step].step-emphasis.step-visible {
+.step-emphasis.step-visible {
   animation: emphasis-land 500ms cubic-bezier(0.16, 1, 0.3, 1) 1;
 }
 
@@ -94,4 +118,157 @@ body {
   0% { transform: scale(0.85); opacity: 0; }
   60% { transform: scale(1.03); }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   AUTO-BUILD ANIMATIONS (trigger on slide load, no click needed)
+   Add these classes directly to elements. They animate when the parent
+   slide gets the .active class. Use style={{ animationDelay }} for stagger.
+   ========================================================================== */
+
+.auto-fade {
+  opacity: 0;
+}
+
+[data-slide].active .auto-fade {
+  animation: auto-fade-in 350ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes auto-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.auto-pop {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+[data-slide].active .auto-pop {
+  animation: pop-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.auto-wipe-right {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+}
+
+[data-slide].active .auto-wipe-right {
+  animation: wipe-right-in 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes wipe-right-in {
+  0% { clip-path: inset(0 100% 0 0); opacity: 0; }
+  1% { opacity: 1; }
+  100% { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+.auto-slide-down {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+[data-slide].active .auto-slide-down {
+  animation: slide-down-in 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slide-down-in {
+  0% { transform: translateY(-30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.auto-slide-up {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+[data-slide].active .auto-slide-up {
+  animation: slide-up-in 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slide-up-in {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   EXIT ANIMATIONS (trigger when leaving a slide)
+   Add these classes to elements. They animate when the parent slide gets
+   the .exiting class (added by runtime before slide transition).
+   Author-controlled exits use data-exit-step + exit-visible class.
+   ========================================================================== */
+
+[data-exit-step] {
+  /* Exit steps are visible by default, hidden when exit-visible is applied */
+}
+
+.exit-fade {
+  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-slide].exiting .exit-fade {
+  opacity: 0;
+}
+
+.exit-scale-out {
+  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-slide].exiting .exit-scale-out {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.exit-slide-up {
+  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-slide].exiting .exit-slide-up {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.exit-slide-down {
+  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-slide].exiting .exit-slide-down {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.exit-wipe-left {
+  transition: clip-path 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-slide].exiting .exit-wipe-left {
+  clip-path: inset(0 0 0 100%);
+  opacity: 0;
+}
+
+/* Author-controlled exit steps: runtime adds exit-visible to trigger */
+[data-exit-step].exit-visible {
+  opacity: 0 !important;
+  transform: scale(0.95) !important;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+/* ==========================================================================
+   BRAND LOGO WATERMARK
+   Place a small logo in the corner of each slide.
+   ========================================================================== */
+
+.slide-logo {
+  position: absolute;
+  bottom: 1.75rem;
+  right: 2rem;
+  z-index: 10;
+  opacity: 0.25;
+  pointer-events: none;
 }

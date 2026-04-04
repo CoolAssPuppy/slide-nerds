@@ -24,6 +24,13 @@ export const BrandConfigSchema = z.object({
     section: z.string(),
     element: z.string(),
   }),
+  logo: z
+    .object({
+      src: z.string(),
+      width: z.number().optional(),
+      height: z.number().optional(),
+    })
+    .optional(),
   tailwind: z
     .object({
       extend: TailwindExtendSchema.optional(),
