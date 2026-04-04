@@ -39,6 +39,25 @@ const TestDeck: React.FC = () => (
   </SlideRuntime>
 )
 
+const DemoCounter: React.FC = () => {
+  const [count, setCount] = React.useState(0)
+
+  return (
+    <button type="button" onClick={() => setCount((value) => value + 1)}>
+      Demo count: {count}
+    </button>
+  )
+}
+
+const InteractiveDeck: React.FC = () => (
+  <SlideRuntime>
+    <section data-slide="">
+      <h2>Live demo</h2>
+      <DemoCounter />
+    </section>
+  </SlideRuntime>
+)
+
 describe('SlideRuntime', () => {
   beforeEach(() => {
     clearDOM()
@@ -108,5 +127,14 @@ describe('SlideRuntime', () => {
   it('should register export API on window', () => {
     render(<TestDeck />)
     expect((window as Record<string, unknown>).slidenerds).toBeDefined()
+  })
+
+  it('should support interactive React components inside slides', async () => {
+    const user = userEvent.setup()
+    render(<InteractiveDeck />)
+
+    const counter = screen.getByRole('button', { name: 'Demo count: 0' })
+    await user.click(counter)
+    expect(screen.getByRole('button', { name: 'Demo count: 1' })).toBeInTheDocument()
   })
 })
