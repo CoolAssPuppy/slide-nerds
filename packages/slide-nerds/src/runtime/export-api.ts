@@ -19,39 +19,43 @@ declare global {
 const SLIDE_WIDTH = 1920
 const SLIDE_HEIGHT = 1080
 
-const captureSlides = async (): Promise<HTMLCanvasElement[]> => {
+const captureSlides = async (): Promise<string[]> => {
   if (typeof document === 'undefined') return []
   const html2canvas = (await import('html2canvas-pro')).default
   const slides = getSlideElements()
-  const canvases: HTMLCanvasElement[] = []
+  const images: string[] = []
 
-  const originalActive = document.querySelector('[data-slide].active')
+  const offscreen = document.createElement('div')
+  offscreen.style.position = 'fixed'
+  offscreen.style.left = '-99999px'
+  offscreen.style.top = '0'
+  offscreen.style.width = `${SLIDE_WIDTH}px`
+  offscreen.style.height = `${SLIDE_HEIGHT}px`
+  offscreen.style.overflow = 'hidden'
+  offscreen.style.zIndex = '-1'
+  document.body.appendChild(offscreen)
 
   for (let i = 0; i < slides.length; i++) {
-    const slide = slides[i] as HTMLElement
+    const clone = slides[i].cloneNode(true) as HTMLElement
 
-    slides.forEach((s) => {
-      ;(s as HTMLElement).classList.remove('active')
-      ;(s as HTMLElement).style.display = 'none'
-    })
-    slide.classList.add('active')
-    slide.style.display = 'flex'
-    slide.style.position = 'absolute'
-    slide.style.inset = '0'
-    slide.style.width = `${SLIDE_WIDTH}px`
-    slide.style.height = `${SLIDE_HEIGHT}px`
+    clone.style.position = 'relative'
+    clone.style.display = 'flex'
+    clone.style.width = `${SLIDE_WIDTH}px`
+    clone.style.height = `${SLIDE_HEIGHT}px`
+    clone.style.overflow = 'hidden'
+    clone.classList.add('active')
 
-    slide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      ;(step as HTMLElement).style.visibility = 'visible'
-      ;(step as HTMLElement).style.opacity = '1'
-      ;(step as HTMLElement).style.transform = 'none'
+    clone.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
+      step.classList.add('step-visible')
     })
 
-    slide.querySelectorAll('[data-notes]').forEach((note) => {
+    clone.querySelectorAll('[data-notes]').forEach((note) => {
       ;(note as HTMLElement).style.display = 'none'
     })
 
-    const canvas = await html2canvas(slide, {
+    offscreen.appendChild(clone)
+
+    const canvas = await html2canvas(clone, {
       width: SLIDE_WIDTH,
       height: SLIDE_HEIGHT,
       scale: 2,
@@ -60,34 +64,27 @@ const captureSlides = async (): Promise<HTMLCanvasElement[]> => {
       logging: false,
     })
 
-    canvases.push(canvas)
-
-    slide.style.width = ''
-    slide.style.height = ''
-    slide.style.position = ''
-    slide.style.inset = ''
-    slide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      ;(step as HTMLElement).style.visibility = ''
-      ;(step as HTMLElement).style.opacity = ''
-      ;(step as HTMLElement).style.transform = ''
-    })
+    images.push(canvas.toDataURL('image/png'))
+    offscreen.removeChild(clone)
   }
 
-  slides.forEach((s) => {
-    const el = s as HTMLElement
-    el.classList.remove('active')
-    el.style.display = ''
-  })
-  if (originalActive) {
-    ;(originalActive as HTMLElement).classList.add('active')
-  }
+  document.body.removeChild(offscreen)
+  return images
+}
 
-  return canvases
+const downloadBlob = (blob: Blob, filename: string): void => {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 const exportPdf = async (): Promise<void> => {
   const { jsPDF } = await import('jspdf')
-  const canvases = await captureSlides()
+  const images = await captureSlides()
+  if (images.length === 0) return
 
   const pdf = new jsPDF({
     orientation: 'landscape',
@@ -96,10 +93,9 @@ const exportPdf = async (): Promise<void> => {
     hotfixes: ['px_scaling'],
   })
 
-  for (let i = 0; i < canvases.length; i++) {
+  for (let i = 0; i < images.length; i++) {
     if (i > 0) pdf.addPage([SLIDE_WIDTH, SLIDE_HEIGHT], 'landscape')
-    const imgData = canvases[i].toDataURL('image/png')
-    pdf.addImage(imgData, 'PNG', 0, 0, SLIDE_WIDTH, SLIDE_HEIGHT)
+    pdf.addImage(images[i], 'PNG', 0, 0, SLIDE_WIDTH, SLIDE_HEIGHT)
   }
 
   pdf.save('presentation.pdf')
@@ -107,14 +103,14 @@ const exportPdf = async (): Promise<void> => {
 
 const exportPptx = async (): Promise<void> => {
   const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
-  const canvases = await captureSlides()
+  const images = await captureSlides()
+  if (images.length === 0) return
 
   const pptx = new PptxGenJS()
   pptx.layout = 'LAYOUT_WIDE'
 
-  for (const canvas of canvases) {
+  for (const imgData of images) {
     const slide = pptx.addSlide()
-    const imgData = canvas.toDataURL('image/png')
     slide.addImage({
       data: imgData,
       x: 0,
@@ -125,12 +121,7 @@ const exportPptx = async (): Promise<void> => {
   }
 
   const blob = await pptx.write({ outputType: 'blob' }) as Blob
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'presentation.pptx'
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadBlob(blob, 'presentation.pptx')
 }
 
 export const registerExportApi = (): void => {
