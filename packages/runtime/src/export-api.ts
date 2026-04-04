@@ -23,6 +23,57 @@ const SLIDE_HEIGHT = 1080
 const yieldToMain = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0))
 
+const rasterizeSvg = (
+  origSvg: SVGSVGElement,
+  cloneSvg: SVGSVGElement,
+): Promise<void> => {
+  return new Promise((resolve) => {
+    const computedStyle = window.getComputedStyle(origSvg)
+    const color = computedStyle.color
+    const width = origSvg.getBoundingClientRect().width || 24
+    const height = origSvg.getBoundingClientRect().height || 24
+
+    cloneSvg.querySelectorAll('*').forEach((el) => {
+      if (el.getAttribute('fill') === 'currentColor') el.setAttribute('fill', color)
+      if (el.getAttribute('stroke') === 'currentColor') el.setAttribute('stroke', color)
+      if (!el.getAttribute('fill') && el.tagName !== 'svg') {
+        const elColor = window.getComputedStyle(origSvg).color
+        if (el.tagName === 'path' || el.tagName === 'circle' || el.tagName === 'rect' ||
+            el.tagName === 'polygon' || el.tagName === 'polyline' || el.tagName === 'line' ||
+            el.tagName === 'ellipse') {
+          el.setAttribute('fill', elColor)
+        }
+      }
+    })
+    if (!cloneSvg.getAttribute('fill') || cloneSvg.getAttribute('fill') === 'currentColor') {
+      cloneSvg.setAttribute('fill', color)
+    }
+
+    const svgData = new XMLSerializer().serializeToString(cloneSvg)
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(svgBlob)
+
+    const img = document.createElement('img')
+    img.width = Math.ceil(width)
+    img.height = Math.ceil(height)
+    img.style.width = `${width}px`
+    img.style.height = `${height}px`
+    img.style.display = computedStyle.display
+    img.style.verticalAlign = computedStyle.verticalAlign
+
+    img.onload = () => {
+      cloneSvg.parentNode?.replaceChild(img, cloneSvg)
+      URL.revokeObjectURL(url)
+      resolve()
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve()
+    }
+    img.src = url
+  })
+}
+
 const captureSlides = async (
   onProgress?: (current: number, total: number) => void,
 ): Promise<string[]> => {
@@ -64,22 +115,15 @@ const captureSlides = async (
       el.style.setProperty('animation', 'none', 'important')
     })
 
-    const originalSlide = slides[i] as HTMLElement
-    const originalSvgs = originalSlide.querySelectorAll('svg')
-    const clonedSvgs = clone.querySelectorAll('svg')
-    originalSvgs.forEach((origSvg, svgIdx) => {
-      const cloneSvg = clonedSvgs[svgIdx]
-      if (!cloneSvg) return
-      const computedColor = window.getComputedStyle(origSvg).color
-      cloneSvg.querySelectorAll('*').forEach((el) => {
-        if (el.getAttribute('fill') === 'currentColor') el.setAttribute('fill', computedColor)
-        if (el.getAttribute('stroke') === 'currentColor') el.setAttribute('stroke', computedColor)
-      })
-      if (cloneSvg.getAttribute('fill') === 'currentColor' || !cloneSvg.getAttribute('fill')) {
-        cloneSvg.setAttribute('fill', computedColor)
-      }
+    clone.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
+      const htmlEl = el as HTMLElement
+      htmlEl.style.setProperty('opacity', '1', 'important')
+      htmlEl.style.setProperty('transform', 'none', 'important')
+      htmlEl.style.setProperty('clip-path', 'none', 'important')
+      htmlEl.style.setProperty('animation', 'none', 'important')
     })
 
+    const originalSlide = slides[i] as HTMLElement
     const originalImgs = originalSlide.querySelectorAll('img')
     const clonedImgs = clone.querySelectorAll('img')
     originalImgs.forEach((origImg, imgIdx) => {
@@ -91,22 +135,23 @@ const captureSlides = async (
       }
     })
 
-    clone.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
-      const htmlEl = el as HTMLElement
-      htmlEl.style.setProperty('opacity', '1', 'important')
-      htmlEl.style.setProperty('transform', 'none', 'important')
-      htmlEl.style.setProperty('clip-path', 'none', 'important')
-      htmlEl.style.setProperty('animation', 'none', 'important')
+    offscreen.appendChild(clone)
+    await yieldToMain()
+
+    const originalSvgs = originalSlide.querySelectorAll('svg')
+    const clonedSvgs = Array.from(clone.querySelectorAll('svg'))
+    const rasterPromises: Promise<void>[] = []
+    originalSvgs.forEach((origSvg, svgIdx) => {
+      const cloneSvg = clonedSvgs[svgIdx]
+      if (!cloneSvg) return
+      rasterPromises.push(rasterizeSvg(origSvg, cloneSvg))
     })
+    await Promise.all(rasterPromises)
+    await yieldToMain()
 
     clone.querySelectorAll('[data-notes]').forEach((note) => {
       ;(note as HTMLElement).style.display = 'none'
     })
-
-    clone.querySelectorAll('::after').length // force layout
-
-    offscreen.appendChild(clone)
-    await yieldToMain()
 
     const canvas = await html2canvas(clone, {
       width: SLIDE_WIDTH,
