@@ -18,6 +18,9 @@ export type ShapeType =
   | 'arrow-left'
   | 'chevron-right'
   | 'pill'
+  | 'badge'
+  | 'parallelogram'
+  | 'heart'
 
 type SlideShapeProps = {
   shape: ShapeType
@@ -120,6 +123,18 @@ const SHAPE_PATHS: Record<ShapeType, (w: number, h: number) => string> = {
   pill: (w, h) => {
     const r = h / 2
     return `M ${r},0 L ${w - r},0 A ${r},${r} 0 1,1 ${w - r},${h} L ${r},${h} A ${r},${r} 0 1,1 ${r},0 Z`
+  },
+  badge: (w, h) => {
+    const notch = w * 0.08
+    return `M 0,0 L ${w},0 L ${w},${h} L ${w / 2 + notch},${h} L ${w / 2},${h - notch * 1.5} L ${w / 2 - notch},${h} L 0,${h} Z`
+  },
+  parallelogram: (w, h) => {
+    const skew = w * 0.2
+    return `M ${skew},0 L ${w},0 L ${w - skew},${h} L 0,${h} Z`
+  },
+  heart: (w, h) => {
+    const cx = w / 2
+    return `M ${cx},${r2(h * 0.35)} C ${cx},${r2(h * 0.2)} ${r2(cx - w * 0.05)},0 ${r2(w * 0.25)},0 C ${r2(w * 0.1)},0 0,${r2(h * 0.1)} 0,${r2(h * 0.3)} C 0,${r2(h * 0.55)} ${cx},${r2(h * 0.8)} ${cx},${h} C ${cx},${r2(h * 0.8)} ${w},${r2(h * 0.55)} ${w},${r2(h * 0.3)} C ${w},${r2(h * 0.1)} ${r2(w * 0.9)},0 ${r2(w * 0.75)},0 C ${r2(cx + w * 0.05)},0 ${cx},${r2(h * 0.2)} ${cx},${r2(h * 0.35)} Z`
   },
 }
 

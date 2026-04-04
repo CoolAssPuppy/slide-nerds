@@ -145,7 +145,7 @@ import { SlideShape } from '@strategicnerds/slide-nerds'
   data-magic-id="avatar" />
 ```
 
-16 shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
+18 shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
 
 ### Branding
 
@@ -264,7 +264,7 @@ Everything that can go on a slide:
 - **Text**: headings, paragraphs, lists, blockquotes
 - **Images**: `<img>` with `object-cover` or `object-contain`
 - **Charts**: Recharts (bar, line, area, pie, radar, scatter, combo, waterfall, funnel, gauge, sparkline, treemap)
-- **Shapes**: SlideShape (16 SVG shapes with text or image content)
+- **Shapes**: SlideShape (18 SVG shapes with text or image content)
 - **Tables**: HTML tables with `slide-table` class
 - **Diagrams**: Mermaid (flowcharts, sequence, journey, mind map, state, C4) or custom SVG
 - **Video**: YouTube/Vimeo iframes or `<video>`

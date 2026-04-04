@@ -182,6 +182,51 @@ describe('useSlideNavigation', () => {
     expect(result.current.stepsForCurrentSlide).toBe(3)
   })
 
+  it('should not navigate when goToSlide targets the current slide', () => {
+    createSlideDOM(3)
+    const { result } = renderHook(() => useSlideNavigation())
+
+    act(() => {
+      result.current.goToSlide(0)
+    })
+
+    expect(result.current.currentSlide).toBe(0)
+  })
+
+  it('should handle step groups as a single logical step', () => {
+    clearDOM()
+    const container = document.createElement('div')
+    const slide = document.createElement('section')
+    slide.setAttribute('data-slide', '')
+
+    const a = document.createElement('div')
+    a.setAttribute('data-step', '')
+    a.setAttribute('data-step-group', 'row')
+    const b = document.createElement('div')
+    b.setAttribute('data-step', '')
+    b.setAttribute('data-step-group', 'row')
+    const c = document.createElement('div')
+    c.setAttribute('data-step', '')
+
+    slide.append(a, b, c)
+    container.appendChild(slide)
+    container.appendChild(createSlideDOM.length ? document.createElement('section') : document.createElement('section'))
+    const slide2 = document.createElement('section')
+    slide2.setAttribute('data-slide', '')
+    container.appendChild(slide2)
+    document.body.appendChild(container)
+
+    const { result } = renderHook(() => useSlideNavigation())
+
+    expect(result.current.stepsForCurrentSlide).toBe(2)
+
+    act(() => { result.current.nextStep() })
+    expect(result.current.currentStep).toBe(1)
+    expect(a.classList.contains('step-visible')).toBe(true)
+    expect(b.classList.contains('step-visible')).toBe(true)
+    expect(c.classList.contains('step-visible')).toBe(false)
+  })
+
   it('should animate matching magic move elements without FLIP measurements', () => {
     clearDOM()
     const container = document.createElement('div')
