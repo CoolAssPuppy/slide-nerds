@@ -9,6 +9,7 @@ import {
 } from './slide-dom'
 
 const EXIT_ANIMATION_DURATION = 400
+const MAGIC_MOVE_DURATION = 420
 
 type SlideNavigationState = {
   currentSlide: number
@@ -37,6 +38,20 @@ const syncUrlToSlide = (slideIndex: number): void => {
   window.history.replaceState({}, '', url.toString())
 }
 
+const toggleClassByThreshold = (
+  elements: ArrayLike<Element>,
+  visibleCount: number,
+  className: string,
+): void => {
+  for (let i = 0; i < elements.length; i++) {
+    if (i < visibleCount) {
+      elements[i].classList.add(className)
+    } else {
+      elements[i].classList.remove(className)
+    }
+  }
+}
+
 const applyStepVisibility = (
   slideIndex: number,
   visibleSteps: number,
@@ -57,22 +72,15 @@ const applyStepVisibility = (
   }
 }
 
-const applyExitStepVisibility = (
-  slideIndex: number,
-  visibleExitSteps: number,
-): void => {
-  const exitSteps = getExitStepElements(slideIndex)
-  exitSteps.forEach((step, index) => {
-    if (index < visibleExitSteps) {
-      step.classList.add('exit-visible')
+const setActiveSlide = (slides: NodeListOf<Element>, targetIndex: number): void => {
+  slides.forEach((slide, index) => {
+    if (index === targetIndex) {
+      slide.classList.add('active')
     } else {
-      step.classList.remove('exit-visible')
+      slide.classList.remove('active')
+      slide.classList.remove('exiting')
     }
   })
-}
-
-const getLogicalStepCount = (slideIndex: number): number => {
-  return getStepEntries(slideIndex).length
 }
 
 export const useSlideNavigation = (): SlideNavigationState => {
@@ -85,16 +93,30 @@ export const useSlideNavigation = (): SlideNavigationState => {
   const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoStepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const currentExitStep = useRef(0)
+  const cachedStepEntriesRef = useRef<ReturnType<typeof getStepEntries>>([])
+  const cachedExitStepCountRef = useRef(0)
 
   useEffect(() => {
     const count = getSlideElements().length
     totalSlidesRef.current = count
     setTotalSlides(count)
+
+    setActiveSlide(getSlideElements(), currentSlide)
   }, [])
 
   useEffect(() => {
-    setStepsForCurrentSlide(getLogicalStepCount(currentSlide))
+    const entries = getStepEntries(currentSlide)
+    cachedStepEntriesRef.current = entries
+    cachedExitStepCountRef.current = getExitStepElements(currentSlide).length
+    setStepsForCurrentSlide(entries.length)
   }, [currentSlide])
+
+  useEffect(() => {
+    return () => {
+      if (exitTimeoutRef.current !== null) clearTimeout(exitTimeoutRef.current)
+      if (autoStepTimeoutRef.current !== null) clearTimeout(autoStepTimeoutRef.current)
+    }
+  }, [])
 
   const clearAutoStepTimer = useCallback(() => {
     if (autoStepTimeoutRef.current !== null) {
@@ -106,8 +128,7 @@ export const useSlideNavigation = (): SlideNavigationState => {
   const performSlideTransition = useCallback(
     (targetSlide: number) => {
       const slides = getSlideElements()
-      const prevSlide = currentSlide
-      const prevEl = slides[prevSlide]
+      const prevEl = slides[currentSlide]
       const nextEl = slides[targetSlide]
 
       const previousMagicIds = new Set<string>()
@@ -118,37 +139,31 @@ export const useSlideNavigation = (): SlideNavigationState => {
         })
       }
 
-      slides.forEach((slide, index) => {
-        if (index === targetSlide) {
-          slide.classList.add('active')
-        } else {
-          slide.classList.remove('active')
-          slide.classList.remove('exiting')
-        }
-      })
+      setActiveSlide(slides, targetSlide)
 
       if (nextEl && previousMagicIds.size > 0) {
         nextEl.querySelectorAll('[data-magic-id]').forEach((el) => {
           const id = el.getAttribute('data-magic-id')
-          if (!id) return
-          if (!previousMagicIds.has(id)) return
+          if (!id || !previousMagicIds.has(id)) return
           const htmlEl = el as HTMLElement
           htmlEl.style.transition = 'none'
           htmlEl.style.opacity = '0'
           htmlEl.style.transform = 'scale(0.96)'
+
+          const cleanupStyles = () => {
+            htmlEl.style.transition = ''
+            htmlEl.style.opacity = ''
+            htmlEl.style.transform = ''
+          }
+
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               htmlEl.style.transition =
-                'opacity 420ms cubic-bezier(0.4, 0, 0.2, 1), transform 420ms cubic-bezier(0.4, 0, 0.2, 1)'
+                `opacity ${MAGIC_MOVE_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1), transform ${MAGIC_MOVE_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
               htmlEl.style.opacity = '1'
               htmlEl.style.transform = 'scale(1)'
-              const cleanup = () => {
-                htmlEl.style.transition = ''
-                htmlEl.style.opacity = ''
-                htmlEl.style.transform = ''
-                htmlEl.removeEventListener('transitionend', cleanup)
-              }
-              htmlEl.addEventListener('transitionend', cleanup)
+              htmlEl.addEventListener('transitionend', cleanupStyles, { once: true })
+              setTimeout(cleanupStyles, MAGIC_MOVE_DURATION + 50)
             })
           })
         })
@@ -202,14 +217,18 @@ export const useSlideNavigation = (): SlideNavigationState => {
   const nextStep = useCallback(() => {
     if (isExiting) return
 
-    const logicalSteps = getLogicalStepCount(currentSlide)
-    const exitSteps = getExitStepElements(currentSlide).length
+    const logicalSteps = cachedStepEntriesRef.current.length
+    const exitSteps = cachedExitStepCountRef.current
 
     if (currentStep < logicalSteps) {
       setCurrentStep(currentStep + 1)
     } else if (exitSteps > 0 && currentExitStep.current < exitSteps) {
       currentExitStep.current++
-      applyExitStepVisibility(currentSlide, currentExitStep.current)
+      toggleClassByThreshold(
+        getExitStepElements(currentSlide),
+        currentExitStep.current,
+        'exit-visible',
+      )
       if (currentExitStep.current >= exitSteps && currentSlide < totalSlidesRef.current - 1) {
         startExitTransition(currentSlide + 1)
       }
@@ -224,7 +243,11 @@ export const useSlideNavigation = (): SlideNavigationState => {
 
     if (currentExitStep.current > 0) {
       currentExitStep.current--
-      applyExitStepVisibility(currentSlide, currentExitStep.current)
+      toggleClassByThreshold(
+        getExitStepElements(currentSlide),
+        currentExitStep.current,
+        'exit-visible',
+      )
     } else if (currentStep > 0) {
       clearAutoStepTimer()
       setCurrentStep(currentStep - 1)
@@ -234,11 +257,10 @@ export const useSlideNavigation = (): SlideNavigationState => {
     }
   }, [currentSlide, currentStep, isExiting, startExitTransition, clearAutoStepTimer])
 
-  // Auto-step sequencing: when a slide becomes active, auto-advance through auto-steps
   useEffect(() => {
     clearAutoStepTimer()
 
-    const entries = getStepEntries(currentSlide)
+    const entries = cachedStepEntriesRef.current
     if (entries.length === 0) return
 
     const scheduleAutoStep = (stepIndex: number) => {
@@ -255,37 +277,16 @@ export const useSlideNavigation = (): SlideNavigationState => {
       }, entry.autoDelay)
     }
 
-    // Start auto-stepping from current position
     if (currentStep < entries.length && entries[currentStep]?.isAuto) {
       scheduleAutoStep(currentStep)
     }
 
     return () => clearAutoStepTimer()
-  }, [currentSlide, clearAutoStepTimer]) // Only re-run on slide change, not step change
+  }, [currentSlide, clearAutoStepTimer])
 
-  // Apply step visibility
   useEffect(() => {
     applyStepVisibility(currentSlide, currentStep)
   }, [currentSlide, currentStep])
-
-  // Sync active class on initial render and slide changes
-  const prevSlideRef = useRef<number>(-1)
-
-  useEffect(() => {
-    if (prevSlideRef.current === currentSlide) return
-
-    const slides = getSlideElements()
-    slides.forEach((slide, index) => {
-      if (index === currentSlide) {
-        slide.classList.add('active')
-      } else {
-        slide.classList.remove('active')
-        slide.classList.remove('exiting')
-      }
-    })
-
-    prevSlideRef.current = currentSlide
-  }, [currentSlide])
 
   useEffect(() => {
     syncUrlToSlide(currentSlide)

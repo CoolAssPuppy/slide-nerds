@@ -4,6 +4,14 @@ const NOTES_SELECTOR = '[data-notes]'
 const EXIT_STEP_SELECTOR = '[data-exit-step]'
 const AUTO_STEP_SELECTOR = '[data-auto-step]'
 
+const EXIT_CLASSES = [
+  'exit-fade',
+  'exit-scale-out',
+  'exit-slide-up',
+  'exit-slide-down',
+  'exit-wipe-left',
+] as const
+
 const queryAll = (selector: string, root?: Element): NodeListOf<Element> => {
   if (typeof document === 'undefined') return [] as unknown as NodeListOf<Element>
   const target = root ?? document
@@ -18,29 +26,23 @@ export const getSlideAt = (index: number): Element | null => {
   return getSlideElements()[index] ?? null
 }
 
-export const getStepElements = (slideIndex: number): NodeListOf<Element> => {
+const queryWithinSlide = (slideIndex: number, selector: string): NodeListOf<Element> => {
   const slide = getSlideAt(slideIndex)
   if (!slide) return queryAll(':not(*)')
-  return queryAll(STEP_SELECTOR, slide)
+  return queryAll(selector, slide)
 }
 
-export const getNotesForSlide = (slideIndex: number): string[] => {
-  const slide = getSlideAt(slideIndex)
-  if (!slide) return []
-  const noteElements = queryAll(NOTES_SELECTOR, slide)
-  return Array.from(noteElements).map((el) => el.textContent ?? '')
+export const getStepElements = (slideIndex: number): NodeListOf<Element> => {
+  return queryWithinSlide(slideIndex, STEP_SELECTOR)
 }
 
 export const getExitStepElements = (slideIndex: number): NodeListOf<Element> => {
-  const slide = getSlideAt(slideIndex)
-  if (!slide) return queryAll(':not(*)')
-  return queryAll(EXIT_STEP_SELECTOR, slide)
+  return queryWithinSlide(slideIndex, EXIT_STEP_SELECTOR)
 }
 
-export const getAutoStepElements = (slideIndex: number): NodeListOf<Element> => {
-  const slide = getSlideAt(slideIndex)
-  if (!slide) return queryAll(':not(*)')
-  return queryAll(AUTO_STEP_SELECTOR, slide)
+export const getNotesForSlide = (slideIndex: number): string[] => {
+  const noteElements = queryWithinSlide(slideIndex, NOTES_SELECTOR)
+  return Array.from(noteElements).map((el) => el.textContent ?? '')
 }
 
 export type StepEntry = {
@@ -87,8 +89,7 @@ export const getStepEntries = (slideIndex: number): ReadonlyArray<StepEntry> => 
 export const hasExitAnimations = (slideIndex: number): boolean => {
   const slide = getSlideAt(slideIndex)
   if (!slide) return false
-  const exitClasses = ['exit-fade', 'exit-scale-out', 'exit-slide-up', 'exit-slide-down', 'exit-wipe-left']
-  return exitClasses.some((cls) => slide.querySelector(`.${cls}`) !== null)
+  return EXIT_CLASSES.some((cls) => slide.querySelector(`.${cls}`) !== null)
 }
 
 export const getSlidesInfo = (): ReadonlyArray<{ index: number; textContent: string }> => {
