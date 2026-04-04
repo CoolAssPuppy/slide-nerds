@@ -43,6 +43,14 @@ const FullscreenIcon = () => (
   </svg>
 )
 
+const ExportIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+)
+
 const SHORTCUTS = [
   { key: 'Space / \u2192', label: 'Next step or slide' },
   { key: '\u2190 / Backspace', label: 'Previous step or slide' },
@@ -168,11 +176,26 @@ export const SlideControls: React.FC = () => {
     }
   }, [])
 
+  const handleExportPdf = useCallback(() => {
+    setIsOpen(false)
+    window.slidenerds?.export({ format: 'pdf' })
+  }, [])
+
+  const handleExportPptx = useCallback(() => {
+    setIsOpen(false)
+    window.slidenerds?.export({ format: 'pptx' })
+  }, [])
+
   const items: ReadonlyArray<ControlItem> = [
     { label: 'Help', icon: <HelpIcon />, action: handleHelp },
     { label: 'Speaker Notes', icon: <PresenterIcon />, action: handlePresenter },
     { label: 'Light Table', icon: <GridIcon />, action: handleLightTable },
     { label: 'Fullscreen', icon: <FullscreenIcon />, action: handleFullscreen },
+  ]
+
+  const exportItems: ReadonlyArray<ControlItem> = [
+    { label: 'Export as PDF', icon: <ExportIcon />, action: handleExportPdf },
+    { label: 'Export as PPTX', icon: <ExportIcon />, action: handleExportPptx },
   ]
 
   const slideLabel = `${state.currentSlide + 1} / ${state.totalSlides}`
@@ -220,38 +243,46 @@ export const SlideControls: React.FC = () => {
             >
               Slide {slideLabel}
             </div>
-            {items.map((item) => (
-              <button
-                key={item.label}
-                onClick={item.action}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '8px 12px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.85)',
-                  background: 'transparent',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  textAlign: 'left' as const,
-                  width: '100%',
-                  transition: 'background 150ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                }}
-              >
-                <span style={{ opacity: 0.7, display: 'flex', alignItems: 'center' }}>
-                  {item.icon}
-                </span>
-                {item.label}
-              </button>
+            {[...items, ...exportItems].map((item, i) => (
+              <React.Fragment key={item.label}>
+                {i === items.length && (
+                  <div style={{
+                    height: '1px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    margin: '2px 8px',
+                  }} />
+                )}
+                <button
+                  onClick={item.action}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '8px 12px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textAlign: 'left' as const,
+                    width: '100%',
+                    transition: 'background 150ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                  }}
+                >
+                  <span style={{ opacity: 0.7, display: 'flex', alignItems: 'center' }}>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </button>
+              </React.Fragment>
             ))}
           </div>
         )}
