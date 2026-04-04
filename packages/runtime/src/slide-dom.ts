@@ -26,9 +26,14 @@ export const getSlideAt = (index: number): Element | null => {
   return getSlideElements()[index] ?? null
 }
 
+const emptyNodeList = (): NodeListOf<Element> => {
+  if (typeof document === 'undefined') return [] as unknown as NodeListOf<Element>
+  return document.createDocumentFragment().querySelectorAll('*')
+}
+
 const queryWithinSlide = (slideIndex: number, selector: string): NodeListOf<Element> => {
   const slide = getSlideAt(slideIndex)
-  if (!slide) return queryAll(':not(*)')
+  if (!slide) return emptyNodeList()
   return queryAll(selector, slide)
 }
 

@@ -44,11 +44,7 @@ const toggleClassByThreshold = (
   className: string,
 ): void => {
   for (let i = 0; i < elements.length; i++) {
-    if (i < visibleCount) {
-      elements[i].classList.add(className)
-    } else {
-      elements[i].classList.remove(className)
-    }
+    elements[i].classList.toggle(className, i < visibleCount)
   }
 }
 
@@ -57,29 +53,18 @@ const applyStepVisibility = (
   visibleSteps: number,
 ): void => {
   const entries = getStepEntries(slideIndex)
-  let entryIndex = 0
-
-  for (const entry of entries) {
-    const isVisible = entryIndex < visibleSteps
+  for (const [i, entry] of entries.entries()) {
+    const isVisible = i < visibleSteps
     for (const el of entry.elements) {
-      if (isVisible) {
-        el.classList.add('step-visible')
-      } else {
-        el.classList.remove('step-visible')
-      }
+      el.classList.toggle('step-visible', isVisible)
     }
-    entryIndex++
   }
 }
 
 const setActiveSlide = (slides: NodeListOf<Element>, targetIndex: number): void => {
   slides.forEach((slide, index) => {
-    if (index === targetIndex) {
-      slide.classList.add('active')
-    } else {
-      slide.classList.remove('active')
-      slide.classList.remove('exiting')
-    }
+    slide.classList.toggle('active', index === targetIndex)
+    if (index !== targetIndex) slide.classList.remove('exiting')
   })
 }
 

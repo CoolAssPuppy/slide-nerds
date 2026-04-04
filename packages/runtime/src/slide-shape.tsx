@@ -41,6 +41,17 @@ type SlideShapeProps = {
 
 const r2 = (n: number): number => Math.round(n * 100) / 100
 
+const regularPolygon = (w: number, h: number, sides: number, rotationOffset: number): string => {
+  const cx = w / 2
+  const cy = h / 2
+  const rad = Math.min(cx, cy)
+  const pts = Array.from({ length: sides }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / sides - rotationOffset
+    return `${r2(cx + rad * Math.cos(angle))},${r2(cy + rad * Math.sin(angle))}`
+  })
+  return `M ${pts.join(' L ')} Z`
+}
+
 const SHAPE_PATHS: Record<ShapeType, (w: number, h: number) => string> = {
   circle: (w, h) => {
     const rx = w / 2
@@ -54,36 +65,9 @@ const SHAPE_PATHS: Record<ShapeType, (w: number, h: number) => string> = {
   },
   triangle: (w, h) => `M ${w / 2},0 L ${w},${h} L 0,${h} Z`,
   diamond: (w, h) => `M ${w / 2},0 L ${w},${h / 2} L ${w / 2},${h} L 0,${h / 2} Z`,
-  pentagon: (w, h) => {
-    const cx = w / 2
-    const cy = h / 2
-    const rad = Math.min(cx, cy)
-    const pts = Array.from({ length: 5 }, (_, i) => {
-      const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2
-      return `${r2(cx + rad * Math.cos(angle))},${r2(cy + rad * Math.sin(angle))}`
-    })
-    return `M ${pts.join(' L ')} Z`
-  },
-  hexagon: (w, h) => {
-    const cx = w / 2
-    const cy = h / 2
-    const rad = Math.min(cx, cy)
-    const pts = Array.from({ length: 6 }, (_, i) => {
-      const angle = (Math.PI * 2 * i) / 6 - Math.PI / 6
-      return `${r2(cx + rad * Math.cos(angle))},${r2(cy + rad * Math.sin(angle))}`
-    })
-    return `M ${pts.join(' L ')} Z`
-  },
-  octagon: (w, h) => {
-    const cx = w / 2
-    const cy = h / 2
-    const rad = Math.min(cx, cy)
-    const pts = Array.from({ length: 8 }, (_, i) => {
-      const angle = (Math.PI * 2 * i) / 8 - Math.PI / 8
-      return `${r2(cx + rad * Math.cos(angle))},${r2(cy + rad * Math.sin(angle))}`
-    })
-    return `M ${pts.join(' L ')} Z`
-  },
+  pentagon: (w, h) => regularPolygon(w, h, 5, Math.PI / 2),
+  hexagon: (w, h) => regularPolygon(w, h, 6, Math.PI / 6),
+  octagon: (w, h) => regularPolygon(w, h, 8, Math.PI / 8),
   star: (w, h) => {
     const cx = w / 2
     const cy = h / 2

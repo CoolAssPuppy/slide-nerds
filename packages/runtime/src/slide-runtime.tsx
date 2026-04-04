@@ -28,15 +28,10 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
     setIsPresenter(isPresenterWindow())
   }, [])
 
-  const handleSlideChange = useCallback(
-    (slide: number) => navigation.goToSlide(slide),
-    [navigation.goToSlide],
-  )
-
   const presenter = usePresenterMode({
     currentSlide: navigation.currentSlide,
     currentStep: navigation.currentStep,
-    onSlideChange: handleSlideChange,
+    onSlideChange: navigation.goToSlide,
   })
 
   const toggleLightTable = useCallback(() => {
