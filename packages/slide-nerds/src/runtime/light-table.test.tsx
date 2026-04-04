@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within, fireEvent } from '@testing-library/react'
-import React from 'react'
 import { LightTable } from './light-table'
 import { SlideContext, type SlideState } from './slide-context'
 
@@ -26,8 +25,10 @@ const getTestContext = (overrides?: Partial<SlideState>): SlideState => ({
   currentStep: 0,
   totalSlides: 3,
   stepsForCurrentSlide: 0,
+  isExiting: false,
   isPresenterMode: false,
   isLightTable: true,
+  toggleLightTable: vi.fn(),
   goToSlide: vi.fn(),
   nextStep: vi.fn(),
   previousStep: vi.fn(),

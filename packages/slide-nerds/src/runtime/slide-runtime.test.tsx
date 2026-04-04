@@ -126,7 +126,7 @@ describe('SlideRuntime', () => {
 
   it('should register export API on window', () => {
     render(<TestDeck />)
-    expect((window as Record<string, unknown>).slidenerds).toBeDefined()
+    expect((window as unknown as Record<string, unknown>).slidenerds).toBeDefined()
   })
 
   it('should support interactive React components inside slides', async () => {

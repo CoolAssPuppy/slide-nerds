@@ -3,7 +3,7 @@ import { registerExportApi } from './export-api'
 
 describe('registerExportApi', () => {
   beforeEach(() => {
-    delete (window as Record<string, unknown>).slidenerds
+    delete (window as unknown as Record<string, unknown>).slidenerds
   })
 
   it('should register slidenerds object on window', () => {
