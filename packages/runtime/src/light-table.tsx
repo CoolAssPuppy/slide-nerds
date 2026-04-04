@@ -16,8 +16,10 @@ const SCALE = THUMB_WIDTH / 1920
 const SlideThumbnail: React.FC<{
   slideIndex: number
   isActive: boolean
-}> = ({ slideIndex, isActive }) => {
+  isPreviewing: boolean
+}> = ({ slideIndex, isActive, isPreviewing }) => {
   const containerRef = useRef<HTMLDivElement>(null)
+  const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const container = containerRef.current
@@ -38,23 +40,44 @@ const SlideThumbnail: React.FC<{
     clone.style.pointerEvents = 'none'
     clone.style.display = 'flex'
 
-    clone.querySelectorAll('[data-step]').forEach((step) => {
-      const el = step as HTMLElement
-      el.style.visibility = 'visible'
-      el.style.opacity = '1'
-      el.style.transform = 'none'
-    })
+    const steps = clone.querySelectorAll('[data-step], [data-auto-step]')
+
+    if (isPreviewing) {
+      steps.forEach((step) => {
+        step.classList.remove('step-visible')
+      })
+    } else {
+      steps.forEach((step) => {
+        step.classList.add('step-visible')
+      })
+    }
 
     clone.querySelectorAll('[data-notes]').forEach((note) => {
       (note as HTMLElement).style.display = 'none'
     })
 
-    // Clear existing children safely
     while (container.firstChild) {
       container.removeChild(container.firstChild)
     }
     container.appendChild(clone)
-  }, [slideIndex])
+
+    if (isPreviewing && steps.length > 0) {
+      if (animTimerRef.current !== null) clearTimeout(animTimerRef.current)
+
+      let stepIndex = 0
+      const revealNext = () => {
+        if (stepIndex >= steps.length) return
+        steps[stepIndex].classList.add('step-visible')
+        stepIndex++
+        animTimerRef.current = setTimeout(revealNext, 400)
+      }
+      animTimerRef.current = setTimeout(revealNext, 300)
+    }
+
+    return () => {
+      if (animTimerRef.current !== null) clearTimeout(animTimerRef.current)
+    }
+  }, [slideIndex, isPreviewing])
 
   return (
     <div
@@ -93,11 +116,13 @@ const SlideThumbnail: React.FC<{
 export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) => {
   const { currentSlide, goToSlide } = useSlideState()
   const [dragSource, setDragSource] = useState<number | null>(null)
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null)
 
   const slides = useMemo(() => getSlidesInfo(), [])
 
   const handleSlideClick = useCallback(
     (index: number) => {
+      setPreviewIndex(index)
       goToSlide(index)
     },
     [goToSlide],
@@ -163,6 +188,7 @@ export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) 
           <SlideThumbnail
             slideIndex={slide.index}
             isActive={slide.index === currentSlide}
+            isPreviewing={previewIndex === slide.index}
           />
         </div>
       ))}
