@@ -1,0 +1,31 @@
+import type { Metadata } from 'next'
+import { SlideRuntime } from '@strategicnerds/slide-nerds'
+import brandConfig from '../brand.config'
+import './globals.css'
+
+export const metadata: Metadata = {
+  title: '{{PROJECT_NAME}}',
+  description: 'A presentation built with slidenerds',
+}
+
+const brandVars = {
+  '--color-primary': brandConfig.colors.primary,
+  '--color-accent': brandConfig.colors.accent,
+  '--color-background': brandConfig.colors.background,
+  '--color-surface': brandConfig.colors.surface,
+  '--color-text': brandConfig.colors.text,
+  '--slide-padding': brandConfig.spacing.slide,
+  '--font-heading': brandConfig.fonts.heading,
+  '--font-body': brandConfig.fonts.body,
+  '--font-mono': brandConfig.fonts.mono,
+} as React.CSSProperties
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" style={brandVars}>
+      <body>
+        <SlideRuntime>{children}</SlideRuntime>
+      </body>
+    </html>
+  )
+}

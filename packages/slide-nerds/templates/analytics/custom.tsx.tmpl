@@ -1,0 +1,20 @@
+import Script from 'next/script'
+
+/**
+ * Custom analytics component.
+ *
+ * Wire your analytics provider here. This component is loaded in the root
+ * layout after the page is interactive.
+ *
+ * Common patterns:
+ * - Add a Script tag with your provider's snippet
+ * - Import and initialize your provider's SDK
+ * - Track page views and slide navigation events
+ */
+export const CustomAnalytics = () => (
+  <Script
+    id="custom-analytics"
+    strategy="afterInteractive"
+    src="/analytics/custom.js"
+  />
+)

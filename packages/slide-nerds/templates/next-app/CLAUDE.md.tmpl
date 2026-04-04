@@ -1,0 +1,497 @@
+# {{PROJECT_NAME}}
+
+A slidenerds presentation deck. Built with Next.js and `@strategicnerds/slide-nerds`.
+
+## First steps when starting a new deck
+
+1. **Ask what kind of presentation this is.** Use the `narrative-frameworks` skill to pick the right structure (SCQA for board decks, PAS for sales, Sparkline for keynotes, etc.).
+2. **Set the brand.** Edit `brand.config.ts` with the user's colors, fonts, and spacing. Then update derived colors in `app/globals.css`. See the `brand` skill for the exact workflow.
+3. **Build slides in `app/page.tsx`.** Each `<section data-slide="">` is one slide.
+
+## Branding workflow
+
+`brand.config.ts` is the single source of truth. The layout reads it and injects CSS custom properties on `<html>`. Change this file to rebrand the entire deck.
+
+After editing `brand.config.ts`, update these derived CSS variables in `app/globals.css`:
+
+```css
+:root {
+  --color-accent-dim: rgba(R, G, B, 0.12);       /* accent at 12% opacity */
+  --color-text-secondary: rgba(R, G, B, 0.6);    /* text at 60% opacity */
+  --color-text-tertiary: rgba(R, G, B, 0.4);     /* text at 40% opacity */
+  --color-border: rgba(255, 255, 255, 0.06);      /* white at 6% for dark themes */
+  --color-surface-elevated: #222228;               /* one step above surface */
+}
+```
+
+If using custom web fonts, add `@import` rules at the top of `globals.css` before `@import 'tailwindcss'`.
+
+Never hardcode hex colors in slide content. Always use `var(--color-accent)`, `var(--color-text)`, etc.
+
+## File structure
+
+| File | Purpose |
+|------|---------|
+| `brand.config.ts` | Colors, fonts, spacing. Single source of truth for brand. |
+| `app/layout.tsx` | Root layout. Reads brand.config.ts and injects CSS variables. |
+| `app/globals.css` | Structural CSS, animations, derived color tokens, font imports. |
+| `app/page.tsx` | The slide deck. All slides live here. |
+
+## Data conventions
+
+| Attribute | Purpose |
+|-----------|---------|
+| `data-slide` | Marks a `<section>` as a slide |
+| `data-step` | Progressive reveal. Hidden until the presenter advances. |
+| `data-notes` | Speaker notes. Hidden in presentation, shown in Speaker Notes window. |
+| `data-magic-id` | Shared identity for Magic Move animation between consecutive slides. |
+
+## Keyboard controls
+
+| Key | Action |
+|-----|--------|
+| Space / Right arrow | Next step or slide |
+| Left arrow / Backspace | Previous step or slide |
+| P | Speaker Notes (opens new window with notes, timer, slide count) |
+| L | Light Table (thumbnail overview of all slides) |
+| F | Fullscreen |
+| Escape | Exit Light Table or fullscreen |
+
+## Animation classes
+
+Add these to `data-step` elements for entrance animations:
+
+| Class | Effect |
+|-------|--------|
+| `step-fade` | Fade in (350ms) |
+| `step-move-up` | Slide up + fade in (420ms) |
+| `step-scale-in` | Scale up + fade in (350ms) |
+| `step-emphasis` | Spring-scale entrance for big stats (500ms) |
+
+## Shape system
+
+```tsx
+import { SlideShape } from '@strategicnerds/slide-nerds'
+
+<SlideShape shape="hexagon" size={100}
+  fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth={1.5}>
+  <p>Text inside</p>
+</SlideShape>
+
+<SlideShape shape="circle" size={140}
+  imageSrc="/photo.jpg" stroke="var(--color-accent)" strokeWidth={2} />
+```
+
+Available shapes: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
+
+## Skills reference
+
+Skills are installed in `.slidenerds/skills/`. Each skill is a directory containing a `SKILL.md` file. Read the relevant skills before building slides.
+
+### Structure and narrative
+- **narrative-frameworks**: SCQA, Minto Pyramid, PAS, BAB, Sparkline, Monroe's. Pick one per deck.
+- **deck-templates**: Complete slide sequences for investor pitch, product launch, board deck, sales deck, conference talk.
+
+### Visual design
+- **visual-design**: Typography scale, spacing hierarchy, composition rules, content density limits.
+- **brand**: How to edit brand.config.ts and globals.css. Palette derivation, font pairing, rebranding checklist.
+- **layout**: Basic alignment, grids, centering, two-up, hero+body.
+- **advanced-layouts**: Dashboard (KPI grid), pricing comparison, before/after, icon grid, logo wall, agenda, appendix.
+
+### Content types
+- **slide-types**: Title, big stat, quote, code, table, chart, team, timeline, image, two-up.
+- **data-visualization**: 13 chart types with Recharts. Bar, line, area, pie, radar, waterfall, funnel, gauge, sparkline, combo.
+- **strategic-frameworks**: SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons, pyramid, risk matrix, maturity model.
+- **diagrams**: Flowcharts, org charts, sequence diagrams, journey maps, mind maps, state diagrams, Venn, swim lanes.
+
+### Animation and interaction
+- **animation**: Step reveals, Magic Move, transition overlays, emphasis pulse.
+- **interactive**: Video embeds, QR codes, clickable links, iframe embeds, click-to-zoom.
+
+### Quality
+- **accessibility**: WCAG contrast, prefers-reduced-motion, screen reader support, color-blind safe palettes.
+- **speaker-notes**: How to write and place speaker notes.
+
+### Output
+- **analytics**: GTM, GA4, PostHog, Plausible integration.
+- **export**: PDF, PPTX, Google Slides export.
+
+## Slide authoring reference
+
+Everything that can go inside a slide lives within a `<section data-slide="">` element in `app/page.tsx`. This is the complete reference.
+
+### Critical layout rule
+
+**The default layout for every content slide is top-left anchored.** Title and content start from a consistent position near the top of the slide and flow downward. Content is NOT vertically centered.
+
+Only these specific slide types use centered layout:
+- Big stat (single number, centered)
+- Section divider (section name, centered)
+- Quote (blockquote, centered, max-w-3xl)
+- Closing (contact info, centered)
+
+Everything else -- charts, tables, text slides, timelines, dashboards, diagrams, team slides, process flows, comparisons -- anchors content to the top-left with the title at a consistent position across all slides.
+
+### Default slide structure (top-left anchored)
+
+```tsx
+<section data-slide="">
+  <div className="bg-mesh-warm flex flex-col w-full"
+    style={{ padding: '4rem 6rem' }}>
+
+    {/* Section label -- same position on every content slide */}
+    <p className="section-label mb-3">Revenue</p>
+
+    {/* Title -- same Y position on every content slide */}
+    <h2 className="text-[2.5rem] font-bold mb-10">ARR trajectory</h2>
+
+    {/* Content flows below the title */}
+    <div data-step="" className="step-fade">
+      {/* Charts, tables, text, shapes, diagrams -- whatever the slide needs */}
+    </div>
+
+    {/* Annotation below the content */}
+    <div data-step="" className="step-move-up mt-5 flex items-center gap-3">
+      <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-accent)' }} />
+      <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
+        Key insight or annotation about the content above.
+      </p>
+    </div>
+
+    <div data-notes="">Speaker notes here.</div>
+  </div>
+</section>
+```
+
+The section-label, title, and content start from the same top-left position on every content slide. This consistency is what makes a deck feel designed rather than assembled.
+
+### Data attributes
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-slide=""` | `<section>` | Marks the element as a slide. Required. |
+| `data-step=""` | Any element | Hides the element until the presenter advances. Revealed in DOM order. |
+| `data-notes=""` | `<div>` | Speaker notes. Hidden during presentation, visible in Speaker Notes window (press P). Place inside the slide section. |
+| `data-magic-id="name"` | Any element | Pairs elements across consecutive slides for FLIP animation. Elements with the same `data-magic-id` on adjacent slides animate position, size, and scale when transitioning. |
+
+### CSS variables (from brand.config.ts)
+
+These are injected on `<html>` by the layout and available everywhere:
+
+| Variable | Source | Usage |
+|----------|--------|-------|
+| `--color-primary` | `brand.colors.primary` | Section divider backgrounds, darkest surfaces |
+| `--color-accent` | `brand.colors.accent` | Highlights, stats, labels, shape strokes, chart fills, active states |
+| `--color-background` | `brand.colors.background` | Slide canvas background |
+| `--color-surface` | `brand.colors.surface` | Card backgrounds (charts, tables, code) |
+| `--color-text` | `brand.colors.text` | Primary text color |
+| `--slide-padding` | `brand.spacing.slide` | Outer slide padding |
+| `--font-heading` | `brand.fonts.heading` | Heading font stack |
+| `--font-body` | `brand.fonts.body` | Body text font stack |
+| `--font-mono` | `brand.fonts.mono` | Monospace font stack |
+
+Derived variables (set in `globals.css`):
+
+| Variable | Value | Usage |
+|----------|-------|-------|
+| `--color-accent-dim` | Accent at 12% opacity | Pill backgrounds, badges, shape fills |
+| `--color-text-secondary` | Text at 60% opacity | Body text, descriptions, labels |
+| `--color-text-tertiary` | Text at 40% opacity | Captions, metadata, timestamps |
+| `--color-border` | White at 6% opacity | Card borders, dividers, table rules |
+| `--color-surface-elevated` | One step above surface | Table headers, elevated cards |
+
+### Animation classes
+
+Add to any `data-step` element. The runtime adds `step-visible` class when the step is active.
+
+| Class | Effect | Duration |
+|-------|--------|----------|
+| `step-fade` | Opacity 0 to 1 | 350ms |
+| `step-move-up` | Translate Y 24px to 0 + fade | 420ms |
+| `step-scale-in` | Scale 0.92 to 1 + fade | 350ms |
+| `step-emphasis` | Spring scale 0.82 to 1.02 to 1 | 500ms |
+
+Example:
+
+```tsx
+<div data-step="" className="step-move-up">
+  <p>This slides up and fades in when the presenter advances.</p>
+</div>
+```
+
+### Utility CSS classes
+
+These are defined in `globals.css` and available on any slide:
+
+| Class | What it does |
+|-------|-------------|
+| `section-label` | Small uppercase text in accent color with wide tracking. Use for section labels above titles. |
+| `card-surface` | Rounded container with surface background and subtle border. Use around charts, tables, code. |
+| `accent-line` | 40x3px accent-colored line. Use as a decorative divider. |
+| `stat-glow` | Text shadow glow in accent color. Use on large stat numbers. |
+| `bg-mesh-warm` | Subtle warm radial gradient background. Use on content slides. |
+| `bg-mesh-cool` | Subtle cool radial gradient background. Alternate with warm for variety. |
+| `bg-section` | Linear gradient from primary to surface. Use on section divider slides. |
+| `slide-table` | Table styling with uppercase headers, accent highlights, and border rules. |
+| `timeline-track` | Horizontal 2px line for timeline slides. |
+| `timeline-dot` | 16px accent circle with glow for timeline nodes. |
+| `timeline-dot-future` | Muted version of timeline-dot for future milestones. |
+| `sr-only` | Visually hidden but screen-reader accessible. Use for chart data tables. |
+
+### Components from @strategicnerds/slide-nerds
+
+```tsx
+import { SlideRuntime, SlideShape, SlideControls, PresenterView, LightTable, useSlideState } from '@strategicnerds/slide-nerds'
+```
+
+**SlideRuntime** -- wraps the entire app in `layout.tsx`. Provides navigation, keyboard controls, and context.
+
+**SlideShape** -- SVG shape with text or image content:
+
+```tsx
+// Shape with text inside
+<SlideShape shape="hexagon" size={100}
+  fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth={1.5}>
+  <p className="text-lg font-bold">42</p>
+</SlideShape>
+
+// Shape with image mask
+<SlideShape shape="circle" size={140}
+  imageSrc="/photo.jpg" stroke="var(--color-accent)" strokeWidth={2} />
+
+// Shape with custom dimensions
+<SlideShape shape="pill" width={200} height={48}
+  fill="var(--color-accent-dim)" stroke="none">
+  <p className="text-sm">Label</p>
+</SlideShape>
+```
+
+Props:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `shape` | ShapeType | required | One of 16 shape types (see list below) |
+| `size` | number | 120 | Width and height (square). Overridden by width/height. |
+| `width` | number | size | Width in pixels |
+| `height` | number | size | Height in pixels |
+| `fill` | string | `var(--color-surface)` | Fill color (CSS value) |
+| `stroke` | string | `var(--color-border)` | Stroke color (CSS value or "none") |
+| `strokeWidth` | number | 1 | Stroke width in pixels |
+| `opacity` | number | undefined | Overall opacity |
+| `imageSrc` | string | undefined | Image URL. Clips image to shape via SVG clipPath. |
+| `children` | ReactNode | undefined | Content rendered centered inside the shape. |
+| `data-magic-id` | string | undefined | For Magic Move transitions. |
+| `data-step` | string | undefined | For progressive reveal. |
+| `className` | string | undefined | Additional CSS classes. |
+
+Shape types: `circle`, `square`, `rounded-square`, `triangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star`, `plus`, `cloud`, `arrow-right`, `arrow-left`, `chevron-right`, `pill`.
+
+**useSlideState** -- React hook for reading slide context:
+
+```tsx
+const { currentSlide, currentStep, totalSlides, goToSlide, nextStep, previousStep, isLightTable, toggleLightTable } = useSlideState()
+```
+
+### Content types you can put on a slide
+
+**Text**: headings (h1-h3), paragraphs, lists, blockquotes. Use Tailwind classes for sizing and the font CSS variables for families.
+
+**Images**: `<img>` tags. Use `object-cover` for full-bleed, `object-contain` for screenshots. Always include `alt` text.
+
+**Charts** (Recharts): Bar, line, area, pie/donut, radar, scatter, combo, treemap. Wrap in a `card-surface` container with `ResponsiveContainer` at a fixed pixel height (300-420px). See the `data-visualization` skill.
+
+```tsx
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+
+<div className="card-surface p-8">
+  <ResponsiveContainer width="100%" height={400}>
+    <BarChart data={data}>
+      <XAxis dataKey="name" stroke="transparent"
+        tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 13 }}
+        tickLine={false} axisLine={false} />
+      <YAxis stroke="transparent"
+        tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 12 }}
+        tickLine={false} axisLine={false} />
+      <Bar dataKey="value" fill="var(--color-accent)"
+        radius={[6, 6, 0, 0]} animationDuration={800} />
+    </BarChart>
+  </ResponsiveContainer>
+</div>
+```
+
+**Shapes** (SlideShape): Any of the 16 SVG shapes with optional text, images, or Magic Move. See above.
+
+**Tables**: HTML `<table>` with the `slide-table` class on the wrapper. Reveal rows one at a time with `data-step`.
+
+```tsx
+<div className="card-surface overflow-hidden">
+  <table className="slide-table w-full text-left">
+    <thead>
+      <tr style={{ background: 'var(--color-surface-elevated)' }}>
+        <th>Feature</th><th>Us</th><th>Them</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-step="" className="step-fade">
+        <td>Speed</td>
+        <td style={{ color: 'var(--color-accent)' }}>Fast</td>
+        <td style={{ color: 'var(--color-text-tertiary)' }}>Slow</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+**Diagrams** (Mermaid): Flowcharts, sequence diagrams, journey maps, mind maps, state diagrams, C4 architecture. Requires installing `mermaid` and `dompurify`. See the `diagrams` skill.
+
+**Video**: YouTube/Vimeo iframes or `<video>` elements. Wrap in `card-surface` with 16:9 aspect ratio. See the `interactive` skill.
+
+**QR codes**: Using `qrcode.react`. Place on the right side of the slide with the URL in plain text beside it. See the `interactive` skill.
+
+**Links**: Styled as pill buttons with an external-link icon. Use `target="_blank"` and `rel="noopener noreferrer"`.
+
+**Strategic frameworks**: SWOT matrices, 2x2 grids, TAM/SAM/SOM circles, process chevrons, pyramids, risk matrices. All built with HTML/CSS. See the `strategic-frameworks` skill.
+
+**Custom SVG**: Venn diagrams, gauge charts, cycle diagrams, any visualization Recharts or Mermaid does not cover.
+
+### Slide layout patterns
+
+Every slide is a `<section data-slide="">` containing a single `<div>` that controls the layout. The CSS rule `[data-slide] > * { min-height: 100%; width: 100%; }` ensures the inner div always fills the slide.
+
+**Top-left anchored with text content** (DEFAULT for: bullet lists, numbered lists, text paragraphs, tables):
+
+```tsx
+<section data-slide="">
+  <div className="bg-mesh-cool flex flex-col w-full"
+    style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Section name</p>
+    <h2 className="text-[2.5rem] font-bold mb-10">Slide title</h2>
+    {/* Text content anchored below the title, flows downward */}
+    <ul className="space-y-4 text-lg">
+      <li data-step="" className="step-fade">First point</li>
+      <li data-step="" className="step-fade">Second point</li>
+    </ul>
+  </div>
+</section>
+```
+
+Text, bullets, and tables stay anchored below the title. The bottom of the slide is breathing room. Do NOT vertically center text content.
+
+**Top-left title with centered visual** (for: diagrams, charts, process flows, shapes, frameworks, team grids, icon grids, timelines, dashboards/KPIs):
+
+```tsx
+<section data-slide="">
+  <div className="flex flex-col w-full"
+    style={{ padding: '4rem 6rem' }}>
+    <p className="section-label mb-3">Section name</p>
+    <h2 className="text-[2.5rem] font-bold mb-8">Slide title</h2>
+    {/* Visual content centered in the remaining space below the title */}
+    <div className="flex-1 flex items-center justify-center">
+      {/* Diagram, chart, shape layout, framework, etc. */}
+    </div>
+  </div>
+</section>
+```
+
+The title stays top-left anchored. The visual fills and centers within the remaining space below it. Use `flex-1 flex items-center justify-center` on the visual container.
+
+**Centered** (ONLY for: big stat, section divider, quote, closing):
+
+```tsx
+<section data-slide="">
+  <div className="flex flex-col items-center justify-center w-full"
+    style={{ paddingBottom: '4rem' }}>
+    {/* Content is centered horizontally and vertically */}
+  </div>
+</section>
+```
+
+**Bottom-aligned** (ONLY for: title slide):
+
+```tsx
+<section data-slide="">
+  <div className="flex flex-col justify-end w-full"
+    style={{ padding: '5rem 5.5rem' }}>
+    {/* Content anchored to the bottom-left */}
+  </div>
+</section>
+```
+
+**Two-column split** (before/after, quote + data):
+
+```tsx
+<section data-slide="">
+  <div className="grid grid-cols-2 w-full">
+    <div style={{ padding: '4rem' }}>{/* Left column */}</div>
+    <div style={{ padding: '4rem' }}>{/* Right column */}</div>
+  </div>
+</section>
+```
+
+**Asymmetric split** (text + visual, 5:7 ratio):
+
+```tsx
+<section data-slide="">
+  <div className="grid grid-cols-12 gap-8 items-center w-full"
+    style={{ padding: '4rem 6rem' }}>
+    <div className="col-span-5">{/* Text */}</div>
+    <div className="col-span-7">{/* Visual */}</div>
+  </div>
+</section>
+```
+
+### Magic Move between slides
+
+Give elements the same `data-magic-id` on two consecutive slides. When navigating between them, the runtime captures positions and animates the transition using FLIP.
+
+```tsx
+{/* Slide A: metrics are large and centered */}
+<section data-slide="">
+  <div data-magic-id="revenue" className="text-6xl font-bold">$4.2M</div>
+  <div data-magic-id="growth" className="text-6xl font-bold">142%</div>
+</section>
+
+{/* Slide B: same metrics are small and top-left, chart appears below */}
+<section data-slide="">
+  <div data-magic-id="revenue" className="text-xl font-bold">$4.2M</div>
+  <div data-magic-id="growth" className="text-xl font-bold">142%</div>
+  <div data-step="" className="step-fade">
+    {/* New content that appears after the move */}
+  </div>
+</section>
+```
+
+### Slide type recipes
+
+| Type | Layout | Key elements |
+|------|--------|-------------|
+| Title | **Bottom-left** | accent-line, h1, subtitle, metadata row. Top 55% is empty. |
+| Section divider | **Centered** | Section number label, h2. bg-section background. |
+| Big stat | **Centered** | Large number with stat-glow, label, delta badge. |
+| Text / bullet list | **Top-left text** | section-label, h2, bullets anchored below title. |
+| Comparison table | **Top-left text** | section-label, h2, card-surface with slide-table. |
+| Chart | **Top-left + centered visual** | section-label, h2 anchored top-left. Chart centered in remaining space. |
+| Diagram | **Top-left + centered visual** | section-label, h2 anchored top-left. Diagram centered below. |
+| Process flow | **Top-left + centered visual** | section-label, h2. Shapes centered in remaining space. |
+| Team | **Top-left + centered visual** | section-label, h2. Avatar grid centered below. |
+| Icon grid | **Top-left + centered visual** | section-label, h2. 3x2 grid centered below. |
+| Dashboard | **Top-left + centered visual** | section-label, h2. KPI grid centered in remaining space. |
+| Timeline | **Top-left + centered visual** | section-label, h2. Timeline track centered in remaining space. |
+| Before/after | **Split** | grid-cols-2 with different backgrounds per side. |
+| Quote | **Centered** | Open-quote glyph, blockquote (max-w-3xl), attribution. |
+| Closing | **Centered** | accent-line, h2, contact info. |
+
+**Two layout sub-types for top-left anchored slides:**
+- **Top-left text**: Text, bullets, tables, KPIs stay anchored directly below the title. No vertical centering.
+- **Top-left + centered visual**: Title stays top-left. The visual (chart, diagram, shapes) is centered both horizontally and vertically in the remaining space below the title using `flex-1 flex items-center justify-center`.
+
+## Tips
+
+- Run `npm run dev` for hot reload while editing.
+- One idea per slide. If a slide says two things, make two slides.
+- Reveal content progressively with `data-step` to control pacing.
+- Charts go inside `card-surface` containers. Use fixed pixel heights (300-420px) on `ResponsiveContainer`.
+- Test at projection distance: if you cannot read it from 2 meters on a laptop, it fails on a projector.
+- Never hardcode hex colors. Always use CSS variables from the brand system.
+- Section labels (`section-label` class) go above every content slide title to show where the audience is in the deck.
+- Keep text above 16pt. Below that it disappears on projectors.

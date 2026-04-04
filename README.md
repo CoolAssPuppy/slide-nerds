@@ -332,10 +332,6 @@ npm test
 - **TypeScript strict mode** everywhere
 - Test files live next to the code they test (`foo.ts` and `foo.test.ts` in the same directory)
 
-## Planned features
-
-**Light Table reordering that persists to source**. The Light Table (press L) lets you drag slides into a new order, but the reorder only lasts for the session. It does not rewrite your source file. Persisting reorder requires a dev server API that parses the JSX AST, identifies `section[data-slide]` blocks, and rewrites them in the new order. This is planned but not yet built. Contributions welcome.
-
 ## What this is not
 
 Not a slide editor. The LLM is the editor.

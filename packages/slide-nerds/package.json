@@ -1,0 +1,48 @@
+{
+  "name": "@strategicnerds/slide-nerds",
+  "version": "0.1.0",
+  "description": "Presentation runtime, CLI, and LLM skill library for Next.js",
+  "type": "module",
+  "main": "./dist/runtime/index.js",
+  "types": "./dist/runtime/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    }
+  },
+  "bin": {
+    "slidenerds": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "skills"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "fs-extra": "^11.0.0",
+    "pptxgenjs": "^4.0.1",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "@types/fs-extra": "^11.0.0",
+    "@types/puppeteer": "^5.4.7",
+    "jsdom": "^25.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
