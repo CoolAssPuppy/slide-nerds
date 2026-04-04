@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { SlideContext } from './slide-context'
-import { useSlideNavigation } from './use-slide-navigation'
-import { usePresenterMode } from './use-presenter-mode'
-import { registerExportApi } from './export-api'
-import { SlideControls } from './slide-controls'
-import { PresenterView } from './presenter-view'
-import { LightTable } from './light-table'
+import { SlideContext } from './slide-context.js'
+import { useSlideNavigation } from './use-slide-navigation.js'
+import { usePresenterMode } from './use-presenter-mode.js'
+import { registerExportApi } from './export-api.js'
+import { SlideControls } from './slide-controls.js'
+import { PresenterView } from './presenter-view.js'
+import { LightTable } from './light-table.js'
 
 type SlideRuntimeProps = {
   children: React.ReactNode

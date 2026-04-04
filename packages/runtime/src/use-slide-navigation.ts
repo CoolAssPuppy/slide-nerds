@@ -6,7 +6,7 @@ import {
   getExitStepElements,
   getStepEntries,
   hasExitAnimations,
-} from './slide-dom'
+} from './slide-dom.js'
 
 const EXIT_ANIMATION_DURATION = 400
 const MAGIC_MOVE_DURATION = 420

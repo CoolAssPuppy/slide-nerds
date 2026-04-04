@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useState } from 'react'
-import { useSlideState } from './slide-context'
+import { useSlideState } from './slide-context.js'
 
 type ControlItem = {
   label: string

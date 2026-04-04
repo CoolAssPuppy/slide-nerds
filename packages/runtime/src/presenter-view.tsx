@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSlideState } from './slide-context'
-import { getNotesForSlide } from './slide-dom'
+import { useSlideState } from './slide-context.js'
+import { getNotesForSlide } from './slide-dom.js'
 
 type PresenterViewProps = {
   className?: string

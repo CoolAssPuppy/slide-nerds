@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useSlideState } from './slide-context'
-import { getSlideElements, getSlidesInfo } from './slide-dom'
+import { useSlideState } from './slide-context.js'
+import { getSlideElements, getSlidesInfo } from './slide-dom.js'
 
 type LightTableProps = {
   className?: string
