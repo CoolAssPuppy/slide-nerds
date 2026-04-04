@@ -37,7 +37,7 @@
     "claude"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/cli/index.js",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
