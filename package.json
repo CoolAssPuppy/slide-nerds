@@ -15,7 +15,8 @@
     "lint": "eslint 'packages/**/*.{ts,tsx}' 'apps/**/*.{ts,tsx}' 'skills/**/*.ts'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --build"
+    "typecheck": "tsc --build",
+    "publish:npm": "cd packages/slide-nerds && npm publish --access public"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
