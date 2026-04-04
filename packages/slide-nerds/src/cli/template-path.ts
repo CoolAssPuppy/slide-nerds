@@ -14,3 +14,7 @@ export const getTemplatePath = (...segments: string[]): string => {
 export const getSkillsPath = (): string => {
   return path.join(PACKAGE_ROOT, 'skills')
 }
+
+export const getTemplatesRoot = (): string => {
+  return path.join(PACKAGE_ROOT, 'templates')
+}
