@@ -57,7 +57,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     query = query.eq('slide_index', parseInt(slideIndex, 10))
   }
 
-  const { data, error } = await query
+  const { data, error } = await query.limit(1000)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

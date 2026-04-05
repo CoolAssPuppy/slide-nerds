@@ -8,7 +8,7 @@ const mockUpdateResult = vi.fn()
 const createChain = () => {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {}
   chain.eq = vi.fn().mockReturnValue(chain)
-  chain.order = mockSelectResult
+  chain.order = vi.fn().mockReturnValue({ limit: mockSelectResult })
   chain.single = mockInsertResult
   chain.select = vi.fn().mockReturnValue(chain)
   chain.insert = vi.fn().mockReturnValue(chain)

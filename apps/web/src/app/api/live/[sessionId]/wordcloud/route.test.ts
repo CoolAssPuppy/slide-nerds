@@ -12,7 +12,8 @@ vi.mock('@/lib/supabase/server', () => ({
           insert: mockInsert,
           select: () => ({
             eq: () => ({
-              eq: mockSelectQuery,
+              eq: () => ({ limit: mockSelectQuery }),
+              limit: mockSelectQuery,
             }),
           }),
         }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const DEFAULT_SERVICE_URL = 'https://slidenerds.com'
-const POLL_INTERVAL_MS = 2000
+const POLL_INTERVAL_MS = 5000
 
 type UseLiveSessionOptions = {
   sessionId?: string

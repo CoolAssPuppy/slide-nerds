@@ -108,7 +108,7 @@ export const LiveReactions: React.FC<LiveComponentProps> = ({ sessionId, service
       createdAt: Date.now(),
     }))
 
-    setFloating((prev) => [...prev, ...newFloating])
+    setFloating((prev) => [...prev, ...newFloating].slice(-50))
   }, [newReactions])
 
   useEffect(() => {

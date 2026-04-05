@@ -51,6 +51,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     .select('id, content, author_name, is_answered, slide_index, created_at')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true })
+    .limit(200)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
