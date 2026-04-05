@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { AppSidebar } from '@/components/layout/AppSidebar'
+import { AppFooter } from '@/components/layout/AppFooter'
 import type { Profile } from '@/lib/supabase/types'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           {children}
         </main>
+        <AppFooter />
       </div>
     </div>
   )

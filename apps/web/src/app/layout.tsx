@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
-import { ThemeSelector } from '@/components/layout/ThemeSelector'
 
 export const metadata: Metadata = {
   title: {
@@ -17,7 +16,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           {children}
-          <ThemeSelector />
         </ThemeProvider>
       </body>
     </html>
