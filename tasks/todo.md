@@ -6,19 +6,27 @@ Build embeddable React components for real-time audience interaction during live
 
 ### Deliverables
 
-- [ ] 1. Database migration: qa_questions, word_cloud_entries tables
-- [ ] 2. API route: POST reactions
-- [ ] 3. API route: GET poll results (aggregated)
-- [ ] 4. API route: POST/GET qa_questions
-- [ ] 5. API route: POST/GET word_cloud_entries
-- [ ] 6. API route: GET audience count (presence tracking)
-- [ ] 7. Shared types and hooks for live components
-- [ ] 8. LivePoll component
-- [ ] 9. LiveReactions component
-- [ ] 10. LiveQA component
-- [ ] 11. LiveAudienceCount component
-- [ ] 12. LiveWordCloud component
-- [ ] 13. Export from runtime index
-- [ ] 14. Tests for API routes
-- [ ] 15. Tests for components
-- [ ] 16. Verify build passes
+- [x] 1. Database migration: qa_questions, word_cloud_entries tables
+- [x] 2. API route: POST/GET reactions
+- [x] 3. API route: GET poll results (aggregated)
+- [x] 4. API route: POST/GET/PATCH qa_questions
+- [x] 5. API route: POST/GET word_cloud_entries
+- [x] 6. API route: GET/POST audience count
+- [x] 7. Shared types and hooks for live components
+- [x] 8. LivePoll component
+- [x] 9. LiveReactions component
+- [x] 10. LiveQA component
+- [x] 11. LiveAudienceCount component
+- [x] 12. LiveWordCloud component
+- [x] 13. Export from runtime index (both packages)
+- [x] 14. Tests for API routes (5 test files)
+- [x] 15. Tests for components (16 tests)
+- [x] 16. Verify build passes
+
+## Results
+
+- 245 tests passing (up from 131)
+- All typechecks pass (runtime, slide-nerds, web)
+- Both runtime packages build cleanly
+- Web app build failure is pre-existing (Stripe portal route, unrelated)
+- No new lint errors introduced

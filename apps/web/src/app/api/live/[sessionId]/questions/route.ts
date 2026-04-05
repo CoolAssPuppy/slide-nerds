@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
-import { createHash } from 'crypto'
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>

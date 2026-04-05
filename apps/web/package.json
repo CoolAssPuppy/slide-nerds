@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'Tests run from root vitest config'"
   },
   "dependencies": {
     "@remotion/player": "^4.0.445",

@@ -47,6 +47,92 @@ export type Database = {
           },
         ]
       }
+      custom_domains: {
+        Row: {
+          created_at: string
+          deck_id: string | null
+          domain: string
+          id: string
+          is_verified: boolean
+          ssl_status: string
+          team_id: string | null
+          verification_token: string
+        }
+        Insert: {
+          created_at?: string
+          deck_id?: string | null
+          domain: string
+          id?: string
+          is_verified?: boolean
+          ssl_status?: string
+          team_id?: string | null
+          verification_token?: string
+        }
+        Update: {
+          created_at?: string
+          deck_id?: string | null
+          domain?: string
+          id?: string
+          is_verified?: boolean
+          ssl_status?: string
+          team_id?: string | null
+          verification_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_domains_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_domains_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deck_comments: {
+        Row: {
+          author_email: string
+          author_name: string | null
+          content: string
+          created_at: string
+          deck_id: string
+          id: string
+          slide_index: number | null
+        }
+        Insert: {
+          author_email: string
+          author_name?: string | null
+          content: string
+          created_at?: string
+          deck_id: string
+          id?: string
+          slide_index?: number | null
+        }
+        Update: {
+          author_email?: string
+          author_name?: string | null
+          content?: string
+          created_at?: string
+          deck_id?: string
+          id?: string
+          slide_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deck_comments_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deck_versions: {
         Row: {
           created_at: string
@@ -136,93 +222,6 @@ export type Database = {
           },
         ]
       }
-      custom_domains: {
-        Row: {
-          id: string
-          deck_id: string | null
-          team_id: string | null
-          domain: string
-          verification_token: string
-          is_verified: boolean
-          ssl_status: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          deck_id?: string | null
-          team_id?: string | null
-          domain: string
-          verification_token?: string
-          is_verified?: boolean
-          ssl_status?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          deck_id?: string | null
-          team_id?: string | null
-          domain?: string
-          verification_token?: string
-          is_verified?: boolean
-          ssl_status?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      deck_comments: {
-        Row: {
-          id: string
-          deck_id: string
-          slide_index: number | null
-          author_email: string
-          author_name: string | null
-          content: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          deck_id: string
-          slide_index?: number | null
-          author_email: string
-          author_name?: string | null
-          content: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          deck_id?: string
-          slide_index?: number | null
-          author_email?: string
-          author_name?: string | null
-          content?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      export_counts: {
-        Row: {
-          id: string
-          user_id: string
-          month: string
-          count: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          month: string
-          count?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          month?: string
-          count?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
       decks: {
         Row: {
           bundle_path: string | null
@@ -293,6 +292,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      export_counts: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          month: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          id?: string
+          month: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          month?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       live_sessions: {
         Row: {
@@ -441,6 +464,44 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_questions: {
+        Row: {
+          author_name: string | null
+          content: string
+          created_at: string
+          id: string
+          is_answered: boolean
+          session_id: string
+          slide_index: number
+        }
+        Insert: {
+          author_name?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_answered?: boolean
+          session_id: string
+          slide_index?: number
+        }
+        Update: {
+          author_name?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_answered?: boolean
+          session_id?: string
+          slide_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_questions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reactions: {
         Row: {
           created_at: string
@@ -582,6 +643,50 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invites: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: string
+          status: string
+          team_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: string
+          status?: string
+          team_id: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: string
+          status?: string
+          team_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
@@ -611,42 +716,6 @@ export type Database = {
           },
         ]
       }
-      team_invites: {
-        Row: {
-          id: string
-          team_id: string
-          email: string
-          role: string
-          invited_by: string
-          token: string
-          status: string
-          created_at: string
-          expires_at: string
-        }
-        Insert: {
-          id?: string
-          team_id: string
-          email: string
-          role?: string
-          invited_by: string
-          token?: string
-          status?: string
-          created_at?: string
-          expires_at?: string
-        }
-        Update: {
-          id?: string
-          team_id?: string
-          email?: string
-          role?: string
-          invited_by?: string
-          token?: string
-          status?: string
-          created_at?: string
-          expires_at?: string
-        }
-        Relationships: []
-      }
       teams: {
         Row: {
           created_at: string
@@ -674,12 +743,50 @@ export type Database = {
         }
         Relationships: []
       }
+      word_cloud_entries: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string
+          slide_index: number
+          voter_hash: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id: string
+          slide_index?: number
+          voter_hash: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string
+          slide_index?: number
+          voter_hash?: string
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "word_cloud_entries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_audience_count: {
+        Args: { p_increment: number; p_session_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
