@@ -181,11 +181,6 @@ export const SlideControls: React.FC = () => {
     window.slidenerds?.export({ format: 'pdf' })
   }, [])
 
-  const handleExportPptx = useCallback(() => {
-    setIsOpen(false)
-    window.slidenerds?.export({ format: 'pptx' })
-  }, [])
-
   const items: ReadonlyArray<ControlItem> = [
     { label: 'Help', icon: <HelpIcon />, action: handleHelp },
     { label: 'Speaker Notes', icon: <PresenterIcon />, action: handlePresenter },
@@ -194,8 +189,7 @@ export const SlideControls: React.FC = () => {
   ]
 
   const exportItems: ReadonlyArray<ControlItem> = [
-    { label: 'Export as PDF', icon: <ExportIcon />, action: handleExportPdf },
-    { label: 'Export as PPTX', icon: <ExportIcon />, action: handleExportPptx },
+    { label: 'Export as PDF (alpha)', icon: <ExportIcon />, action: handleExportPdf },
   ]
 
   const slideLabel = `${state.currentSlide + 1} / ${state.totalSlides}`
