@@ -14,7 +14,7 @@ export function TerminalWindow({ children, title = 'Terminal' }: TerminalWindowP
         <span className="w-3 h-3 rounded-full bg-[#28c840]" />
         <span className="ml-2 text-xs text-[var(--muted-foreground)]">{title}</span>
       </div>
-      <div className="p-4 font-mono text-sm text-[#e0e0e0] min-h-[200px] overflow-hidden">
+      <div className="p-4 font-mono text-sm text-[#e0e0e0] min-h-[340px] overflow-hidden">
         {children}
       </div>
     </div>
