@@ -1,4 +1,4 @@
-name: Tests
+name: Package tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  runtime-cli-security:
     runs-on: ubuntu-latest
     strategy:
       matrix:
