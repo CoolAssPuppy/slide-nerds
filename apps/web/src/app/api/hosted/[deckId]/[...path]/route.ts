@@ -62,9 +62,9 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Deck not found or not uploaded' }, { status: 404 })
   }
 
-  // For now, serve all hosted content (access control via the viewer page)
-  // The viewer page handles auth gates before embedding this route in an iframe
-  const storagePath = `${deck.bundle_path.replace(/\.zip$/, '')}/${filePath}`
+  // Access control is handled by the viewer page (auth gates before iframe embed)
+  // bundle_path is now the extracted directory, not a zip file
+  const storagePath = `${deck.bundle_path}/${filePath}`
 
   const { data, error } = await supabaseAdmin.storage
     .from('deck-bundles')
