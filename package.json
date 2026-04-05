@@ -16,7 +16,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --build packages/runtime packages/cli",
-    "publish:npm": "cd packages/slide-nerds && npm publish --access public"
+    "publish:npm": "cd packages/slide-nerds && npm publish --access public",
+    "dev": "cd apps/web && doppler run -- npm run dev",
+    "dev:web": "cd apps/web && doppler run -- npm run dev"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
