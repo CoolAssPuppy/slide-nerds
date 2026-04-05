@@ -1,58 +1,72 @@
 # slidenerds.com (apps/web)
 
-The public website and paid platform. Next.js 15 App Router deployed to Vercel.
+The hosted service for the open-source `@strategicnerds/slide-nerds` npm package. Next.js 15 App Router deployed to Vercel.
 
-## What lives here
+## Running locally
 
-- Marketing site (landing page, pricing, docs)
-- Auth (GitHub login, SSO, email via Supabase Auth)
-- Personal skill library hosting
-- Brand library sync (brand.config.ts synced to cloud, pulled into decks on create)
-- Analytics dashboard (views, unique visitors, slide dwell time, completion rate)
-- Team features (shared skills, brand enforcement, comments, permissions)
-- Custom domain support (CNAME to slidenerds.com for team skill libraries)
-- Billing ($4/user/month for teams via Stripe)
+```bash
+cd apps/web
+doppler run -- npm run dev
+```
 
-## What does NOT live here
+Or with manual env vars:
 
-- The runtime package (packages/runtime)
-- The CLI (packages/cli)
-- The skill library SKILL.md files (skills/)
-- Database schema and migrations (apps/supabase/)
-- iOS app (apps/ios/)
-- Deck hosting (decks deploy to Vercel directly, not through this app)
+```bash
+cp .env.local.example .env.local
+# Fill in Supabase URL and anon key from: cd ../supabase && npx supabase status
+npm run dev
+```
 
 ## Architecture
 
-- `src/app/` -- Next.js App Router pages and API routes
-- `src/components/` -- React components
-- `src/lib/supabase/` -- Supabase client (server, browser, middleware)
-- `src/middleware.ts` -- Auth session refresh on every request
-- Uses `@slidenerds/runtime` as a workspace dependency for shared types (BrandConfig, etc.)
+### Route groups
+
+- `(marketing)/` -- public pages (landing, pricing, docs)
+- `(auth)/` -- login, signup, OAuth callback
+- `(app)/` -- authenticated dashboard (profile, slides, team)
+- `(viewer)/` -- public deck viewer (/d/:slug)
+- `(live)/` -- live presentation (audience + presenter views)
+- `api/` -- API routes for CRUD, export, sharing, live, Stripe
+
+### Key directories
+
+- `src/components/layout/` -- AppHeader, AppSidebar, ThemeToggle
+- `src/components/profile/` -- AvatarUpload, ProfileForm, DangerZone
+- `src/components/slides/` -- DeckGrid, DeckCard, NewDeckDialog, DeckSettingsForm
+- `src/lib/supabase/` -- client.ts, server.ts, middleware.ts, database.types.ts, types.ts
+
+### Design system
+
+- NerdsUI tokens via `@strategicnerds/nerdsui-web`
+- Tailwind CSS with NerdsUI preset
+- CSS custom properties for all colors (dark default, light theme via `.light` class)
+- Primary accent: oklch green (#3ECF8E equivalent)
+- Never hardcode colors, spacing, or typography. Use NerdsUI tokens.
+
+### Database
+
+Schema lives in `apps/supabase/migrations/`. Generate types after schema changes:
+
+```bash
+cd apps/supabase
+npx supabase db reset
+npx supabase gen types typescript --local > ../web/src/lib/supabase/database.types.ts
+```
+
+### Environment variables
+
+```
+NEXT_PUBLIC_SUPABASE_URL       -- Supabase API URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY  -- Supabase publishable key
+STRIPE_SECRET_KEY              -- Stripe secret (for billing, optional)
+STRIPE_WEBHOOK_SECRET          -- Stripe webhook signing secret (optional)
+```
 
 ## Stack
 
-- Next.js 15 (App Router)
-- Supabase (Postgres, Auth, Storage) -- schema lives in apps/supabase/
-- @supabase/ssr for server-side auth
-- Stripe for billing (to be added)
-- Tailwind CSS
-
-## Environment variables
-
-Copy `.env.local.example` to `.env.local` and fill in:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
-Get these from `npx supabase status` after starting local Supabase.
-
-## Commands
-
-```bash
-npm run dev        # Start dev server
-npm run build      # Production build
-npm run typecheck  # TypeScript strict mode
-```
+- Next.js 15 App Router
+- Supabase (Postgres, Auth, Storage, Realtime)
+- @supabase/ssr@0.10 for server-side auth
+- NerdsUI design tokens
+- Tailwind CSS v4
+- Stripe (billing, to be fully integrated)
