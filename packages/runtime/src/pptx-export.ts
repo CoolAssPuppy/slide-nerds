@@ -1,4 +1,4 @@
-import { getSlideElements } from './slide-dom.js'
+import { getSlideElements, getNotesForSlide } from './slide-dom.js'
 
 const SLIDE_W = 13.333
 const SLIDE_H = 7.5
@@ -9,6 +9,7 @@ type PptxSlide = {
   addText: (text: string | Array<{ text: string; options?: Record<string, unknown> }>, options: Record<string, unknown>) => void
   addShape: (shape: string, options: Record<string, unknown>) => void
   addImage: (options: Record<string, unknown>) => void
+  addNotes: (notes: string) => void
   background: Record<string, unknown>
 }
 
@@ -309,6 +310,11 @@ export const exportNativePptx = async (
 
     const inner = slideEl.firstElementChild || slideEl
     walkElement(pptxSlide, inner)
+
+    const notes = getNotesForSlide(i)
+    if (notes.length > 0) {
+      pptxSlide.addNotes(notes.join('\n'))
+    }
 
     slideEl.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
       step.classList.remove('step-visible')
