@@ -14,13 +14,13 @@ export function AppFooter() {
 
   return (
     <footer className="flex items-center justify-between h-10 px-6 border-t border-[var(--border)] bg-[var(--card)] shrink-0">
-      <div className="w-24" />
+      <div style={{ minWidth: '180px' }} />
 
       <p className="text-xs text-[var(--muted-foreground)]">
         &copy; 2026 Strategic Nerds, Inc.
       </p>
 
-      <div className="w-24 flex justify-end">
+      <div className="flex justify-end" style={{ minWidth: '180px' }}>
         {mounted && (
           <div
             className="flex flex-row-reverse items-center overflow-hidden rounded-full"
@@ -53,8 +53,9 @@ export function AppFooter() {
                     width: show ? '14px' : '0px',
                     height: '14px',
                     opacity: show ? 1 : 0,
+                    border: '1px solid rgba(128,128,128,0.3)',
                     boxShadow: isActive
-                      ? '0 0 0 2px var(--background), 0 0 0 3px var(--foreground)'
+                      ? '0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground)'
                       : 'none',
                     transition: 'width 300ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease',
                   }}

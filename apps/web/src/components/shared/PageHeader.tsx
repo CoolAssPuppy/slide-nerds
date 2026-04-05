@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Presentation } from 'lucide-react'
 import { NewDeckDialog } from '@/components/slides/NewDeckDialog'
 
 type PageHeaderProps = {
@@ -27,8 +28,9 @@ export function PageHeader({ title, description, showNewDeck, actions }: PageHea
           <>
             <button
               onClick={() => setShowDialog(true)}
-              className="px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
             >
+              <Presentation size={16} />
               New deck
             </button>
             {showDialog && <NewDeckDialog onClose={() => setShowDialog(false)} />}

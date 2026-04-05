@@ -1,46 +1,25 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { Presentation, User, Users, LogOut } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
-  { href: '/slides', label: 'Slides', icon: SlidesIcon },
-  { href: '/profile', label: 'Profile', icon: ProfileIcon },
-  { href: '/team', label: 'Team', icon: TeamIcon },
+  { href: '/slides', label: 'Slides', icon: Presentation },
+  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/team', label: 'Team', icon: Users },
 ] as const
-
-function SlidesIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2" />
-      <line x1="8" y1="21" x2="16" y2="21" />
-      <line x1="12" y1="17" x2="12" y2="21" />
-    </svg>
-  )
-}
-
-function ProfileIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  )
-}
-
-function TeamIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
-}
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   return (
     <aside
@@ -66,12 +45,22 @@ export function AppSidebar() {
                   : 'text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]'
               }`}
             >
-              <item.icon className="shrink-0" />
+              <item.icon size={18} className="shrink-0" />
               {item.label}
             </Link>
           )
         })}
       </nav>
+
+      <div className="p-2 border-t border-[var(--border)]">
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 px-3 py-2 rounded-[var(--n-radius-md)] text-sm font-medium text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors w-full"
+        >
+          <LogOut size={18} className="shrink-0" />
+          Sign out
+        </button>
+      </div>
     </aside>
   )
 }
