@@ -1,59 +1,84 @@
--- Test account for local development
--- Email: test@strategicnerds.com / Password: password123
+-- Seed data for local development
+-- Run: cd apps && npx supabase db reset
 
--- Create the auth user (Supabase local dev uses this format)
+-- Create test user
+-- Email: test@strategicnerds.com / Password: password123
 insert into auth.users (
   id,
   instance_id,
+  aud,
+  role,
   email,
   encrypted_password,
   email_confirmed_at,
+  raw_app_meta_data,
   raw_user_meta_data,
-  role,
-  aud,
   created_at,
-  updated_at
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  recovery_token
 ) values (
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  '00000000-0000-0000-0000-000000000001',
   '00000000-0000-0000-0000-000000000000',
+  'authenticated',
+  'authenticated',
   'test@strategicnerds.com',
   crypt('password123', gen_salt('bf')),
   now(),
-  '{"full_name": "Test User"}'::jsonb,
-  'authenticated',
-  'authenticated',
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Test User"}',
   now(),
-  now()
-) on conflict (id) do nothing;
+  now(),
+  '',
+  '',
+  '',
+  ''
+);
 
--- Create identity for the user
 insert into auth.identities (
   id,
   user_id,
-  identity_data,
-  provider,
   provider_id,
+  provider,
+  identity_data,
   last_sign_in_at,
   created_at,
   updated_at
 ) values (
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  '{"sub": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "email": "test@strategicnerds.com"}'::jsonb,
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000001',
   'email',
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'test@strategicnerds.com'),
   now(),
   now(),
   now()
-) on conflict do nothing;
+);
 
--- The profile is auto-created by the handle_new_user trigger,
--- but since we're inserting directly into auth.users, trigger it manually
-insert into public.profiles (id, display_name, avatar_url)
-values ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Test User', null)
+-- Update the profile created by the trigger
+update public.profiles
+set display_name = 'Test User'
+where id = '00000000-0000-0000-0000-000000000001';
+
+-- If the trigger didn't fire, create the profile
+insert into public.profiles (id, display_name)
+values ('00000000-0000-0000-0000-000000000001', 'Test User')
 on conflict (id) do nothing;
 
 -- Create a free subscription
 insert into public.subscriptions (user_id, plan, status)
-values ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'free', 'active')
-on conflict do nothing;
+values ('00000000-0000-0000-0000-000000000001', 'free', 'active');
+
+-- Create a sample deck
+insert into public.decks (id, owner_id, name, slug, is_public, slide_count, source_type)
+values (
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000001',
+  'Sample Sales Deck',
+  'sample-sales-deck',
+  false,
+  0,
+  'push'
+);
