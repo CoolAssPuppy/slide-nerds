@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
         path: false,
         stream: false,
       }
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'node:fs': false,
+        'node:path': false,
+        'node:stream': false,
+        'node:url': false,
+        'node:buffer': false,
+      }
     }
     return config
   },
