@@ -19,53 +19,94 @@ declare global {
 
 const SLIDE_WIDTH = 1920
 const SLIDE_HEIGHT = 1080
+const PPTX_WIDTH_IN = 13.333
+const PPTX_HEIGHT_IN = 7.5
 
 const yieldToMain = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0))
 
-const preRenderFilteredImage = (
+const resolveFilteredImgToPng = async (
   origImg: HTMLImageElement,
   cloneImg: HTMLImageElement,
 ): Promise<void> => {
-  return new Promise((resolve) => {
-    const computedFilter = window.getComputedStyle(origImg).filter
-    if (!computedFilter || computedFilter === 'none') {
-      resolve()
-      return
-    }
+  const computedFilter = window.getComputedStyle(origImg).filter
+  if (!computedFilter || computedFilter === 'none') return
 
-    const width = origImg.naturalWidth || origImg.width || 100
-    const height = origImg.naturalHeight || origImg.height || 100
+  const isSvg = origImg.src.endsWith('.svg') || origImg.src.includes('.svg?')
+  const displayWidth = origImg.getBoundingClientRect().width || origImg.width || 100
+  const displayHeight = origImg.getBoundingClientRect().height || origImg.height || 100
+
+  if (isSvg) {
+    try {
+      const resp = await fetch(origImg.src)
+      const svgText = await resp.text()
+
+      const wrapper = document.createElement('div')
+      wrapper.style.cssText = `position:fixed;left:-99999px;top:0;width:${displayWidth * 2}px;height:${displayHeight * 2}px;overflow:hidden;`
+      const innerImg = document.createElement('img')
+      innerImg.style.cssText = `width:${displayWidth * 2}px;height:${displayHeight * 2}px;filter:${computedFilter};`
+      const svgDataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgText)
+      innerImg.src = svgDataUri
+      wrapper.appendChild(innerImg)
+      document.body.appendChild(wrapper)
+
+      await new Promise<void>((r) => {
+        if (innerImg.complete) r()
+        else innerImg.onload = () => r()
+      })
+      await yieldToMain()
+
+      const canvas = document.createElement('canvas')
+      canvas.width = displayWidth * 2
+      canvas.height = displayHeight * 2
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.filter = computedFilter
+        ctx.drawImage(innerImg, 0, 0, displayWidth * 2, displayHeight * 2)
+        cloneImg.src = canvas.toDataURL('image/png')
+        cloneImg.style.setProperty('filter', 'none', 'important')
+      }
+
+      document.body.removeChild(wrapper)
+    } catch {
+      // Fetch failed, leave as-is
+    }
+  } else {
     const canvas = document.createElement('canvas')
+    const width = origImg.naturalWidth || displayWidth
+    const height = origImg.naturalHeight || displayHeight
     canvas.width = width
     canvas.height = height
     const ctx = canvas.getContext('2d')
-    if (!ctx) { resolve(); return }
+    if (!ctx) return
 
     const tempImg = new Image()
     tempImg.crossOrigin = 'anonymous'
-    tempImg.onload = () => {
-      ctx.filter = computedFilter
-      ctx.drawImage(tempImg, 0, 0, width, height)
-      try {
-        cloneImg.src = canvas.toDataURL('image/png')
-      } catch {
-        // CORS might prevent toDataURL
+    await new Promise<void>((resolve) => {
+      tempImg.onload = () => {
+        ctx.filter = computedFilter
+        ctx.drawImage(tempImg, 0, 0, width, height)
+        try {
+          cloneImg.src = canvas.toDataURL('image/png')
+          cloneImg.style.setProperty('filter', 'none', 'important')
+        } catch {
+          // tainted canvas
+        }
+        resolve()
       }
-      cloneImg.style.setProperty('filter', 'none', 'important')
-      resolve()
-    }
-    tempImg.onerror = () => resolve()
-    tempImg.src = origImg.src
-  })
+      tempImg.onerror = () => resolve()
+      tempImg.src = origImg.src
+    })
+  }
 }
 
-const resolveAllSvgColors = (origSvg: SVGSVGElement, cloneSvg: SVGSVGElement): void => {
+const resolveInlineSvg = (origSvg: SVGSVGElement, cloneSvg: SVGSVGElement): void => {
   const svgStyle = window.getComputedStyle(origSvg)
-  cloneSvg.setAttribute('fill', svgStyle.fill || svgStyle.color)
-  cloneSvg.setAttribute('color', svgStyle.color)
-  cloneSvg.removeAttribute('class')
-  cloneSvg.removeAttribute('style')
+  const rootColor = svgStyle.color
+  const rootFill = svgStyle.fill
+
+  cloneSvg.setAttribute('fill', rootFill || rootColor)
+  cloneSvg.setAttribute('color', rootColor)
 
   const originalNodes = Array.from(origSvg.querySelectorAll('*'))
   const clonedNodes = Array.from(cloneSvg.querySelectorAll('*'))
@@ -75,29 +116,30 @@ const resolveAllSvgColors = (origSvg: SVGSVGElement, cloneSvg: SVGSVGElement): v
     if (!originalNode) return
 
     const cs = window.getComputedStyle(originalNode)
-
     clonedNode.setAttribute('fill', cs.fill)
     clonedNode.setAttribute('stroke', cs.stroke)
     clonedNode.setAttribute('fill-opacity', cs.fillOpacity)
     clonedNode.setAttribute('stroke-opacity', cs.strokeOpacity)
     clonedNode.setAttribute('stroke-width', cs.strokeWidth)
     clonedNode.setAttribute('opacity', cs.opacity)
-
     clonedNode.removeAttribute('class')
     clonedNode.removeAttribute('style')
   })
+
+  cloneSvg.removeAttribute('class')
+  cloneSvg.removeAttribute('style')
 }
 
-const rasterizeSvg = (
+const rasterizeInlineSvg = (
   origSvg: SVGSVGElement,
   cloneSvg: SVGSVGElement,
 ): Promise<void> => {
   return new Promise((resolve) => {
     const width = origSvg.getBoundingClientRect().width || 24
     const height = origSvg.getBoundingClientRect().height || 24
-    const computedStyle = window.getComputedStyle(origSvg)
+    const display = window.getComputedStyle(origSvg).display
 
-    resolveAllSvgColors(origSvg, cloneSvg)
+    resolveInlineSvg(origSvg, cloneSvg)
 
     cloneSvg.setAttribute('width', String(Math.ceil(width)))
     cloneSvg.setAttribute('height', String(Math.ceil(height)))
@@ -107,27 +149,29 @@ const rasterizeSvg = (
     cloneSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 
     const svgData = new XMLSerializer().serializeToString(cloneSvg)
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-    const url = URL.createObjectURL(svgBlob)
+    const dataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData)
 
-    const img = document.createElement('img')
-    img.width = Math.ceil(width)
-    img.height = Math.ceil(height)
-    img.style.width = `${width}px`
-    img.style.height = `${height}px`
-    img.style.display = computedStyle.display
-    img.style.verticalAlign = computedStyle.verticalAlign
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.ceil(width) * 2
+    canvas.height = Math.ceil(height) * 2
+    const ctx = canvas.getContext('2d')
+    if (!ctx) { resolve(); return }
 
+    const img = new Image()
     img.onload = () => {
-      cloneSvg.parentNode?.replaceChild(img, cloneSvg)
-      URL.revokeObjectURL(url)
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      const pngImg = document.createElement('img')
+      pngImg.width = Math.ceil(width)
+      pngImg.height = Math.ceil(height)
+      pngImg.style.width = `${width}px`
+      pngImg.style.height = `${height}px`
+      pngImg.style.display = display
+      pngImg.src = canvas.toDataURL('image/png')
+      cloneSvg.parentNode?.replaceChild(pngImg, cloneSvg)
       resolve()
     }
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      resolve()
-    }
-    img.src = url
+    img.onerror = () => resolve()
+    img.src = dataUri
   })
 }
 
@@ -153,6 +197,20 @@ const captureSlides = async (
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total)
     await yieldToMain()
+
+    const originalSlide = slides[i] as HTMLElement
+    const wasHidden = !originalSlide.classList.contains('active')
+
+    if (wasHidden) {
+      originalSlide.style.setProperty('display', 'flex', 'important')
+      originalSlide.style.setProperty('position', 'fixed', 'important')
+      originalSlide.style.setProperty('left', '-99999px', 'important')
+      originalSlide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
+        ;(step as HTMLElement).style.setProperty('visibility', 'visible', 'important')
+        ;(step as HTMLElement).style.setProperty('opacity', '1', 'important')
+      })
+      await yieldToMain()
+    }
 
     const clone = slides[i].cloneNode(true) as HTMLElement
     clone.style.position = 'relative'
@@ -180,51 +238,32 @@ const captureSlides = async (
       htmlEl.style.setProperty('animation', 'none', 'important')
     })
 
-    const originalSlide = slides[i] as HTMLElement
-    const wasHidden = !originalSlide.classList.contains('active')
-    if (wasHidden) {
-      originalSlide.style.setProperty('display', 'flex', 'important')
-      originalSlide.style.setProperty('position', 'fixed', 'important')
-      originalSlide.style.setProperty('left', '-99999px', 'important')
-      originalSlide.style.setProperty('visibility', 'hidden', 'important')
-      originalSlide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-        (step as HTMLElement).style.setProperty('visibility', 'visible', 'important')
-        ;(step as HTMLElement).style.setProperty('opacity', '1', 'important')
-      })
-    }
-    await yieldToMain()
-
     offscreen.appendChild(clone)
     await yieldToMain()
 
     const originalImgs = Array.from(originalSlide.querySelectorAll('img'))
     const clonedImgs = Array.from(clone.querySelectorAll('img'))
-    const imgPromises: Promise<void>[] = []
-    originalImgs.forEach((origImg, imgIdx) => {
+    for (let imgIdx = 0; imgIdx < originalImgs.length; imgIdx++) {
       const cloneImg = clonedImgs[imgIdx] as HTMLImageElement | undefined
-      if (!cloneImg) return
-      imgPromises.push(preRenderFilteredImage(origImg, cloneImg))
-    })
-    await Promise.all(imgPromises)
+      if (!cloneImg) continue
+      await resolveFilteredImgToPng(originalImgs[imgIdx], cloneImg)
+    }
 
     const originalSvgs = Array.from(originalSlide.querySelectorAll('svg'))
     const clonedSvgs = Array.from(clone.querySelectorAll('svg'))
-    const svgPromises: Promise<void>[] = []
-    originalSvgs.forEach((origSvg, svgIdx) => {
+    for (let svgIdx = 0; svgIdx < originalSvgs.length; svgIdx++) {
       const cloneSvg = clonedSvgs[svgIdx]
-      if (!cloneSvg) return
-      svgPromises.push(rasterizeSvg(origSvg, cloneSvg))
-    })
-    await Promise.all(svgPromises)
+      if (!cloneSvg) continue
+      await rasterizeInlineSvg(originalSvgs[svgIdx], cloneSvg)
+    }
     await yieldToMain()
 
     if (wasHidden) {
       originalSlide.style.removeProperty('display')
       originalSlide.style.removeProperty('position')
       originalSlide.style.removeProperty('left')
-      originalSlide.style.removeProperty('visibility')
       originalSlide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-        (step as HTMLElement).style.removeProperty('visibility')
+        ;(step as HTMLElement).style.removeProperty('visibility')
         ;(step as HTMLElement).style.removeProperty('opacity')
       })
     }
@@ -298,8 +337,6 @@ const exportPdf = async (): Promise<void> => {
     const images = await captureSlides(progress.update)
     if (images.length === 0) return
 
-    progress.update(images.length, images.length)
-
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'px',
@@ -319,11 +356,9 @@ const exportPdf = async (): Promise<void> => {
 }
 
 const exportPptx = async (): Promise<void> => {
-  const PPTX_WIDTH_IN = 13.333
-  const PPTX_HEIGHT_IN = 7.5
   const progress = showProgress()
   try {
-    const PptxGenJS = (await import('pptxgenjs')).default
+    const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
     const images = await captureSlides(progress.update)
     if (images.length === 0) return
 
