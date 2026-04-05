@@ -39,8 +39,8 @@ export default async function HomePage() {
       <header className="flex items-center justify-between h-14 px-6 border-b border-[var(--border)]">
         <span className="text-lg font-bold text-[var(--foreground)]">SlideNerds</span>
         <nav className="flex items-center gap-4">
-          <Link href="/pricing" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-            Pricing
+          <Link href="/docs" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+            Docs
           </Link>
           <Link href="/login" className="text-sm font-medium px-4 py-1.5 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)]">
             Sign in
@@ -74,7 +74,7 @@ export default async function HomePage() {
               npm install
             </a>
           </div>
-          <div className="mt-16">
+          <div className="mt-16 w-full max-w-2xl">
             <CopyCodeBlock code={INSTALL_CODE} />
           </div>
         </section>
@@ -101,7 +101,9 @@ export default async function HomePage() {
                 Host your slides on our service, share them with colleagues, customers, and partners, and get analytics on what people read.
               </p>
               <div className="mt-6 flex justify-center">
-                <CopyCodeBlock code={SHARE_CODE} />
+                <div className="w-full max-w-2xl">
+                  <CopyCodeBlock code={SHARE_CODE} />
+                </div>
               </div>
             </div>
             <div className="max-w-4xl mx-auto">

@@ -4,13 +4,10 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between h-14 px-6 border-b border-[var(--border)]">
-        <Link href="/" className="text-lg font-bold text-[var(--primary)]">
+        <Link href="/" className="text-lg font-bold text-[var(--foreground)]">
           SlideNerds
         </Link>
         <nav className="flex items-center gap-4">
-          <Link href="/pricing" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-            Pricing
-          </Link>
           <Link href="/docs" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
             Docs
           </Link>
