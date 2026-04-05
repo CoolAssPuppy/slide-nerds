@@ -136,8 +136,34 @@ export type Database = {
           },
         ]
       }
+      export_counts: {
+        Row: {
+          id: string
+          user_id: string
+          month: string
+          count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          month: string
+          count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          month?: string
+          count?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       decks: {
         Row: {
+          bundle_path: string | null
+          bundle_size_bytes: number | null
           created_at: string
           deployed_url: string | null
           description: string | null
@@ -148,6 +174,7 @@ export type Database = {
           slide_count: number | null
           slug: string | null
           source_type: string | null
+          source_url: string | null
           team_id: string | null
           thumbnail_url: string | null
           updated_at: string
@@ -155,6 +182,8 @@ export type Database = {
           version: number | null
         }
         Insert: {
+          bundle_path?: string | null
+          bundle_size_bytes?: number | null
           created_at?: string
           deployed_url?: string | null
           description?: string | null
@@ -165,6 +194,7 @@ export type Database = {
           slide_count?: number | null
           slug?: string | null
           source_type?: string | null
+          source_url?: string | null
           team_id?: string | null
           thumbnail_url?: string | null
           updated_at?: string
@@ -172,6 +202,8 @@ export type Database = {
           version?: number | null
         }
         Update: {
+          bundle_path?: string | null
+          bundle_size_bytes?: number | null
           created_at?: string
           deployed_url?: string | null
           description?: string | null
@@ -182,6 +214,7 @@ export type Database = {
           slide_count?: number | null
           slug?: string | null
           source_type?: string | null
+          source_url?: string | null
           team_id?: string | null
           thumbnail_url?: string | null
           updated_at?: string
