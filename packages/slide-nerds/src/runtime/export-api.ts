@@ -264,7 +264,7 @@ const exportPptx = async (): Promise<void> => {
   const PPTX_HEIGHT_IN = 7.5
   const progress = showProgress()
   try {
-    const PptxGenJS = (await import('pptxgenjs')).default
+    const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
     const images = await captureSlides(progress.update)
     if (images.length === 0) return
 
