@@ -266,7 +266,7 @@ const getSlideBackground = (slideEl: Element): string => {
 export const exportNativePptx = async (
   onProgress?: (current: number, total: number) => void,
 ): Promise<void> => {
-  const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
+  const PptxGenJS = (await import('pptxgenjs')).default
   const slides = getSlideElements()
   const total = slides.length
 
