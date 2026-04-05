@@ -23,6 +23,43 @@ const SLIDE_HEIGHT = 1080
 const yieldToMain = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0))
 
+const preRenderFilteredImage = (
+  origImg: HTMLImageElement,
+  cloneImg: HTMLImageElement,
+): Promise<void> => {
+  return new Promise((resolve) => {
+    const computedFilter = window.getComputedStyle(origImg).filter
+    if (!computedFilter || computedFilter === 'none') {
+      resolve()
+      return
+    }
+
+    const width = origImg.naturalWidth || origImg.width || 100
+    const height = origImg.naturalHeight || origImg.height || 100
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) { resolve(); return }
+
+    const tempImg = new Image()
+    tempImg.crossOrigin = 'anonymous'
+    tempImg.onload = () => {
+      ctx.filter = computedFilter
+      ctx.drawImage(tempImg, 0, 0, width, height)
+      try {
+        cloneImg.src = canvas.toDataURL('image/png')
+      } catch {
+        // CORS might prevent toDataURL
+      }
+      cloneImg.style.setProperty('filter', 'none', 'important')
+      resolve()
+    }
+    tempImg.onerror = () => resolve()
+    tempImg.src = origImg.src
+  })
+}
+
 const resolveAllSvgColors = (origSvg: SVGSVGElement, cloneSvg: SVGSVGElement): void => {
   const svgStyle = window.getComputedStyle(origSvg)
   cloneSvg.setAttribute('fill', svgStyle.fill || svgStyle.color)
@@ -157,29 +194,28 @@ const captureSlides = async (
     }
     await yieldToMain()
 
-    const originalImgs = originalSlide.querySelectorAll('img')
-    const clonedImgs = clone.querySelectorAll('img')
-    originalImgs.forEach((origImg, imgIdx) => {
-      const cloneImg = clonedImgs[imgIdx] as HTMLElement | undefined
-      if (!cloneImg) return
-      const computedFilter = window.getComputedStyle(origImg).filter
-      if (computedFilter && computedFilter !== 'none') {
-        cloneImg.style.setProperty('filter', computedFilter, 'important')
-      }
-    })
-
     offscreen.appendChild(clone)
     await yieldToMain()
 
-    const originalSvgs = originalSlide.querySelectorAll('svg')
+    const originalImgs = Array.from(originalSlide.querySelectorAll('img'))
+    const clonedImgs = Array.from(clone.querySelectorAll('img'))
+    const imgPromises: Promise<void>[] = []
+    originalImgs.forEach((origImg, imgIdx) => {
+      const cloneImg = clonedImgs[imgIdx] as HTMLImageElement | undefined
+      if (!cloneImg) return
+      imgPromises.push(preRenderFilteredImage(origImg, cloneImg))
+    })
+    await Promise.all(imgPromises)
+
+    const originalSvgs = Array.from(originalSlide.querySelectorAll('svg'))
     const clonedSvgs = Array.from(clone.querySelectorAll('svg'))
-    const rasterPromises: Promise<void>[] = []
+    const svgPromises: Promise<void>[] = []
     originalSvgs.forEach((origSvg, svgIdx) => {
       const cloneSvg = clonedSvgs[svgIdx]
       if (!cloneSvg) return
-      rasterPromises.push(rasterizeSvg(origSvg, cloneSvg))
+      svgPromises.push(rasterizeSvg(origSvg, cloneSvg))
     })
-    await Promise.all(rasterPromises)
+    await Promise.all(svgPromises)
     await yieldToMain()
 
     if (wasHidden) {
