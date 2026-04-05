@@ -13,6 +13,10 @@ cd my-talk
 npm install
 npm run dev`
 
+const SHARE_CODE = `slidenerds login
+slidenerds link --name my-talk
+slidenerds push`
+
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -96,9 +100,9 @@ export default async function HomePage() {
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
                 Host your slides on our service, share them with colleagues, customers, and partners, and get analytics on what people read.
               </p>
-              <pre className="mt-6 inline-block text-left text-sm text-[var(--muted-foreground)] bg-[var(--background)] border border-[var(--border)] rounded-[var(--n-radius-lg)] px-6 py-4">
-                <code>{`slidenerds login\nslidenerds link --name my-talk\nslidenerds push`}</code>
-              </pre>
+              <div className="mt-6 flex justify-center">
+                <CopyCodeBlock code={SHARE_CODE} />
+              </div>
             </div>
             <div className="max-w-4xl mx-auto">
               <SlidePreviewPlayer variant="analytics" />
