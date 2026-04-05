@@ -7,6 +7,7 @@ import { registerAnalyticsCommand } from './commands/analytics.js'
 import { registerLoginCommand } from './commands/login.js'
 import { registerLinkCommand } from './commands/link.js'
 import { registerPushCommand } from './commands/push.js'
+import { registerBrandCommand } from './commands/brand.js'
 
 const program = new Command()
 
@@ -18,5 +19,6 @@ registerAnalyticsCommand(program)
 registerLoginCommand(program)
 registerLinkCommand(program)
 registerPushCommand(program)
+registerBrandCommand(program)
 
 program.parse()
