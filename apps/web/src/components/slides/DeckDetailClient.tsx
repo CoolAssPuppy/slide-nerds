@@ -68,7 +68,7 @@ export function DeckDetailClient({ deck }: DeckDetailClientProps) {
             >
               <Download className="w-4 h-4" />
             </button>
-            <ExportDropdown deck={deck} isOpen={showExport} onClose={() => setShowExport(false)} />
+            <ExportDropdown isOpen={showExport} onClose={() => setShowExport(false)} />
           </div>
 
           <button

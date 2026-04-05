@@ -40,20 +40,22 @@ function DeckCard({ deck }: { deck: Deck }) {
   return (
     <div className="group relative rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden hover:border-[var(--primary)] transition-colors">
       <Link href={`/slides/${deck.id}`} className="block">
-        <div className="aspect-video bg-[var(--muted)] flex items-center justify-center overflow-hidden">
+        <div className="aspect-video bg-[var(--muted)] relative overflow-hidden">
           {deck.thumbnail_url ? (
             <img src={deck.thumbnail_url} alt="" className="w-full h-full object-cover" />
           ) : deck.bundle_path ? (
             <iframe
               src={`/api/hosted/${deck.id}/index.html`}
               title={deck.name}
-              className="w-full h-full border-none pointer-events-none"
-              style={{ transform: 'scale(0.25)', transformOrigin: 'top left', width: '400%', height: '400%' }}
+              className="absolute top-0 left-0 border-none pointer-events-none"
+              style={{ width: '1920px', height: '1080px', transform: 'scale(var(--preview-scale))', transformOrigin: 'top left', '--preview-scale': '0.22' } as React.CSSProperties}
               sandbox="allow-scripts allow-same-origin"
               tabIndex={-1}
             />
           ) : (
-            <span className="text-[var(--muted-foreground)] text-sm">No preview</span>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[var(--muted-foreground)] text-sm">No preview</span>
+            </div>
           )}
         </div>
         <div className="p-3">
@@ -85,12 +87,6 @@ function DeckCard({ deck }: { deck: Deck }) {
         </button>
         {showMenu && (
           <div className="absolute right-0 top-8 w-36 rounded-[var(--n-radius-md)] border border-[var(--border)] bg-[var(--popover)] shadow-lg py-1 z-10">
-            <Link
-              href={`/slides/${deck.id}/settings`}
-              className="block px-3 py-1.5 text-sm hover:bg-[var(--accent)] transition-colors"
-            >
-              Settings
-            </Link>
             <button
               onClick={handleDelete}
               className="w-full text-left px-3 py-1.5 text-sm text-[var(--destructive)] hover:bg-[var(--accent)] transition-colors"

@@ -43,13 +43,6 @@ const FullscreenIcon = () => (
   </svg>
 )
 
-const ExportIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-)
 
 const SHORTCUTS = [
   { key: 'Space / \u2192', label: 'Next step or slide' },
@@ -176,20 +169,11 @@ export const SlideControls: React.FC = () => {
     }
   }, [])
 
-  const handleExportPdf = useCallback(() => {
-    setIsOpen(false)
-    window.slidenerds?.export({ format: 'pdf' })
-  }, [])
-
   const items: ReadonlyArray<ControlItem> = [
     { label: 'Help', icon: <HelpIcon />, action: handleHelp },
     { label: 'Speaker Notes', icon: <PresenterIcon />, action: handlePresenter },
     { label: 'Light Table', icon: <GridIcon />, action: handleLightTable },
     { label: 'Fullscreen', icon: <FullscreenIcon />, action: handleFullscreen },
-  ]
-
-  const exportItems: ReadonlyArray<ControlItem> = [
-    { label: 'Export as PDF (alpha)', icon: <ExportIcon />, action: handleExportPdf },
   ]
 
   const slideLabel = `${state.currentSlide + 1} / ${state.totalSlides}`
@@ -237,15 +221,8 @@ export const SlideControls: React.FC = () => {
             >
               Slide {slideLabel}
             </div>
-            {[...items, ...exportItems].map((item, i) => (
+            {items.map((item) => (
               <React.Fragment key={item.label}>
-                {i === items.length && (
-                  <div style={{
-                    height: '1px',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    margin: '2px 8px',
-                  }} />
-                )}
                 <button
                   onClick={item.action}
                   style={{
