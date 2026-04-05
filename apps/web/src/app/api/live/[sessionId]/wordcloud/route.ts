@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
-import { createHash } from 'crypto'
+import { getVoterHash } from '@/lib/ip-hash'
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>
@@ -22,13 +21,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: 'Word must be 50 characters or fewer' }, { status: 400 })
   }
 
-  const headersList = await headers()
-  const forwarded = headersList.get('x-forwarded-for')
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
-  const voterHash = createHash('sha256')
-    .update(ip + sessionId + (slide_index ?? 0))
-    .digest('hex')
-    .slice(0, 32)
+  const voterHash = getVoterHash(request, sessionId, String(slide_index ?? 0))
 
   const { error } = await supabase
     .from('word_cloud_entries')

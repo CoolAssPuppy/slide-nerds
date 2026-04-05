@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
-import { createHash } from 'crypto'
+import { getVoterHash } from '@/lib/ip-hash'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -13,10 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'poll_id and option_index required' }, { status: 400 })
   }
 
-  const headersList = await headers()
-  const forwarded = headersList.get('x-forwarded-for')
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
-  const voterHash = createHash('sha256').update(ip + poll_id).digest('hex').slice(0, 32)
+  const voterHash = getVoterHash(request, poll_id)
 
   const { error } = await supabase
     .from('poll_votes')
