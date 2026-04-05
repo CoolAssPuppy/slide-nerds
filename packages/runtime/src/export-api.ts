@@ -144,6 +144,19 @@ const captureSlides = async (
     })
 
     const originalSlide = slides[i] as HTMLElement
+    const wasHidden = !originalSlide.classList.contains('active')
+    if (wasHidden) {
+      originalSlide.style.setProperty('display', 'flex', 'important')
+      originalSlide.style.setProperty('position', 'fixed', 'important')
+      originalSlide.style.setProperty('left', '-99999px', 'important')
+      originalSlide.style.setProperty('visibility', 'hidden', 'important')
+      originalSlide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
+        (step as HTMLElement).style.setProperty('visibility', 'visible', 'important')
+        ;(step as HTMLElement).style.setProperty('opacity', '1', 'important')
+      })
+    }
+    await yieldToMain()
+
     const originalImgs = originalSlide.querySelectorAll('img')
     const clonedImgs = clone.querySelectorAll('img')
     originalImgs.forEach((origImg, imgIdx) => {
@@ -168,6 +181,17 @@ const captureSlides = async (
     })
     await Promise.all(rasterPromises)
     await yieldToMain()
+
+    if (wasHidden) {
+      originalSlide.style.removeProperty('display')
+      originalSlide.style.removeProperty('position')
+      originalSlide.style.removeProperty('left')
+      originalSlide.style.removeProperty('visibility')
+      originalSlide.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
+        (step as HTMLElement).style.removeProperty('visibility')
+        ;(step as HTMLElement).style.removeProperty('opacity')
+      })
+    }
 
     clone.querySelectorAll('[data-notes]').forEach((note) => {
       ;(note as HTMLElement).style.display = 'none'
