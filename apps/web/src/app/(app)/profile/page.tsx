@@ -45,7 +45,9 @@ export default async function ProfilePage() {
             Details
           </h2>
           <ProfileForm
-            displayName={profile?.display_name ?? ''}
+            firstName={profile?.first_name ?? ''}
+            lastName={profile?.last_name ?? ''}
+            companyName={profile?.company_name ?? ''}
             email={user!.email ?? ''}
             plan={subscription?.plan ?? 'free'}
           />

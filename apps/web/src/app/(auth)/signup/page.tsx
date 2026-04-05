@@ -6,9 +6,11 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [password, setPassword] = useState('')
-  const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -19,11 +21,18 @@ export default function SignupPage() {
     setError(null)
     setLoading(true)
 
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: displayName },
+        data: {
+          full_name: fullName,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          company_name: companyName.trim() || undefined,
+        },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
@@ -36,6 +45,8 @@ export default function SignupPage() {
     }
   }
 
+  const inputClass = 'w-full h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]'
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
@@ -47,16 +58,29 @@ export default function SignupPage() {
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-            <input
-              id="name"
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              required
-              className="w-full h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium mb-1">First name</label>
+              <input
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium mb-1">Last name</label>
+              <input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </div>
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
@@ -66,7 +90,19 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="company" className="block text-sm font-medium mb-1">
+              Company <span className="text-[var(--muted-foreground)] font-normal">(optional)</span>
+            </label>
+            <input
+              id="company"
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              className={inputClass}
             />
           </div>
           <div>
@@ -78,7 +114,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className={inputClass}
             />
           </div>
 

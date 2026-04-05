@@ -28,7 +28,7 @@ insert into auth.users (
   crypt('password123', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Test User"}',
+  '{"full_name":"Test User","first_name":"Test","last_name":"User","company_name":"Strategic Nerds"}',
   now(),
   now(),
   '',
