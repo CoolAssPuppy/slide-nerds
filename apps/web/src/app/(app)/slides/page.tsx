@@ -3,28 +3,65 @@ import { DeckGrid } from '@/components/slides/DeckGrid'
 import { PageHeader } from '@/components/shared/PageHeader'
 import type { Deck } from '@/lib/supabase/types'
 
-export const metadata = { title: 'My slides' }
+export const metadata = { title: 'Slides' }
 
 export default async function SlidesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data } = await supabase
+  // Own decks
+  const { data: ownData } = await supabase
     .from('decks')
     .select('*')
     .eq('owner_id', user!.id)
     .order('updated_at', { ascending: false })
+  const ownDecks = (ownData ?? []) as Deck[]
 
-  const decks = (data ?? []) as Deck[]
+  // Shared with me (public decks from share links where I'm an allowed email)
+  // For now, show decks that are public and not owned by me
+  const { data: sharedData } = await supabase
+    .from('decks')
+    .select('*')
+    .eq('is_public', true)
+    .neq('owner_id', user!.id)
+    .order('updated_at', { ascending: false })
+    .limit(20)
+  const sharedDecks = (sharedData ?? []) as Deck[]
 
   return (
     <div>
       <PageHeader
-        title="My slides"
+        title="Slides"
         description="All your presentation decks in one place."
         showNewDeck
       />
-      <DeckGrid decks={decks} />
+
+      {ownDecks.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
+            My decks
+          </h2>
+          <DeckGrid decks={ownDecks} />
+        </div>
+      )}
+
+      {ownDecks.length === 0 && (
+        <div className="mb-8 text-center py-12 rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)]">
+          <p className="text-[var(--muted-foreground)] mb-2">No decks yet</p>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Create a deck and push from the CLI with <code className="text-[var(--primary)]">slidenerds push</code>
+          </p>
+        </div>
+      )}
+
+      {sharedDecks.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
+            Shared with me
+          </h2>
+          <DeckGrid decks={sharedDecks} />
+        </div>
+      )}
     </div>
   )
 }

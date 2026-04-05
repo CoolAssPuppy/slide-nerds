@@ -611,6 +611,42 @@ export type Database = {
           },
         ]
       }
+      team_invites: {
+        Row: {
+          id: string
+          team_id: string
+          email: string
+          role: string
+          invited_by: string
+          token: string
+          status: string
+          created_at: string
+          expires_at: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          email: string
+          role?: string
+          invited_by: string
+          token?: string
+          status?: string
+          created_at?: string
+          expires_at?: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          email?: string
+          role?: string
+          invited_by?: string
+          token?: string
+          status?: string
+          created_at?: string
+          expires_at?: string
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           created_at: string

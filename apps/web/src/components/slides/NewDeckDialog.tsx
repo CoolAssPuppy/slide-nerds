@@ -1,25 +1,21 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Upload } from 'lucide-react'
 
 type NewDeckDialogProps = {
   onClose: () => void
 }
 
-type Tab = 'link' | 'upload' | 'cli'
+type Tab = 'link' | 'cli'
 
 export function NewDeckDialog({ onClose }: NewDeckDialogProps) {
-  const [tab, setTab] = useState<Tab>('link')
+  const [tab, setTab] = useState<Tab>('cli')
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
-  const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -35,43 +31,21 @@ export function NewDeckDialog({ onClose }: NewDeckDialogProps) {
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
-    // Create the deck first
-    const { data: deck, error: insertError } = await supabase.from('decks').insert({
+    const { error: insertError } = await supabase.from('decks').insert({
       name: name.trim(),
       slug,
       owner_id: user.id,
       deployed_url: tab === 'link' && url.trim() ? url.trim() : null,
       source_type: tab === 'link' && url.trim() ? 'url' : 'push',
-    }).select().single()
+    })
 
-    if (insertError || !deck) {
-      setError(insertError?.message ?? 'Failed to create deck')
+    if (insertError) {
+      setError(insertError.message)
       setLoading(false)
-      return
+    } else {
+      router.refresh()
+      onClose()
     }
-
-    // If uploading a file, push it to the deck
-    if (tab === 'upload' && file) {
-      setUploadProgress('Uploading...')
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const resp = await fetch(`/api/decks/${deck.id}/push`, {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!resp.ok) {
-        const data = await resp.json()
-        setError(data.error ?? 'Upload failed')
-        setLoading(false)
-        setUploadProgress('')
-        return
-      }
-    }
-
-    router.refresh()
-    onClose()
   }
 
   const inputClass = 'w-full h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]'
@@ -91,14 +65,11 @@ export function NewDeckDialog({ onClose }: NewDeckDialogProps) {
         <h2 className="text-lg font-semibold mb-4">New deck</h2>
 
         <div className="flex gap-1 mb-4">
+          <button onClick={() => setTab('cli')} className={tabClass(tab === 'cli')}>
+            Push from CLI
+          </button>
           <button onClick={() => setTab('link')} className={tabClass(tab === 'link')}>
             Link URL
-          </button>
-          <button onClick={() => setTab('upload')} className={tabClass(tab === 'upload')}>
-            Upload
-          </button>
-          <button onClick={() => setTab('cli')} className={tabClass(tab === 'cli')}>
-            CLI
           </button>
         </div>
 
@@ -137,54 +108,20 @@ export function NewDeckDialog({ onClose }: NewDeckDialogProps) {
             </div>
           )}
 
-          {tab === 'upload' && (
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Deck bundle (zip)
-              </label>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-[var(--n-radius-md)] border-2 border-dashed border-[var(--border)] p-6 text-center cursor-pointer hover:border-[var(--primary)] transition-colors"
-              >
-                <Upload className="w-8 h-8 mx-auto mb-2 text-[var(--muted-foreground)]" />
-                {file ? (
-                  <p className="text-sm">{file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)</p>
-                ) : (
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    Click to select or drag a zip file
-                  </p>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".zip"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="hidden"
-                />
-              </div>
-              <p className="text-xs text-[var(--muted-foreground)] mt-1">
-                Upload the zip of your <code className="text-[var(--primary)]">out/</code> directory from <code className="text-[var(--primary)]">next build</code>
-              </p>
-            </div>
-          )}
-
           {tab === 'cli' && (
             <div className="rounded-[var(--n-radius-md)] bg-[#0a0a0a] border border-[var(--border)] p-4">
+              <p className="text-xs text-[var(--muted-foreground)] mb-3">
+                Create the deck here, then push from your terminal:
+              </p>
               <pre className="text-sm text-[var(--muted-foreground)] whitespace-pre-wrap">
-                <code>{`# Link your project
+                <code>{`slidenerds login
 slidenerds link
-
-# Build and push
 slidenerds push`}</code>
               </pre>
-              <p className="text-xs text-[var(--muted-foreground)] mt-3">
-                Create the deck first, then push from your terminal.
-              </p>
             </div>
           )}
 
           {error && <p className="text-sm text-[var(--destructive)]">{error}</p>}
-          {uploadProgress && <p className="text-sm text-[var(--muted-foreground)]">{uploadProgress}</p>}
 
           <div className="flex justify-end gap-2">
             <button
@@ -199,7 +136,7 @@ slidenerds push`}</code>
               disabled={loading || !name.trim()}
               className="px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {loading ? (uploadProgress || 'Creating...') : 'Create'}
+              {loading ? 'Creating...' : 'Create'}
             </button>
           </div>
         </form>

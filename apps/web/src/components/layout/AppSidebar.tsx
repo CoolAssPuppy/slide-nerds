@@ -2,13 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Presentation, User, Users, LogOut } from 'lucide-react'
+import { Presentation, Users, User, Settings, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
-const NAV_ITEMS = [
+const TOP_NAV = [
   { href: '/slides', label: 'Slides', icon: Presentation },
-  { href: '/profile', label: 'Profile', icon: User },
   { href: '/team', label: 'Team', icon: Users },
+] as const
+
+const BOTTOM_NAV = [
+  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/account', label: 'Account', icon: Settings },
 ] as const
 
 export function AppSidebar() {
@@ -19,6 +23,15 @@ export function AppSidebar() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/login')
+  }
+
+  const linkClass = (href: string) => {
+    const isActive = pathname.startsWith(href)
+    return `flex items-center gap-3 px-3 py-2 rounded-[var(--n-radius-md)] text-sm font-medium transition-colors ${
+      isActive
+        ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+        : 'text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]'
+    }`
   }
 
   return (
@@ -33,26 +46,21 @@ export function AppSidebar() {
       </div>
 
       <nav className="flex-1 p-2">
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname.startsWith(item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-[var(--n-radius-md)] text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
-                  : 'text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]'
-              }`}
-            >
-              <item.icon size={18} className="shrink-0" />
-              {item.label}
-            </Link>
-          )
-        })}
+        {TOP_NAV.map((item) => (
+          <Link key={item.href} href={item.href} className={linkClass(item.href)}>
+            <item.icon size={18} className="shrink-0" />
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
-      <div className="p-2 border-t border-[var(--border)]">
+      <div className="p-2 border-t border-[var(--border)] space-y-1">
+        {BOTTOM_NAV.map((item) => (
+          <Link key={item.href} href={item.href} className={linkClass(item.href)}>
+            <item.icon size={18} className="shrink-0" />
+            {item.label}
+          </Link>
+        ))}
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2 rounded-[var(--n-radius-md)] text-sm font-medium text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors w-full"
