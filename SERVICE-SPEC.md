@@ -82,7 +82,7 @@ Support light and dark themes. Dark is the default (matches the presentation aes
 
 ### Components
 
-Use shadcn/ui for all components (Button, Dialog, Input, Select, Table, Card, Tabs, etc.). Apply NerdsUI tokens via Tailwind classes. Never build custom components when shadcn/ui has one.
+Use Supabase UI components (`@supabase/ui`) as the primary component library. Supplement with shadcn/ui where Supabase UI doesn't have a component. Apply NerdsUI tokens via Tailwind classes. Never build custom components when Supabase UI or shadcn/ui has one.
 
 ### Typography
 
@@ -111,50 +111,266 @@ The app icon lives at `/Users/prashant/Developer/sites/strategic-nerds/public/im
 /auth/callback              OAuth callback handler
 ```
 
-### Dashboard (authenticated)
+### Profile (authenticated)
 
 ```
-/dashboard                  My decks (grid view with thumbnails)
-/dashboard/new              Create/link a new deck
-/dashboard/settings         Account settings, billing, theme
-/dashboard/team             Team management (Pro/Team tiers)
-/dashboard/team/members     Invite/manage team members
+/profile                    Profile page
 ```
 
-### Deck management (authenticated)
+**Profile page features:**
+- Avatar upload (click to change, drag-and-drop, crop dialog)
+  - Stored in Supabase Storage `avatars` bucket at `{user_id}/avatar.{ext}`
+  - Public read, authenticated write (owner only)
+  - Max file size: 2MB
+  - Accepted formats: JPEG, PNG, WebP
+  - Resized to 256x256 on upload (client-side before upload)
+- Display name (editable inline)
+- Email (read-only, from auth)
+- Account created date
+- Current plan badge (Free / Pro / Team)
+- Theme preference (light / dark / system)
+- Danger zone: delete account (confirmation dialog, cascading delete)
+
+### Slides (authenticated)
 
 ```
-/d/:slug                    View hosted deck (public or authenticated viewer)
-/d/:slug/settings           Sharing, analytics, export settings
-/d/:slug/analytics          View tracking data
-/d/:slug/export             Export options (PDF, PPTX)
-/d/:slug/versions           Version history
+/slides                     All my slide decks
+/slides/[id]                A specific slide deck
+/slides/[id]/settings       Deck settings (rename, sharing, danger zone)
+/slides/[id]/analytics      View tracking for this deck
+/slides/[id]/export         Export options (PDF, PPTX)
 ```
+
+**`/slides` -- All my slide decks:**
+- Grid of deck cards showing:
+  - Thumbnail (slide 1 screenshot, or placeholder)
+  - Deck name (editable via double-click or kebab menu)
+  - Slide count
+  - Last updated timestamp
+  - Sharing status badge (Private / Public / Restricted)
+  - Kebab menu: Rename, Duplicate, Share, Export, Delete
+- Sort by: Last updated, Name, Created date
+- Filter by: All, Public, Private, Shared with me
+- Empty state: illustration + "Create your first deck" CTA with instructions
+- "New deck" button in top-right (opens dialog with two options):
+  - Link an existing deployed URL
+  - Push from CLI (shows `slidenerds push` instructions)
+- Search bar for deck name filtering
+- Pagination or infinite scroll (25 decks per page)
+
+**`/slides/[id]` -- A specific slide deck:**
+- Full-width embedded viewer (the hosted slide runtime)
+- Top bar with:
+  - Back arrow to `/slides`
+  - Deck name (editable inline)
+  - Slide count
+  - Share button (opens share dialog)
+  - Export dropdown (PDF, PPTX)
+  - Settings gear icon
+  - Kebab menu: Duplicate, Delete
+- Viewer shows the full slidenerds runtime (navigation, animations, Magic Move)
+- Keyboard shortcuts work (arrow keys, space, P, L, F)
+
+**`/slides/[id]/settings` -- Deck settings:**
+- **General section:**
+  - Deck name (text input)
+  - Description (textarea, optional)
+  - Slug (auto-generated from name, editable)
+  - Thumbnail (auto-generated from slide 1, or manual upload)
+- **Sharing section:**
+  - Visibility toggle: Private / Public
+  - Share link with copy button
+  - Access restrictions (Pro/Team only):
+    - Email allowlist (comma-separated input)
+    - Domain allowlist (e.g., "@acme.com")
+    - Password protection (set/change/remove)
+  - Link expiration (optional date picker)
+- **Danger zone:**
+  - Delete deck (confirmation dialog: type deck name to confirm)
+  - Transfer ownership (Team tier only)
+
+**`/slides/[id]/analytics` -- Deck analytics:**
+- Total views count
+- Unique viewers count
+- Average time spent
+- Chart: views over time (line chart, last 30 days)
+- Chart: time per slide (bar chart, which slides get most attention)
+- Table: recent viewers (email if authenticated, "Anonymous" otherwise)
+  - Columns: Viewer, Slides viewed, Time spent, Date
+- All analytics data scoped to the deck owner via RLS
+
+**`/slides/[id]/export` -- Export page:**
+- Two cards side by side:
+  - **Export as PDF**: description, "Export" button, shows progress, downloads file
+  - **Export as PPTX**: description, "Export" button, shows progress, downloads file
+- Export history (last 10 exports with download links, expire after 24h)
+- Export count for free tier (X of 5 used this month)
+
+### Team (authenticated, Pro/Team tier)
+
+```
+/team                       Team overview
+/team/members               Manage team members
+/team/billing               Team billing (Stripe portal)
+```
+
+**`/team` -- Team overview:**
+- Team name (editable)
+- Team slug
+- Member count
+- Shared brand configs
+- Shared decks
+
+**`/team/members` -- Manage members:**
+- Table: Name, Email, Role (Owner/Admin/Member), Joined date
+- Invite button (email input + role selector)
+- Change role (dropdown per row, owner only)
+- Remove member (confirmation dialog)
 
 ### Live presentation
 
 ```
 /live/:sessionId            Audience view (real-time sync)
 /live/:sessionId/presenter  Presenter controls + speaker notes
-/live/:sessionId/poll/:id   Poll results (embedded in audience view)
 ```
+
+### Hosted deck viewer (public or restricted)
+
+```
+/d/:slug                    View a shared deck
+```
+
+- If public: renders immediately
+- If restricted: shows auth gate (email input, password input, or "Sign in" button depending on access type)
+- If expired: shows "This link has expired" message
+- The viewer renders the full slidenerds runtime with navigation
 
 ### API routes
 
 ```
 /api/auth/callback          Supabase Auth callback
-/api/decks                  CRUD for decks
-/api/decks/:id/push         Receive deck push from CLI
-/api/decks/:id/export/pdf   Server-side PDF export
-/api/decks/:id/export/pptx  Server-side PPTX export
-/api/decks/:id/share        Create/manage share links
-/api/decks/:id/analytics    Record view events
-/api/live                   WebSocket upgrade for live sessions
-/api/live/:sessionId/poll   Create/vote on polls
-/api/stripe/webhook         Stripe payment webhook
-/api/stripe/checkout        Create checkout session
-/api/stripe/portal          Customer billing portal
+/api/decks                  GET (list), POST (create)
+/api/decks/[id]             GET, PATCH (rename, settings), DELETE
+/api/decks/[id]/push        POST (receive deck push from CLI)
+/api/decks/[id]/export/pdf  POST (server-side PDF export)
+/api/decks/[id]/export/pptx POST (server-side PPTX export)
+/api/decks/[id]/share       GET, POST, PATCH, DELETE (share links)
+/api/decks/[id]/analytics   GET (read), POST (record view event)
+/api/live                   POST (create live session)
+/api/live/[sessionId]       GET (session info), DELETE (end session)
+/api/live/[sessionId]/poll  POST (create poll), PATCH (end poll)
+/api/live/[sessionId]/vote  POST (cast vote)
+/api/stripe/webhook         POST (Stripe events)
+/api/stripe/checkout        POST (create checkout session)
+/api/stripe/portal          POST (create billing portal session)
+/api/upload/avatar          POST (upload avatar to Supabase Storage)
 ```
+
+## Supabase Storage buckets
+
+### `avatars`
+
+User profile avatars.
+
+```sql
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true);
+
+-- Anyone can read (public bucket)
+create policy "Public avatar read" on storage.objects
+  for select using (bucket_id = 'avatars');
+
+-- Users can upload their own avatar
+create policy "Users upload own avatar" on storage.objects
+  for insert with check (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Users can update their own avatar
+create policy "Users update own avatar" on storage.objects
+  for update using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Users can delete their own avatar
+create policy "Users delete own avatar" on storage.objects
+  for delete using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+```
+
+File path convention: `{user_id}/avatar.{ext}`
+
+### `deck-thumbnails`
+
+Auto-generated slide thumbnails for deck cards.
+
+```sql
+insert into storage.buckets (id, name, public) values ('deck-thumbnails', 'deck-thumbnails', true);
+
+-- Anyone can read thumbnails (needed for shared decks)
+create policy "Public thumbnail read" on storage.objects
+  for select using (bucket_id = 'deck-thumbnails');
+
+-- Deck owners can write thumbnails (via server-side export)
+create policy "Service role writes thumbnails" on storage.objects
+  for insert with check (bucket_id = 'deck-thumbnails')
+  using (auth.role() = 'service_role');
+```
+
+File path convention: `{deck_id}/slide-{index}.png`
+
+### `exports`
+
+Temporary export files (PDF, PPTX). Auto-deleted after 24 hours.
+
+```sql
+insert into storage.buckets (id, name, public) values ('exports', 'exports', false);
+
+-- Users can read their own exports
+create policy "Users read own exports" on storage.objects
+  for select using (
+    bucket_id = 'exports'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Service role writes exports (via server-side export)
+create policy "Service role writes exports" on storage.objects
+  for insert with check (bucket_id = 'exports')
+  using (auth.role() = 'service_role');
+```
+
+File path convention: `{user_id}/{deck_id}/{timestamp}.{pdf|pptx}`
+
+### `deck-assets`
+
+Images, logos, and other assets uploaded for use in decks.
+
+```sql
+insert into storage.buckets (id, name, public) values ('deck-assets', 'deck-assets', true);
+
+-- Anyone can read (needed for hosted deck rendering)
+create policy "Public asset read" on storage.objects
+  for select using (bucket_id = 'deck-assets');
+
+-- Deck owners can upload assets
+create policy "Users upload own assets" on storage.objects
+  for insert with check (
+    bucket_id = 'deck-assets'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Users can delete their own assets
+create policy "Users delete own assets" on storage.objects
+  for delete using (
+    bucket_id = 'deck-assets'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+```
+
+File path convention: `{user_id}/{deck_id}/{filename}`
 
 ## Data model
 
@@ -545,89 +761,123 @@ jobs:
 apps/web/
   src/
     app/
-      (marketing)/              # Public pages (landing, pricing, docs)
-        page.tsx                # Landing page
-        pricing/page.tsx
-        docs/page.tsx
-      (auth)/                   # Auth pages
-        login/page.tsx
-        signup/page.tsx
-        auth/callback/route.ts
-      (dashboard)/              # Authenticated pages
-        dashboard/
-          page.tsx              # My decks
-          new/page.tsx          # Create deck
-          settings/page.tsx     # Account settings
-          team/page.tsx         # Team management
-        d/[slug]/
-          page.tsx              # Deck viewer
-          settings/page.tsx     # Deck settings
-          analytics/page.tsx    # Deck analytics
-          export/page.tsx       # Export options
-      (live)/                   # Live presentation
+      (marketing)/                  # Public pages (no auth required)
+        layout.tsx                  # Marketing layout (header + footer)
+        page.tsx                    # Landing page
+        pricing/page.tsx            # Pricing tiers
+        docs/page.tsx               # Documentation
+      (auth)/                       # Auth pages
+        login/page.tsx              # Sign in
+        signup/page.tsx             # Create account
+        auth/callback/route.ts      # OAuth callback
+      (app)/                        # Authenticated app pages
+        layout.tsx                  # App layout (header + sidebar)
+        profile/page.tsx            # Profile page (avatar, name, settings)
+        slides/
+          page.tsx                  # All my slide decks (grid)
+          [id]/
+            page.tsx                # View a specific deck (embedded runtime)
+            settings/page.tsx       # Deck settings (rename, share, delete)
+            analytics/page.tsx      # Deck analytics
+            export/page.tsx         # Export options (PDF, PPTX)
+        team/
+          page.tsx                  # Team overview
+          members/page.tsx          # Manage team members
+          billing/page.tsx          # Team billing
+      (viewer)/                     # Public/restricted deck viewer
+        d/[slug]/page.tsx           # Hosted deck viewer
+      (live)/                       # Live presentation
         live/[sessionId]/
-          page.tsx              # Audience view
-          presenter/page.tsx    # Presenter view
+          page.tsx                  # Audience view
+          presenter/page.tsx        # Presenter view
       api/
         auth/callback/route.ts
-        decks/route.ts
-        decks/[id]/
-          push/route.ts
-          export/pdf/route.ts
-          export/pptx/route.ts
-          share/route.ts
-          analytics/route.ts
-        live/route.ts
+        decks/route.ts              # GET (list), POST (create)
+        decks/[id]/route.ts         # GET, PATCH, DELETE
+        decks/[id]/push/route.ts    # POST (receive CLI push)
+        decks/[id]/export/
+          pdf/route.ts              # POST (server-side PDF)
+          pptx/route.ts             # POST (server-side PPTX)
+        decks/[id]/share/route.ts   # CRUD share links
+        decks/[id]/analytics/route.ts
+        live/route.ts               # POST (create session)
+        live/[sessionId]/route.ts   # GET, DELETE
+        live/[sessionId]/poll/route.ts
+        live/[sessionId]/vote/route.ts
+        upload/avatar/route.ts      # POST (avatar to Storage)
         stripe/
           webhook/route.ts
           checkout/route.ts
           portal/route.ts
     components/
       layout/
-        DashboardLayout.tsx
-        MarketingLayout.tsx
-        Header.tsx
-        Sidebar.tsx
-        ThemeToggle.tsx
-      decks/
-        DeckCard.tsx
-        DeckGrid.tsx
-        DeckSettings.tsx
-        ShareDialog.tsx
-        ExportDialog.tsx
+        AppHeader.tsx               # Dashboard header (logo, nav, avatar, theme toggle)
+        AppSidebar.tsx              # Left sidebar (Slides, Profile, Team)
+        MarketingHeader.tsx         # Public page header
+        MarketingFooter.tsx         # Public page footer
+        ThemeToggle.tsx             # Light/dark/system toggle
+      profile/
+        AvatarUpload.tsx            # Click-to-upload avatar with crop
+        ProfileForm.tsx             # Display name, email, preferences
+        DangerZone.tsx              # Delete account section
+      slides/
+        DeckCard.tsx                # Card for deck grid (thumbnail, name, badge)
+        DeckGrid.tsx                # Grid layout for deck cards
+        DeckEmptyState.tsx          # Empty state illustration + CTA
+        NewDeckDialog.tsx           # Create deck dialog (link URL or push)
+        RenameDialog.tsx            # Inline rename dialog
+        DeleteDeckDialog.tsx        # Confirmation dialog (type name to confirm)
+        ShareDialog.tsx             # Sharing settings (visibility, links, restrictions)
+        ExportCard.tsx              # Export option card (PDF or PPTX)
       analytics/
-        ViewChart.tsx
-        SlideHeatmap.tsx
-        ViewerTable.tsx
+        ViewsOverTimeChart.tsx      # Line chart (last 30 days)
+        TimePerSlideChart.tsx       # Bar chart (dwell time per slide)
+        ViewerTable.tsx             # Recent viewers table
+        StatCard.tsx                # Total views, unique viewers, avg time
       live/
-        PresenterControls.tsx
-        AudienceView.tsx
-        PollCard.tsx
-        ReactionButton.tsx
-        ReactionFeed.tsx
+        PresenterControls.tsx       # Slide nav, notes, timer, audience count
+        AudienceSlideView.tsx       # Real-time synced slide viewer
+        PollCreator.tsx             # Create poll form
+        PollVoter.tsx               # Vote interface for audience
+        PollResults.tsx             # Live results bar chart
+        ReactionButton.tsx          # Emoji reaction button
+        ReactionFeed.tsx            # Floating reactions overlay
       billing/
-        PricingCard.tsx
-        PlanBadge.tsx
+        PricingCard.tsx             # Plan card (features, price, CTA)
+        PlanBadge.tsx               # Free / Pro / Team badge
+        UsageMeter.tsx              # Export usage for free tier
+      shared/
+        PageHeader.tsx              # Consistent page header (title, description, actions)
+        ConfirmDialog.tsx           # Reusable confirmation dialog
+        CopyButton.tsx              # Click-to-copy with feedback
+        SearchInput.tsx             # Debounced search input
+        SortSelect.tsx              # Sort dropdown
     lib/
       supabase/
-        client.ts
-        server.ts
-        middleware.ts
-        database.types.ts
+        client.ts                   # Browser client
+        server.ts                   # Server client
+        middleware.ts               # Auth middleware
+        database.types.ts           # Generated from schema
+        storage.ts                  # Storage bucket helpers (upload, getUrl, delete)
       stripe/
-        client.ts
-        webhooks.ts
+        client.ts                   # Stripe client
+        webhooks.ts                 # Webhook event handlers
       export/
-        pdf.ts                  # Puppeteer PDF export
-        pptx.ts                 # Puppeteer + pptxgenjs PPTX export
+        pdf.ts                      # Puppeteer PDF export
+        pptx.ts                     # Puppeteer + pptxgenjs PPTX export
       utils/
-        slugify.ts
-        rate-limit.ts
+        slugify.ts                  # Name to URL slug
+        rate-limit.ts               # API rate limiting
+        image-resize.ts             # Client-side image resize for avatars
     hooks/
-      use-deck.ts
-      use-analytics.ts
-      use-live-session.ts
-      use-subscription.ts
+      use-deck.ts                   # Deck CRUD operations
+      use-decks.ts                  # List/filter/sort decks
+      use-profile.ts                # Profile read/update
+      use-avatar.ts                 # Avatar upload/delete
+      use-analytics.ts              # Deck analytics data
+      use-live-session.ts           # Live session state
+      use-subscription.ts           # Current plan, limits
+      use-share-link.ts             # Share link management
 ```
 
 ## Quality gates
