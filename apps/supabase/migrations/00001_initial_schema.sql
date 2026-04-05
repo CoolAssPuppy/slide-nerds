@@ -51,9 +51,7 @@ create policy "Team members can read their team"
 
 create policy "Team members can read memberships"
   on public.team_members for select
-  using (
-    team_id in (select team_id from public.team_members where user_id = auth.uid())
-  );
+  using (user_id = auth.uid());
 
 -- Brand configs (per user or per team)
 create table public.brand_configs (
