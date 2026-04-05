@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { plan } = body as { plan: 'pro' | 'team' }
+  const { plan: _plan } = body as { plan: 'pro' | 'team' }
 
   // TODO: Create Stripe checkout session
   // const session = await stripe.checkout.sessions.create({

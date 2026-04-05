@@ -12,7 +12,7 @@ export default function PresenterPage({ params }: PageProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [deckUrl, setDeckUrl] = useState<string | null>(null)
   const [deckName, setDeckName] = useState('')
-  const [audienceCount, setAudienceCount] = useState(0)
+  const [audienceCount, _setAudienceCount] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const supabase = createClient()
 
