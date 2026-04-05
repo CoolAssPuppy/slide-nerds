@@ -14,19 +14,6 @@ export default function CliAuthPage() {
   const [done, setDone] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (!callbackUrl) return
-
-    const checkExistingSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        redirectToCli(session.access_token, session.refresh_token)
-      }
-    }
-    checkExistingSession()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callbackUrl])
-
   const redirectToCli = (accessToken: string, refreshToken: string) => {
     if (!callbackUrl) return
     const url = new URL(callbackUrl)
@@ -35,6 +22,22 @@ export default function CliAuthPage() {
     setDone(true)
     window.location.href = url.toString()
   }
+
+  useEffect(() => {
+    if (!callbackUrl) return
+
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        const url = new URL(callbackUrl)
+        url.searchParams.set('access_token', session.access_token)
+        url.searchParams.set('refresh_token', session.refresh_token)
+        setDone(true)
+        window.location.href = url.toString()
+      }
+    }
+    checkExistingSession()
+  }, [callbackUrl, supabase])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
