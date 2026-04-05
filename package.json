@@ -6,7 +6,8 @@
   "description": "A presentation runtime for Next.js with an LLM skill library",
   "workspaces": [
     "packages/runtime",
-    "packages/cli"
+    "packages/cli",
+    "apps/web"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
