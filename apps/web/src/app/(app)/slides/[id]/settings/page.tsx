@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DeckSettingsForm } from '@/components/slides/DeckSettingsForm'
+import { VersionHistory } from '@/components/slides/VersionHistory'
 import type { Deck } from '@/lib/supabase/types'
 
 type PageProps = {
@@ -37,6 +38,13 @@ export default async function DeckSettingsPage({ params }: PageProps) {
       </div>
 
       <DeckSettingsForm deck={deck} />
+
+      <section className="mt-8 rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">
+        <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
+          Version history
+        </h2>
+        <VersionHistory deckId={deck.id} currentVersion={deck.version ?? 1} />
+      </section>
     </div>
   )
 }
