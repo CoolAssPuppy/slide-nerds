@@ -16,6 +16,30 @@ enabled = true
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["http://localhost:3000/auth/callback"]
 
+[auth.email.template.confirmation]
+subject = "Confirm your email"
+content_path = "./supabase/emails/confirm.html"
+
+[auth.email.template.invite]
+subject = "You've been invited to SlideNerds"
+content_path = "./supabase/emails/invite.html"
+
+[auth.email.template.magic_link]
+subject = "Sign in to SlideNerds"
+content_path = "./supabase/emails/magic_link.html"
+
+[auth.email.template.recovery]
+subject = "Reset your password"
+content_path = "./supabase/emails/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new email"
+content_path = "./supabase/emails/email_change.html"
+
+[auth.email.template.reauthentication]
+subject = "Your verification code"
+content_path = "./supabase/emails/reauthentication.html"
+
 [auth.external.github]
 enabled = false
 client_id = "env(SUPABASE_AUTH_GITHUB_CLIENT_ID)"
