@@ -1,18 +1,68 @@
+@import '@strategicnerds/nerdsui-web/preset/globals.css';
 @import 'tailwindcss';
 
 :root {
-  --color-primary: #1a1a2e;
-  --color-accent: #e94560;
-  --color-background: #0f3460;
-  --color-surface: #16213e;
-  --color-text: #eaeaea;
+  --background: oklch(0.13 0.005 155);
+  --foreground: oklch(0.93 0 0);
+  --card: oklch(0.16 0.005 155);
+  --card-foreground: oklch(0.93 0 0);
+  --popover: oklch(0.16 0.005 155);
+  --popover-foreground: oklch(0.93 0 0);
+  --primary: oklch(0.72 0.17 162);
+  --primary-foreground: oklch(0.13 0.005 155);
+  --secondary: oklch(0.2 0.01 155);
+  --secondary-foreground: oklch(0.93 0 0);
+  --muted: oklch(0.2 0.005 155);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.22 0.01 155);
+  --accent-foreground: oklch(0.72 0.17 162);
+  --border: oklch(0.25 0.005 155);
+  --input: oklch(0.25 0.005 155);
+  --ring: oklch(0.72 0.17 162);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.72 0.17 162);
+  --success-foreground: oklch(0.13 0.005 155);
+  --warning: oklch(0.7 0.17 75);
+  --warning-foreground: oklch(0.15 0 0);
+  --info: oklch(0.55 0.15 245);
+  --info-foreground: oklch(0.98 0 0);
 }
 
-html,
+.light {
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.55 0.18 162);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.15 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.96 0.02 162);
+  --accent-foreground: oklch(0.15 0 0);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.55 0.18 162);
+}
+
+html {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background: var(--color-background);
-  color: var(--color-text);
-  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
