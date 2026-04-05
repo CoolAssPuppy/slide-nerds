@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { FileText, FileSpreadsheet } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { FileText, FileSpreadsheet, Loader2 } from 'lucide-react'
 
 type ExportDropdownProps = {
+  deckId: string
   isOpen: boolean
   onClose: () => void
 }
 
-export function ExportDropdown({ isOpen, onClose }: ExportDropdownProps) {
+export function ExportDropdown({ deckId, isOpen, onClose }: ExportDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [exporting, setExporting] = useState<'pdf' | 'pptx' | null>(null)
 
   useEffect(() => {
     if (!isOpen) return
@@ -34,34 +36,69 @@ export function ExportDropdown({ isOpen, onClose }: ExportDropdownProps) {
 
   if (!isOpen) return null
 
+  const handleExport = async (format: 'pdf' | 'pptx') => {
+    setExporting(format)
+    try {
+      const resp = await fetch(`/api/decks/${deckId}/export/${format}`, {
+        method: 'POST',
+      })
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: 'Export failed' }))
+        alert(err.error)
+        return
+      }
+
+      const blob = await resp.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = resp.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1] ?? `deck.${format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      onClose()
+    } finally {
+      setExporting(null)
+    }
+  }
+
   return (
     <div
       ref={ref}
       className="absolute right-0 top-10 w-56 rounded-[var(--n-radius-md)] border border-[var(--border)] bg-[var(--popover)] shadow-lg py-1 z-50"
     >
       <button
-        disabled
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm opacity-40 cursor-not-allowed"
+        onClick={() => handleExport('pdf')}
+        disabled={exporting !== null}
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-[var(--accent)] transition-colors disabled:opacity-60"
       >
-        <FileText className="w-4 h-4 text-[var(--muted-foreground)]" />
+        {exporting === 'pdf' ? (
+          <Loader2 className="w-4 h-4 text-[var(--muted-foreground)] animate-spin" />
+        ) : (
+          <FileText className="w-4 h-4 text-[var(--muted-foreground)]" />
+        )}
         <div className="text-left">
           <p className="font-medium">Export as PDF</p>
-          <p className="text-xs text-[var(--muted-foreground)]">Coming soon</p>
+          <p className="text-xs text-[var(--muted-foreground)]">1920x1080, pixel-perfect</p>
         </div>
       </button>
       <button
-        disabled
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm opacity-40 cursor-not-allowed"
+        onClick={() => handleExport('pptx')}
+        disabled={exporting !== null}
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-[var(--accent)] transition-colors disabled:opacity-60"
       >
-        <FileSpreadsheet className="w-4 h-4 text-[var(--muted-foreground)]" />
+        {exporting === 'pptx' ? (
+          <Loader2 className="w-4 h-4 text-[var(--muted-foreground)] animate-spin" />
+        ) : (
+          <FileSpreadsheet className="w-4 h-4 text-[var(--muted-foreground)]" />
+        )}
         <div className="text-left">
           <p className="font-medium">Export as PPTX</p>
-          <p className="text-xs text-[var(--muted-foreground)]">Coming soon</p>
+          <p className="text-xs text-[var(--muted-foreground)]">Native PowerPoint</p>
         </div>
       </button>
-      <p className="px-3 py-2 text-xs text-[var(--muted-foreground)] border-t border-[var(--border)]">
-        Use <code className="bg-[var(--muted)] px-1 rounded">slidenerds export</code> from the CLI.
-      </p>
     </div>
   )
 }

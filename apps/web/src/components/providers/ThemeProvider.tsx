@@ -9,7 +9,7 @@ type ThemeContextValue = {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'midnight',
+  theme: 'snow',
   setTheme: () => {},
 })
 
@@ -26,7 +26,7 @@ function applyTheme(id: ThemeId) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeId>('midnight')
+  const [theme, setThemeState] = useState<ThemeId>('snow')
 
   useEffect(() => {
     const saved = localStorage.getItem('slidenerds-theme') as ThemeId | null

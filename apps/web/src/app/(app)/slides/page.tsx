@@ -17,6 +17,28 @@ export default async function SlidesPage() {
     .order('updated_at', { ascending: false })
   const ownDecks = (ownData ?? []) as Deck[]
 
+  // Fetch viewer counts for own decks
+  const deckIds = ownDecks.map((d) => d.id)
+  const viewerCounts: Record<string, number> = {}
+  if (deckIds.length > 0) {
+    const { data: viewsData } = await supabase
+      .from('deck_views')
+      .select('deck_id, viewer_id, ip_hash')
+      .in('deck_id', deckIds)
+    if (viewsData) {
+      const viewerSets = new Map<string, Set<string>>()
+      for (const v of viewsData) {
+        const key = v.viewer_id || v.ip_hash || 'anon'
+        const set = viewerSets.get(v.deck_id) ?? new Set()
+        set.add(key)
+        viewerSets.set(v.deck_id, set)
+      }
+      for (const [deckId, set] of viewerSets) {
+        viewerCounts[deckId] = set.size
+      }
+    }
+  }
+
   // Shared with me (public decks from share links where I'm an allowed email)
   // For now, show decks that are public and not owned by me
   const { data: sharedData } = await supabase
@@ -41,7 +63,7 @@ export default async function SlidesPage() {
           <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
             My decks
           </h2>
-          <DeckGrid decks={ownDecks} />
+          <DeckGrid decks={ownDecks} viewerCounts={viewerCounts} />
         </div>
       )}
 

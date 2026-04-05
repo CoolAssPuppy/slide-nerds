@@ -3,14 +3,16 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Deck } from '@/lib/supabase/types'
 
 type DeckGridProps = {
   decks: Deck[]
+  viewerCounts?: Record<string, number>
 }
 
-export function DeckGrid({ decks }: DeckGridProps) {
+export function DeckGrid({ decks, viewerCounts = {} }: DeckGridProps) {
   if (decks.length === 0) {
     return <EmptyState />
   }
@@ -18,13 +20,13 @@ export function DeckGrid({ decks }: DeckGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {decks.map((deck) => (
-        <DeckCard key={deck.id} deck={deck} />
+        <DeckCard key={deck.id} deck={deck} viewers={viewerCounts[deck.id] ?? 0} />
       ))}
     </div>
   )
 }
 
-function DeckCard({ deck }: { deck: Deck }) {
+function DeckCard({ deck, viewers }: { deck: Deck; viewers: number }) {
   const [showMenu, setShowMenu] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -59,21 +61,22 @@ function DeckCard({ deck }: { deck: Deck }) {
           )}
         </div>
         <div className="p-3">
-          <h3 className="font-semibold text-sm truncate">{deck.name}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-[var(--muted-foreground)]">{timeAgo}</span>
-            {deck.slide_count && deck.slide_count > 0 && (
-              <span className="text-xs text-[var(--muted-foreground)]">
-                {deck.slide_count} slides
-              </span>
-            )}
-            <span className={`text-xs px-1.5 py-0.5 rounded-[var(--n-radius-sm)] ${
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm truncate">{deck.name}</h3>
+            <span className={`text-xs px-1.5 py-0.5 rounded-[var(--n-radius-sm)] shrink-0 ${
               deck.is_public
                 ? 'bg-[var(--success)] text-[var(--success-foreground)]'
                 : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
             }`}>
               {deck.is_public ? 'Public' : 'Private'}
             </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5">
+            <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
+              <Users className="w-3 h-3" />
+              {viewers}
+            </span>
+            <span className="text-xs text-[var(--muted-foreground)]">{timeAgo}</span>
           </div>
         </div>
       </Link>
