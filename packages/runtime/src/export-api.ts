@@ -23,52 +23,51 @@ const SLIDE_HEIGHT = 1080
 const yieldToMain = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0))
 
+const resolveAllSvgColors = (origSvg: SVGSVGElement, cloneSvg: SVGSVGElement): void => {
+  const svgStyle = window.getComputedStyle(origSvg)
+  cloneSvg.setAttribute('fill', svgStyle.fill || svgStyle.color)
+  cloneSvg.setAttribute('color', svgStyle.color)
+  cloneSvg.removeAttribute('class')
+  cloneSvg.removeAttribute('style')
+
+  const originalNodes = Array.from(origSvg.querySelectorAll('*'))
+  const clonedNodes = Array.from(cloneSvg.querySelectorAll('*'))
+
+  clonedNodes.forEach((clonedNode, idx) => {
+    const originalNode = originalNodes[idx] as Element | undefined
+    if (!originalNode) return
+
+    const cs = window.getComputedStyle(originalNode)
+
+    clonedNode.setAttribute('fill', cs.fill)
+    clonedNode.setAttribute('stroke', cs.stroke)
+    clonedNode.setAttribute('fill-opacity', cs.fillOpacity)
+    clonedNode.setAttribute('stroke-opacity', cs.strokeOpacity)
+    clonedNode.setAttribute('stroke-width', cs.strokeWidth)
+    clonedNode.setAttribute('opacity', cs.opacity)
+
+    clonedNode.removeAttribute('class')
+    clonedNode.removeAttribute('style')
+  })
+}
+
 const rasterizeSvg = (
   origSvg: SVGSVGElement,
   cloneSvg: SVGSVGElement,
 ): Promise<void> => {
   return new Promise((resolve) => {
-    const computedStyle = window.getComputedStyle(origSvg)
-    const color = computedStyle.color
     const width = origSvg.getBoundingClientRect().width || 24
     const height = origSvg.getBoundingClientRect().height || 24
+    const computedStyle = window.getComputedStyle(origSvg)
 
-    const originalNodes = Array.from(origSvg.querySelectorAll('*'))
-    const clonedNodes = Array.from(cloneSvg.querySelectorAll('*'))
+    resolveAllSvgColors(origSvg, cloneSvg)
 
-    clonedNodes.forEach((clonedNode, idx) => {
-      const originalNode = originalNodes[idx] as Element | undefined
-      if (!originalNode) return
-
-      const originalNodeStyle = window.getComputedStyle(originalNode)
-      const fill = originalNodeStyle.fill
-      const stroke = originalNodeStyle.stroke
-
-      if (clonedNode.getAttribute('fill') === 'currentColor') {
-        clonedNode.setAttribute('fill', color)
-      } else if (fill && fill !== 'none') {
-        clonedNode.setAttribute('fill', fill)
-      }
-
-      if (clonedNode.getAttribute('stroke') === 'currentColor') {
-        clonedNode.setAttribute('stroke', color)
-      } else if (stroke && stroke !== 'none') {
-        clonedNode.setAttribute('stroke', stroke)
-      }
-
-      const fillOpacity = originalNodeStyle.fillOpacity
-      const strokeOpacity = originalNodeStyle.strokeOpacity
-      if (fillOpacity && fillOpacity !== '1') {
-        clonedNode.setAttribute('fill-opacity', fillOpacity)
-      }
-      if (strokeOpacity && strokeOpacity !== '1') {
-        clonedNode.setAttribute('stroke-opacity', strokeOpacity)
-      }
-    })
-
-    if (!cloneSvg.getAttribute('fill') || cloneSvg.getAttribute('fill') === 'currentColor') {
-      cloneSvg.setAttribute('fill', color)
+    cloneSvg.setAttribute('width', String(Math.ceil(width)))
+    cloneSvg.setAttribute('height', String(Math.ceil(height)))
+    if (!cloneSvg.getAttribute('viewBox')) {
+      cloneSvg.setAttribute('viewBox', `0 0 ${Math.ceil(width)} ${Math.ceil(height)}`)
     }
+    cloneSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 
     const svgData = new XMLSerializer().serializeToString(cloneSvg)
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
@@ -264,7 +263,7 @@ const exportPptx = async (): Promise<void> => {
   const PPTX_HEIGHT_IN = 7.5
   const progress = showProgress()
   try {
-    const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
+    const PptxGenJS = (await import('pptxgenjs')).default
     const images = await captureSlides(progress.update)
     if (images.length === 0) return
 
