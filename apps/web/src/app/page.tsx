@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CopyCodeBlock } from '@/components/home/CopyCodeBlock'
+import { TerminalBrowserDemo } from '@/components/home/TerminalBrowserDemo'
 import { SlidePreviewPlayer } from '@/components/home/SlidePreviewPlayer'
 import { FeatureGrid } from '@/components/home/FeatureGrid'
 import { PricingSection } from '@/components/home/PricingSection'
@@ -76,28 +77,28 @@ export default async function HomePage() {
 
         {/* Section 1: Build */}
         <section className="py-24 px-6">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl font-extrabold tracking-tight">Build slides, completely free</h2>
-              <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-md">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-extrabold tracking-tight">Build slides like you build code</h2>
+              <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
                 Use your favorite LLM to generate gorgeous decks. The open-source package works locally with zero cost.
               </p>
             </div>
-            <SlidePreviewPlayer variant="build" />
+            <TerminalBrowserDemo />
           </div>
         </section>
 
         {/* Section 2: Share */}
         <section className="py-24 px-6 bg-[var(--muted)]">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1">
-              <SlidePreviewPlayer variant="analytics" />
-            </div>
-            <div className="order-1 lg:order-2">
-              <h2 className="text-4xl font-extrabold tracking-tight">Push slides to SlideNerds and share</h2>
-              <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-md">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-extrabold tracking-tight">Share slides with SlideNerds</h2>
+              <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
                 Host your slides on our service, share them with colleagues, customers, and partners, and get analytics on what people read.
               </p>
+            </div>
+            <div className="max-w-4xl mx-auto">
+              <SlidePreviewPlayer variant="analytics" />
             </div>
           </div>
         </section>
@@ -117,7 +118,7 @@ export default async function HomePage() {
 
         {/* Section 4: Features */}
         <section className="py-24 px-6 bg-[var(--muted)]">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Everything you need</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)]">
@@ -135,18 +136,12 @@ export default async function HomePage() {
             <p className="mt-4 text-lg text-[var(--muted-foreground)]">
               Install the package, fire up your LLM, and have a deck ready in minutes.
             </p>
-            <div className="mt-10 flex justify-center gap-4">
+            <div className="mt-10">
               <Link
                 href="/signup"
                 className="px-8 py-3 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
               >
                 Get started free
-              </Link>
-              <Link
-                href="/pricing"
-                className="px-8 py-3 rounded-[var(--n-radius-md)] border border-[var(--border)] text-sm font-medium hover:bg-[var(--accent)] transition-colors"
-              >
-                View pricing
               </Link>
             </div>
           </div>

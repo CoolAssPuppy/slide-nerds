@@ -20,7 +20,7 @@ type Step =
   | 'split-view'
 
 const COMMANDS = [
-  'npx @strategicnerds/slide-nerds create my-talk',
+  'slidenerds create my-talk',
   'cd my-talk',
   'npm install',
   'npm run dev',
@@ -39,7 +39,7 @@ function ThinkingDots() {
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--primary)]"
+          className="inline-block w-1.5 h-1.5 rounded-full bg-[#D97757]"
           animate={{ y: [0, -4, 0] }}
           transition={{
             duration: 0.5,
@@ -166,14 +166,14 @@ export function TerminalBrowserDemo() {
                   {showClaudeUI && (
                     <>
                       <CompletedLine text="claude" />
-                      <div className="mt-3 rounded-[var(--n-radius-md)] border border-[var(--border)] bg-[#111] p-3">
+                      <div className="mt-3 rounded-[var(--n-radius-md)] border border-[#3d3024] bg-[#1a1410] p-3">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-4 h-4 rounded-full bg-[var(--primary)] flex items-center justify-center text-[8px] font-bold text-black">
+                          <div className="w-4 h-4 rounded-full bg-[#D97757] flex items-center justify-center text-[8px] font-bold text-white">
                             C
                           </div>
-                          <span className="text-[var(--primary)] font-bold text-xs">Claude Code</span>
+                          <span className="text-[#D97757] font-bold text-xs">Claude Code</span>
                         </div>
-                        <div className="text-xs text-[var(--muted-foreground)] mb-2">
+                        <div className="text-xs text-[#a08b7a] mb-2">
                           What would you like to build?
                         </div>
                         {step === 'claude-ui' && (
@@ -189,14 +189,14 @@ export function TerminalBrowserDemo() {
                           <div className="text-xs leading-relaxed">{CLAUDE_PROMPT}</div>
                         )}
                         {step === 'thinking' && (
-                          <div className="mt-3 flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
+                          <div className="mt-3 flex items-center gap-1.5 text-xs text-[#a08b7a]">
                             <span>Thinking</span>
                             <ThinkingDots />
                           </div>
                         )}
                         {step === 'split-view' && (
-                          <div className="mt-3 text-xs text-[var(--primary)] font-medium">
-                            Created 4 slides in ./slides
+                          <div className="mt-3 text-xs text-[#D97757] font-medium">
+                            Created 4 slides in ./app/page.tsx
                           </div>
                         )}
                       </div>

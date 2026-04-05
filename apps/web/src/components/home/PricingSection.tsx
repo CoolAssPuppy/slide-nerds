@@ -8,9 +8,9 @@ const PLANS = [
     price: '$0',
     period: 'forever',
     features: [
-      '3 hosted decks',
+      'Unlimited public decks',
       'Public sharing only',
-      '5 exports per month',
+      'Unlimited exports',
       'Basic analytics',
     ],
     highlighted: false,
