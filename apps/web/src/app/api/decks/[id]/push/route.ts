@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createApiClient } from '@/lib/supabase/api-client'
 import { getUserPlan, getUploadSizeLimit, formatBytes } from '@/lib/tier'
 import JSZip from 'jszip'
 
@@ -8,8 +8,7 @@ type RouteContext = {
 }
 
 export async function POST(request: Request, context: RouteContext) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { supabase, user } = await createApiClient(request)
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

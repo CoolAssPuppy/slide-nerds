@@ -30,6 +30,18 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
   const callbackUrl = `http://localhost:${port}/callback`
 
   return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      console.log('Login timed out.')
+      server.close()
+      resolve(false)
+    }, 5 * 60 * 1000)
+
+    const finish = (success: boolean) => {
+      clearTimeout(timeout)
+      server.close()
+      resolve(success)
+    }
+
     const server = http.createServer(async (req, res) => {
       const url = new URL(req.url ?? '/', `http://localhost:${port}`)
 
@@ -47,14 +59,12 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
           res.writeHead(200, { 'Content-Type': 'text/html' })
           res.end('<html><body><h1>Logged in to SlideNerds</h1><p>You can close this window.</p></body></html>')
 
-          server.close()
-          resolve(true)
+          finish(true)
         } else {
           res.writeHead(400, { 'Content-Type': 'text/html' })
           res.end('<html><body><h1>Login failed</h1><p>No token received.</p></body></html>')
 
-          server.close()
-          resolve(false)
+          finish(false)
         }
       }
     })
@@ -65,13 +75,6 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
       console.log(`If the browser doesn't open, visit:\n${loginUrl}\n`)
       openBrowser(loginUrl)
     })
-
-    // Timeout after 5 minutes
-    setTimeout(() => {
-      console.log('Login timed out.')
-      server.close()
-      resolve(false)
-    }, 5 * 60 * 1000)
   })
 }
 

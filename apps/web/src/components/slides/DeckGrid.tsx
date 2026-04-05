@@ -40,9 +40,18 @@ function DeckCard({ deck }: { deck: Deck }) {
   return (
     <div className="group relative rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden hover:border-[var(--primary)] transition-colors">
       <Link href={`/slides/${deck.id}`} className="block">
-        <div className="aspect-video bg-[var(--muted)] flex items-center justify-center">
+        <div className="aspect-video bg-[var(--muted)] flex items-center justify-center overflow-hidden">
           {deck.thumbnail_url ? (
             <img src={deck.thumbnail_url} alt="" className="w-full h-full object-cover" />
+          ) : deck.bundle_path ? (
+            <iframe
+              src={`/api/hosted/${deck.id}/index.html`}
+              title={deck.name}
+              className="w-full h-full border-none pointer-events-none"
+              style={{ transform: 'scale(0.25)', transformOrigin: 'top left', width: '400%', height: '400%' }}
+              sandbox="allow-scripts allow-same-origin"
+              tabIndex={-1}
+            />
           ) : (
             <span className="text-[var(--muted-foreground)] text-sm">No preview</span>
           )}

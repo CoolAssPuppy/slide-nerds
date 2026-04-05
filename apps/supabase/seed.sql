@@ -71,14 +71,4 @@ on conflict (id) do nothing;
 insert into public.subscriptions (user_id, stripe_customer_id, stripe_subscription_id, plan, status)
 values ('00000000-0000-0000-0000-000000000001', 'cus_test_000001', 'sub_test_000001', 'team', 'active');
 
--- Create a sample deck
-insert into public.decks (id, owner_id, name, slug, is_public, slide_count, source_type)
-values (
-  '00000000-0000-0000-0000-000000000002',
-  '00000000-0000-0000-0000-000000000001',
-  'Sample Sales Deck',
-  'sample-sales-deck',
-  false,
-  0,
-  'push'
-);
+-- No sample decks -- test user starts with a clean slate

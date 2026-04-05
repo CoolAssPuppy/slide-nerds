@@ -90,7 +90,18 @@ export async function GET(request: Request, context: RouteContext) {
 
   const contentType = getContentType(filePath)
   const cacheControl = getCacheControl(filePath)
-  const arrayBuffer = await data.arrayBuffer()
+  let arrayBuffer = await data.arrayBuffer()
+
+  // Rewrite absolute asset paths in HTML so they resolve relative to this
+  // endpoint instead of the host app's root. e.g. "/_next/..." becomes
+  // "./_next/..." which the browser resolves as /api/hosted/{deckId}/_next/...
+  if (filePath.endsWith('.html')) {
+    const html = new TextDecoder().decode(arrayBuffer)
+    const rewritten = html
+      .replace(/(href|src)="\/(?!\/)/g, '$1="./')
+      .replace(/(href|src)='\/(?!\/)/g, "$1='./")
+    arrayBuffer = new TextEncoder().encode(rewritten).buffer as ArrayBuffer
+  }
 
   return new NextResponse(arrayBuffer, {
     headers: {

@@ -129,7 +129,7 @@ function DeckViewer({ deck }: { deck: Deck }) {
         title={deck.name}
         className="w-full h-full border-none"
         allow="fullscreen"
-        sandbox={isSandboxed ? 'allow-scripts' : undefined}
+        sandbox={isSandboxed ? 'allow-scripts allow-same-origin' : undefined}
       />
     </div>
   )

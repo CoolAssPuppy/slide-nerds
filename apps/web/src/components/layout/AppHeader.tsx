@@ -25,9 +25,10 @@ export function AppHeader({ user, displayName, avatarUrl }: AppHeaderProps) {
   const firstName = displayName?.split(' ')[0] || user.email?.split('@')[0] || 'friend'
 
   const greeting = useMemo(() => {
-    const idx = Math.floor(Math.random() * GREETINGS.length)
-    return GREETINGS[idx]
-  }, [])
+    // Deterministic hash from user ID so server and client pick the same greeting
+    const hash = user.id.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
+    return GREETINGS[hash % GREETINGS.length]
+  }, [user.id])
 
   const initials = (displayName || user.email || '?')
     .split(' ')
