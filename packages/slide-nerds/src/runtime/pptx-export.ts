@@ -1,9 +1,20 @@
 import { getSlideElements, getNotesForSlide } from './slide-dom.js'
 
-const SLIDE_W = 13.333
-const SLIDE_H = 7.5
-const PX_TO_INCH_X = SLIDE_W / 1920
-const PX_TO_INCH_Y = SLIDE_H / 1080
+const SLIDE_W_IN = 13.333
+const SLIDE_H_IN = 7.5
+
+let slideOriginX = 0
+let slideOriginY = 0
+let pxPerInchX = 1920 / SLIDE_W_IN
+let pxPerInchY = 1080 / SLIDE_H_IN
+
+const calibrateToSlide = (slideEl: Element): void => {
+  const rect = slideEl.getBoundingClientRect()
+  slideOriginX = rect.left
+  slideOriginY = rect.top
+  pxPerInchX = rect.width / SLIDE_W_IN
+  pxPerInchY = rect.height / SLIDE_H_IN
+}
 
 type PptxSlide = {
   addText: (text: string | Array<{ text: string; options?: Record<string, unknown> }>, options: Record<string, unknown>) => void
@@ -41,11 +52,15 @@ const pxToFontPt = (pxStr: string): number => {
 
 const getRect = (el: Element): { x: number; y: number; w: number; h: number } => {
   const rect = el.getBoundingClientRect()
+  const x = (rect.left - slideOriginX) / pxPerInchX
+  const y = (rect.top - slideOriginY) / pxPerInchY
+  const w = rect.width / pxPerInchX
+  const h = rect.height / pxPerInchY
   return {
-    x: rect.left * PX_TO_INCH_X,
-    y: rect.top * PX_TO_INCH_Y,
-    w: rect.width * PX_TO_INCH_X,
-    h: rect.height * PX_TO_INCH_Y,
+    x: Math.max(0, x),
+    y: Math.max(0, y),
+    w: Math.min(w, SLIDE_W_IN - x),
+    h: Math.min(h, SLIDE_H_IN - y),
   }
 }
 
@@ -128,7 +143,7 @@ const addCardSurface = (slide: PptxSlide, el: Element): void => {
   if (bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') return
 
   const borderRadius = parseFloat(cs.borderRadius) || 0
-  const rectRadius = Math.min(borderRadius * PX_TO_INCH_X, 0.2)
+  const rectRadius = Math.min(borderRadius / pxPerInchX, 0.2)
 
   slide.addShape('roundRect', {
     x: rect.x,
@@ -145,23 +160,50 @@ const addCardSurface = (slide: PptxSlide, el: Element): void => {
   })
 }
 
-const addImageElement = (slide: PptxSlide, el: HTMLImageElement): void => {
+const imgToBase64 = async (img: HTMLImageElement): Promise<string | null> => {
+  try {
+    const canvas = document.createElement('canvas')
+    const width = img.naturalWidth || img.width || 100
+    const height = img.naturalHeight || img.height || 100
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    ctx.drawImage(img, 0, 0, width, height)
+    return canvas.toDataURL('image/png')
+  } catch {
+    try {
+      const resp = await fetch(img.src)
+      const blob = await resp.blob()
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = () => resolve(null)
+        reader.readAsDataURL(blob)
+      })
+    } catch {
+      return null
+    }
+  }
+}
+
+const addImageElement = async (slide: PptxSlide, el: HTMLImageElement): Promise<void> => {
   const rect = getRect(el)
   if (rect.w < 0.1 || rect.h < 0.1) return
 
-  const src = el.src
-  if (!src) return
+  const data = await imgToBase64(el)
+  if (!data) return
 
   try {
     slide.addImage({
-      path: src,
+      data,
       x: rect.x,
       y: rect.y,
       w: rect.w,
       h: rect.h,
     })
   } catch {
-    // Image might not be accessible
+    // Image conversion failed
   }
 }
 
@@ -205,7 +247,7 @@ const addSvgElement = (slide: PptxSlide, el: SVGSVGElement): void => {
 
 const processedElements = new Set<Element>()
 
-const walkElement = (slide: PptxSlide, el: Element): void => {
+const walkElement = async (slide: PptxSlide, el: Element): Promise<void> => {
   if (processedElements.has(el)) return
   if (!isVisible(el)) return
   if (el.hasAttribute('data-notes')) return
@@ -213,7 +255,7 @@ const walkElement = (slide: PptxSlide, el: Element): void => {
   const tag = el.tagName.toLowerCase()
 
   if (tag === 'img') {
-    addImageElement(slide, el as HTMLImageElement)
+    await addImageElement(slide, el as HTMLImageElement)
     processedElements.add(el)
     return
   }
@@ -234,7 +276,9 @@ const walkElement = (slide: PptxSlide, el: Element): void => {
     return
   }
 
-  Array.from(el.children).forEach((child) => walkElement(slide, child))
+  for (const child of Array.from(el.children)) {
+    await walkElement(slide, child)
+  }
 }
 
 const hasTextChildren = (el: Element): boolean => {
@@ -305,11 +349,13 @@ export const exportNativePptx = async (
 
     await new Promise((r) => setTimeout(r, 50))
 
+    calibrateToSlide(slideEl)
+
     const pptxSlide = pptx.addSlide()
     pptxSlide.background = { color: getSlideBackground(slideEl) }
 
     const inner = slideEl.firstElementChild || slideEl
-    walkElement(pptxSlide, inner)
+    await walkElement(pptxSlide, inner)
 
     const notes = getNotesForSlide(i)
     if (notes.length > 0) {
