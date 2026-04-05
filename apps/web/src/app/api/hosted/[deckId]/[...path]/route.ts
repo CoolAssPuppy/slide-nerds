@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { checkDeckAccess } from '@/lib/deck-access'
 
 type RouteContext = {
   params: Promise<{ deckId: string; path: string[] }>
@@ -35,35 +37,47 @@ function getContentType(filePath: string): string {
 }
 
 function getCacheControl(filePath: string): string {
-  // Hashed assets (JS/CSS bundles) can be cached forever
   if (/\.[a-f0-9]{8,}\.(js|css|mjs)$/i.test(filePath)) {
     return 'public, max-age=31536000, immutable'
   }
-  // HTML files should revalidate
   if (filePath.endsWith('.html')) {
     return 'public, max-age=0, must-revalidate'
   }
-  // Everything else: cache for 1 hour
   return 'public, max-age=3600'
 }
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { deckId, path } = await context.params
   const filePath = path.join('/')
 
-  // Look up the deck to find its bundle path
-  const { data: deck } = await supabaseAdmin
-    .from('decks')
-    .select('bundle_path, is_public, owner_id, version')
-    .eq('id', deckId)
-    .single()
+  const url = new URL(request.url)
+  const shareToken = url.searchParams.get('token')
 
-  if (!deck?.bundle_path) {
-    return NextResponse.json({ error: 'Deck not found or not uploaded' }, { status: 404 })
+  let userId: string | null = null
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    userId = user?.id ?? null
+  } catch {
+    // No authenticated session -- that's fine for public decks and share tokens
   }
 
-  // Access control is handled by the viewer page (auth gates before iframe embed)
-  // bundle_path is now the extracted directory, not a zip file
+  const { access, deck } = await checkDeckAccess({
+    adminClient: supabaseAdmin,
+    deckId,
+    userId,
+    shareToken,
+  })
+
+  if (!access.granted) {
+    const status = access.reason === 'not_found' ? 404 : 403
+    return NextResponse.json({ error: access.reason }, { status })
+  }
+
+  if (!deck?.bundle_path) {
+    return NextResponse.json({ error: 'Deck not uploaded' }, { status: 404 })
+  }
+
   const storagePath = `${deck.bundle_path}/${filePath}`
 
   const { data, error } = await supabaseAdmin.storage

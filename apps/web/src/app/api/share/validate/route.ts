@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { verifySharePassword } from '@/lib/share-password'
 import { z } from 'zod'
 
 const validateSchema = z.object({
@@ -34,10 +35,12 @@ export async function POST(request: Request) {
 
   switch (type) {
     case 'password': {
-      // Simple comparison for now. In production, use bcrypt.
-      // The password_hash column stores the hash; here we compare directly
-      // since we don't have bcrypt installed yet.
-      if (shareLink.password_hash !== value) {
+      if (!shareLink.password_hash) {
+        return NextResponse.json({ error: 'No password set' }, { status: 403 })
+      }
+
+      const isValid = await verifySharePassword(value, shareLink.password_hash)
+      if (!isValid) {
         return NextResponse.json({ error: 'Incorrect password' }, { status: 403 })
       }
       break

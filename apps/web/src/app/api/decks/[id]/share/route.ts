@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { hashSharePassword } from '@/lib/share-password'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -37,18 +38,22 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   const body = await request.json()
-  const { access_type, allowed_emails, allowed_domains, expires_at } = body as {
+  const { access_type, password, allowed_emails, allowed_domains, expires_at } = body as {
     access_type?: string
+    password?: string
     allowed_emails?: string[]
     allowed_domains?: string[]
     expires_at?: string
   }
+
+  const passwordHash = password ? await hashSharePassword(password) : null
 
   const { data, error } = await supabase
     .from('share_links')
     .insert({
       deck_id: id,
       access_type: access_type || 'public',
+      password_hash: passwordHash,
       allowed_emails: allowed_emails || null,
       allowed_domains: allowed_domains || null,
       expires_at: expires_at || null,

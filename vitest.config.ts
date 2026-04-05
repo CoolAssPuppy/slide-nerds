@@ -5,6 +5,7 @@ export default defineConfig({
     projects: [
       'packages/runtime',
       'packages/cli',
+      'apps/web',
       {
         test: {
           name: 'skills',
