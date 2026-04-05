@@ -17,7 +17,7 @@ export function CopyCodeBlock({ code }: CopyCodeBlockProps) {
   }, [code])
 
   return (
-    <div className="relative w-full max-w-4xl rounded-[var(--n-radius-xl)] border border-[var(--border)] bg-[var(--card)] p-5 text-left">
+    <div className="relative w-full max-w-5xl rounded-[var(--n-radius-xl)] border border-[var(--border)] bg-[var(--card)] p-5 text-left">
       <button
         onClick={handleCopy}
         className="absolute top-3 right-3 p-1.5 rounded-[var(--n-radius-sm)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] transition-colors"

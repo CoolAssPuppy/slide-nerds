@@ -93,13 +93,14 @@ export async function GET(request: Request, context: RouteContext) {
   let arrayBuffer = await data.arrayBuffer()
 
   // Rewrite absolute asset paths in HTML so they resolve relative to this
-  // endpoint instead of the host app's root. e.g. "/_next/..." becomes
-  // "./_next/..." which the browser resolves as /api/hosted/{deckId}/_next/...
+  // endpoint. When a share token is present, append it so sub-resources
+  // (CSS, JS, images) also pass auth.
   if (filePath.endsWith('.html')) {
     const html = new TextDecoder().decode(arrayBuffer)
+    const qs = shareToken ? `?token=${shareToken}` : ''
     const rewritten = html
-      .replace(/(href|src)="\/(?!\/)/g, '$1="./')
-      .replace(/(href|src)='\/(?!\/)/g, "$1='./")
+      .replace(/(href|src)="\/([^"]*?)"/g, (_match, attr, path) => `${attr}="./${path}${qs}"`)
+      .replace(/(href|src)='\/([^']*?)'/g, (_match, attr, path) => `${attr}='./${path}${qs}'`)
     arrayBuffer = new TextEncoder().encode(rewritten).buffer as ArrayBuffer
   }
 
