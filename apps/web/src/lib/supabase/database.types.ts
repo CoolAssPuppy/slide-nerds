@@ -136,6 +136,69 @@ export type Database = {
           },
         ]
       }
+      custom_domains: {
+        Row: {
+          id: string
+          deck_id: string | null
+          team_id: string | null
+          domain: string
+          verification_token: string
+          is_verified: boolean
+          ssl_status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          deck_id?: string | null
+          team_id?: string | null
+          domain: string
+          verification_token?: string
+          is_verified?: boolean
+          ssl_status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          deck_id?: string | null
+          team_id?: string | null
+          domain?: string
+          verification_token?: string
+          is_verified?: boolean
+          ssl_status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      deck_comments: {
+        Row: {
+          id: string
+          deck_id: string
+          slide_index: number | null
+          author_email: string
+          author_name: string | null
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          deck_id: string
+          slide_index?: number | null
+          author_email: string
+          author_name?: string | null
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          deck_id?: string
+          slide_index?: number | null
+          author_email?: string
+          author_name?: string | null
+          content?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       export_counts: {
         Row: {
           id: string

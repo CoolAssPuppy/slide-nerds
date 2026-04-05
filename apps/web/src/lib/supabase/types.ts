@@ -21,3 +21,6 @@ export type Subscription = Tables<'subscriptions'>
 export type Team = Tables<'teams'>
 export type TeamMember = Tables<'team_members'>
 export type BrandConfig = Tables<'brand_configs'>
+export type CustomDomain = Tables<'custom_domains'>
+export type DeckComment = Tables<'deck_comments'>
+export type ExportCount = Tables<'export_counts'>
