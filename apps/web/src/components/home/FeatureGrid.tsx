@@ -1,6 +1,6 @@
 import {
   Sparkles, BookOpen, Terminal, Monitor, LayoutGrid,
-  Keyboard, Wand2, Code2,
+  Keyboard, Wand2, Code2, Blocks, Film,
   Radio, BarChart3, Link, Globe, Users, Palette, FileText,
   FileSpreadsheet, History, MessageSquare, Eye, Lock,
 } from 'lucide-react'
@@ -10,6 +10,8 @@ const OPEN_SOURCE_FEATURES = [
   { icon: BookOpen, title: '18 built-in skills', desc: 'Layout, animation, data viz, diagrams, accessibility, and more.' },
   { icon: Terminal, title: 'CLI workflow', desc: 'Create, build, push, and export from your terminal.' },
   { icon: Code2, title: 'Code is the source', desc: 'Your deck is a Next.js app. Version it, branch it, review it.' },
+  { icon: Blocks, title: 'Embed any React component', desc: 'Drop in live demos, interactive charts, or product features. If it runs in React, it runs in your slide.' },
+  { icon: Film, title: 'Remotion and beyond', desc: 'Build cinematic animations with Remotion, Three.js, or any library. Your slides are just code.' },
   { icon: Monitor, title: 'Presenter mode', desc: 'Speaker notes, timer, and slide preview in a second window.' },
   { icon: LayoutGrid, title: 'Light table', desc: 'See all your slides at a glance and jump to any one.' },
   { icon: Keyboard, title: 'Keyboard shortcuts', desc: 'Navigate, present, and control everything from the keyboard.' },
