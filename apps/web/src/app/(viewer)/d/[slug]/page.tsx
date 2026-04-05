@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import type { Deck } from '@/lib/supabase/types'
 import { AccessGate } from '@/components/viewer/AccessGate'
+import { ViewTracker } from '@/components/viewer/ViewTracker'
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -90,7 +91,7 @@ export default async function DeckViewerPage({ params, searchParams }: PageProps
               shareLink={shareLink}
               deckName={deck.name}
             >
-              <DeckViewer deck={deck} />
+              <DeckViewer deck={deck} shareToken={token} />
             </AccessGate>
           )
         }
@@ -100,10 +101,10 @@ export default async function DeckViewerPage({ params, searchParams }: PageProps
     }
   }
 
-  return <DeckViewer deck={deck} />
+  return <DeckViewer deck={deck} shareToken={token} />
 }
 
-function DeckViewer({ deck }: { deck: Deck }) {
+function DeckViewer({ deck, shareToken }: { deck: Deck; shareToken?: string }) {
   // Hosted content (uploaded bundle) takes priority over external URL
   const hostedUrl = deck.bundle_path
     ? `/api/hosted/${deck.id}/index.html`
@@ -124,6 +125,7 @@ function DeckViewer({ deck }: { deck: Deck }) {
 
   return (
     <div className="h-screen w-screen">
+      <ViewTracker deckId={deck.id} shareToken={shareToken} />
       <iframe
         src={viewerUrl}
         title={deck.name}
