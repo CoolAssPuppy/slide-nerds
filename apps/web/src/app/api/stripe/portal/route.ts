@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { stripe } from '@/lib/stripe/client'
 
-export async function POST() {
+export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -9,14 +10,25 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // TODO: Create Stripe billing portal session
-  // const { data: subscription } = await supabase.from('subscriptions').select('stripe_customer_id').eq('user_id', user.id).single()
-  // const session = await stripe.billingPortal.sessions.create({
-  //   customer: subscription.stripe_customer_id,
-  //   return_url: `${origin}/profile`,
-  // })
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('stripe_customer_id')
+    .eq('user_id', user.id)
+    .single()
 
-  return NextResponse.json({
-    url: '/profile?message=stripe-not-configured',
+  if (!subscription?.stripe_customer_id) {
+    return NextResponse.json(
+      { error: 'No active subscription found. Subscribe first.' },
+      { status: 404 }
+    )
+  }
+
+  const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: subscription.stripe_customer_id,
+    return_url: `${origin}/profile`,
   })
+
+  return NextResponse.json({ url: session.url })
 }

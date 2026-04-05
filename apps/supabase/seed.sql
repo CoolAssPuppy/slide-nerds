@@ -67,9 +67,9 @@ insert into public.profiles (id, display_name)
 values ('00000000-0000-0000-0000-000000000001', 'Test User')
 on conflict (id) do nothing;
 
--- Create a free subscription
-insert into public.subscriptions (user_id, plan, status)
-values ('00000000-0000-0000-0000-000000000001', 'free', 'active');
+-- Create a team subscription (highest tier) for the test user
+insert into public.subscriptions (user_id, stripe_customer_id, stripe_subscription_id, plan, status)
+values ('00000000-0000-0000-0000-000000000001', 'cus_test_000001', 'sub_test_000001', 'team', 'active');
 
 -- Create a sample deck
 insert into public.decks (id, owner_id, name, slug, is_public, slide_count, source_type)

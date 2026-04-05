@@ -1,10 +1,14 @@
-import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { PricingButton } from '@/components/billing/PricingButton'
+import type { Subscription } from '@/lib/supabase/types'
+import type { Plan } from '@/lib/stripe/config'
 
 export const metadata = { title: 'Pricing' }
 
 const PLANS = [
   {
-    name: 'Free',
+    name: 'Free' as const,
+    plan: 'free' as Plan,
     price: '$0',
     period: 'forever',
     features: [
@@ -13,12 +17,11 @@ const PLANS = [
       '5 exports per month',
       'Basic analytics',
     ],
-    cta: 'Get started',
-    href: '/signup',
     highlighted: false,
   },
   {
-    name: 'Pro',
+    name: 'Pro' as const,
+    plan: 'pro' as Plan,
     price: '$12',
     period: 'per month',
     features: [
@@ -29,12 +32,11 @@ const PLANS = [
       'Full analytics',
       'Live presentations',
     ],
-    cta: 'Start free trial',
-    href: '/signup',
     highlighted: true,
   },
   {
-    name: 'Team',
+    name: 'Team' as const,
+    plan: 'team' as Plan,
     price: '$29',
     period: 'per seat / month',
     features: [
@@ -45,13 +47,27 @@ const PLANS = [
       'Priority export',
       'SSO (coming soon)',
     ],
-    cta: 'Contact us',
-    href: '/signup',
     highlighted: false,
   },
 ] as const
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let currentPlan: Plan = 'free'
+  if (user) {
+    const { data: subData } = await supabase
+      .from('subscriptions')
+      .select('plan')
+      .eq('user_id', user.id)
+      .single()
+    const sub = subData as Pick<Subscription, 'plan'> | null
+    currentPlan = (sub?.plan ?? 'free') as Plan
+  }
+
+  const isAuthenticated = Boolean(user)
+
   return (
     <div className="max-w-5xl mx-auto py-20 px-6">
       <div className="text-center mb-16">
@@ -89,16 +105,14 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href={plan.href}
-              className={`mt-6 block text-center py-2.5 rounded-[var(--n-radius-md)] text-sm font-medium transition-opacity ${
-                plan.highlighted
-                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90'
-                  : 'border border-[var(--border)] hover:bg-[var(--accent)]'
-              }`}
-            >
-              {plan.cta}
-            </Link>
+            <div className="mt-6">
+              <PricingButton
+                plan={plan.plan}
+                currentPlan={currentPlan}
+                isAuthenticated={isAuthenticated}
+                isHighlighted={plan.highlighted}
+              />
+            </div>
           </div>
         ))}
       </div>
