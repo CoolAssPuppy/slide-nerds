@@ -57,7 +57,7 @@ npx supabase gen types typescript --local > ../web/src/lib/supabase/database.typ
 
 ```
 NEXT_PUBLIC_SUPABASE_URL       -- Supabase API URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY  -- Supabase publishable key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY  -- Supabase publishable key
 STRIPE_SECRET_KEY              -- Stripe secret (for billing, optional)
 STRIPE_WEBHOOK_SECRET          -- Stripe webhook signing secret (optional)
 ```
