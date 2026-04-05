@@ -18,7 +18,7 @@ const PLANS = [
   {
     name: 'Pro' as const,
     plan: 'pro' as Plan,
-    price: '$12',
+    price: '$4',
     period: 'per month',
     features: [
       'Unlimited decks',
@@ -33,7 +33,7 @@ const PLANS = [
   {
     name: 'Team' as const,
     plan: 'team' as Plan,
-    price: '$29',
+    price: '$9',
     period: 'per seat / month',
     features: [
       'Everything in Pro',
