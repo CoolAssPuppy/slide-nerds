@@ -19,9 +19,6 @@ declare global {
 
 const SLIDE_WIDTH = 1920
 const SLIDE_HEIGHT = 1080
-const PPTX_WIDTH_IN = 13.333
-const PPTX_HEIGHT_IN = 7.5
-
 const yieldToMain = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0))
 
@@ -124,15 +121,6 @@ const captureSlides = async (
   return images
 }
 
-const downloadBlob = (blob: Blob, filename: string): void => {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
 const showProgress = (): {
   element: HTMLElement
   update: (current: number, total: number) => void
@@ -194,26 +182,8 @@ const exportPdf = async (): Promise<void> => {
 const exportPptx = async (): Promise<void> => {
   const progress = showProgress()
   try {
-    const PptxGenJS = (await import(/* webpackIgnore: true */ 'pptxgenjs')).default
-    const images = await captureSlides(progress.update, progress.element)
-    if (images.length === 0) return
-
-    const pptx = new PptxGenJS()
-    pptx.layout = 'LAYOUT_WIDE'
-
-    for (const imgData of images) {
-      const slide = pptx.addSlide()
-      slide.addImage({
-        data: imgData,
-        x: 0,
-        y: 0,
-        w: PPTX_WIDTH_IN,
-        h: PPTX_HEIGHT_IN,
-      })
-    }
-
-    const blob = (await pptx.write({ outputType: 'blob' })) as Blob
-    downloadBlob(blob, 'presentation.pptx')
+    const { exportNativePptx } = await import('./pptx-export.js')
+    await exportNativePptx(progress.update)
   } finally {
     progress.remove()
   }
