@@ -7,7 +7,7 @@ import {
 
 const OPEN_SOURCE_FEATURES = [
   { icon: Sparkles, title: 'LLM-powered creation', desc: 'Use Claude, GPT, or any LLM to generate slides from a prompt.' },
-  { icon: BookOpen, title: '18 built-in skills', desc: 'Layout, animation, data viz, diagrams, accessibility, and more.' },
+  { icon: BookOpen, title: '19 built-in skills', desc: 'Layout, animation, data viz, diagrams, accessibility, and more.' },
   { icon: Terminal, title: 'CLI workflow', desc: 'Create, build, push, and export from your terminal.' },
   { icon: Code2, title: 'Code is the source', desc: 'Your deck is a Next.js app. Version it, branch it, review it.' },
   { icon: Blocks, title: 'Embed React components', desc: 'Live demos, charts, and interactive features on any slide.' },

@@ -87,7 +87,7 @@ export function AnalyticsComposition() {
           Build, version, and ship your decks with the tools you already use.
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          {['AI-powered', '18 skills', 'Ship anywhere'].map((t) => (
+          {['AI-powered', '19 skills', 'Ship anywhere'].map((t) => (
             <div key={t} style={{
               fontSize: 11,
               color: MUTED,
