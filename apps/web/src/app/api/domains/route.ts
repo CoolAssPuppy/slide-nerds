@@ -79,6 +79,26 @@ export async function DELETE(request: Request) {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
+  const { data: domain } = await supabase
+    .from('custom_domains')
+    .select('id, deck_id')
+    .eq('id', id)
+    .single()
+
+  if (!domain) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  const { data: deck } = await supabase
+    .from('decks')
+    .select('owner_id')
+    .eq('id', domain.deck_id)
+    .single()
+
+  if (!deck || deck.owner_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   await supabase.from('custom_domains').delete().eq('id', id)
 
   return NextResponse.json({ deleted: true })

@@ -34,6 +34,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { data: config } = await supabase
+    .from('brand_configs')
+    .select('id, owner_id')
+    .eq('id', id)
+    .single()
+
+  if (!config || config.owner_id !== user.id) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   const body = await request.json()
   const allowed = ['name', 'config']
   const updates: Record<string, unknown> = {}
@@ -55,7 +65,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
   }
 
   return NextResponse.json(data)
@@ -69,13 +79,23 @@ export async function DELETE(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { data: config } = await supabase
+    .from('brand_configs')
+    .select('id, owner_id')
+    .eq('id', id)
+    .single()
+
+  if (!config || config.owner_id !== user.id) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   const { error } = await supabase
     .from('brand_configs')
     .delete()
     .eq('id', id)
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

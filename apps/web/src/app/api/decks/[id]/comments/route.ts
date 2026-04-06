@@ -63,6 +63,16 @@ export async function DELETE(request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { data: deck } = await supabase
+    .from('decks')
+    .select('id, owner_id')
+    .eq('id', id)
+    .single()
+
+  if (!deck || deck.owner_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const { searchParams } = new URL(request.url)
   const commentId = searchParams.get('commentId')
   if (!commentId) return NextResponse.json({ error: 'Missing commentId' }, { status: 400 })

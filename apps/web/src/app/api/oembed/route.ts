@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     thumbnail_url: deck.thumbnail_url ?? undefined,
     width: 960,
     height: 540,
-    html: `<iframe src="${url}" width="960" height="540" frameborder="0" allowfullscreen title="${deck.name}"></iframe>`,
+    html: `<iframe src="${url}" width="960" height="540" frameborder="0" allowfullscreen title="${deck.name.replace(/[&<>"']/g, (c: string) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] ?? c))}"></iframe>`,
   }
 
   return NextResponse.json(response, {

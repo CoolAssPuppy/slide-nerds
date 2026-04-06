@@ -82,7 +82,7 @@ export const verifyTelemetryToken = (
 }
 
 export const getTelemetrySecret = (): string => {
-  const secret = process.env.SLIDENERDS_TELEMETRY_SECRET ?? process.env.NEXTAUTH_SECRET
+  const secret = process.env.SLIDENERDS_TELEMETRY_SECRET
   if (secret) return secret
 
   if (process.env.NODE_ENV === 'development') {

@@ -42,7 +42,14 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   const results = polls.map((poll) => {
-    const options = typeof poll.options === 'string' ? JSON.parse(poll.options) : poll.options
+    let options: string[] = []
+    try {
+      options = typeof poll.options === 'string'
+        ? JSON.parse(poll.options)
+        : Array.isArray(poll.options) ? poll.options : []
+    } catch {
+      options = []
+    }
     const pollVotes = voteCounts.get(poll.id) ?? new Map<number, number>()
     const totalVotes = Array.from(pollVotes.values()).reduce((sum, count) => sum + count, 0)
 
