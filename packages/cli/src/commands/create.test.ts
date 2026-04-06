@@ -63,7 +63,7 @@ describe('scaffoldProject', () => {
     await scaffoldProject('test-deck', targetDir)
 
     const pkg = JSON.parse(await fs.readFile(path.join(targetDir, 'package.json'), 'utf-8'))
-    expect(pkg.dependencies['@slidenerds/runtime']).toBeDefined()
+    expect(pkg.dependencies['@strategicnerds/slide-nerds']).toBeDefined()
     expect(pkg.dependencies['next']).toBeDefined()
     expect(pkg.dependencies['react']).toBeDefined()
   })
@@ -77,7 +77,7 @@ describe('scaffoldProject', () => {
 
     const layout = await fs.readFile(path.join(targetDir, 'app', 'layout.tsx'), 'utf-8')
     expect(layout).toContain('SlideRuntime')
-    expect(layout).toContain("import { SlideRuntime } from '@slidenerds/runtime'")
+    expect(layout).toContain("import { SlideRuntime } from '@strategicnerds/slide-nerds'")
   })
 
   it('should create manifest and slide files using data conventions', async () => {
