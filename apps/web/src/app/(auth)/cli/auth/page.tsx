@@ -1,10 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function CliAuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-[var(--muted-foreground)]">Loading...</p>
+      </div>
+    }>
+      <CliAuthContent />
+    </Suspense>
+  )
+}
+
+function CliAuthContent() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callback')
   const [email, setEmail] = useState('')
