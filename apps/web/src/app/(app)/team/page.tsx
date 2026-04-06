@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 import { TeamMemberList } from '@/components/team/TeamMemberList'
 
 export const metadata = { title: 'Team' }
@@ -21,21 +20,42 @@ export default async function TeamPage() {
   }>
 
   if (teams.length === 0) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name, first_name, last_name')
+      .eq('id', user!.id)
+      .single()
+
+    const displayName = profile?.display_name
+      ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+      ?? 'My Team'
+    const slug = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'my-team'
+
+    const { data: newTeam } = await supabase
+      .from('teams')
+      .insert({ name: `${displayName}'s Team`, slug: `${slug}-${Date.now()}`, owner_id: user!.id })
+      .select()
+      .single()
+
+    if (newTeam) {
+      await supabase
+        .from('team_members')
+        .insert({ team_id: newTeam.id, user_id: user!.id, role: 'owner' })
+
+      return (
+        <div className="max-w-3xl">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-2xl font-bold">Team</h1>
+          </div>
+          <TeamMemberList teamId={newTeam.id} teammates={[]} canManage={true} />
+        </div>
+      )
+    }
+
     return (
       <div className="max-w-2xl">
         <h1 className="text-2xl font-bold mb-8">Team</h1>
-        <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-8 text-center">
-          <p className="text-[var(--muted-foreground)]">You are not part of any team yet.</p>
-          <p className="text-sm text-[var(--muted-foreground)] mt-1">
-            Teams are available on the Team plan.
-          </p>
-          <Link
-            href="/account"
-            className="inline-block mt-4 px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium"
-          >
-            Upgrade plan
-          </Link>
-        </div>
+        <p className="text-[var(--muted-foreground)]">Something went wrong. Please try again.</p>
       </div>
     )
   }
