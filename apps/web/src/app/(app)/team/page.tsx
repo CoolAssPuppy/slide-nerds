@@ -52,8 +52,9 @@ export default async function TeamPage() {
 
       return (
         <div className="max-w-3xl">
-          <div className="flex items-center justify-between mb-8">
+          <div className="mb-8">
             <h1 className="text-2xl font-bold">Team</h1>
+            <p className="text-sm text-[var(--muted-foreground)] mt-1">Everyone you&apos;re collaborating with on slides.</p>
           </div>
           <TeamMemberList teamId={newTeam.id} teammates={[]} canManage={true} />
         </div>
@@ -132,8 +133,9 @@ export default async function TeamPage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">{team.teams?.name ?? 'Team'}</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold">Team</h1>
+        <p className="text-sm text-[var(--muted-foreground)] mt-1">Everyone you&apos;re collaborating with on slides.</p>
       </div>
 
       <TeamMemberList

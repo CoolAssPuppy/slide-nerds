@@ -126,6 +126,17 @@ export function TeamMemberList({ teamId, teammates, canManage }: TeamMemberListP
 
   return (
     <>
+      {canManage && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setIsDialogOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90"
+          >
+            <UserPlus className="w-4 h-4" />
+            Invite teammate
+          </button>
+        </div>
+      )}
       <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
