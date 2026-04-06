@@ -14,3 +14,4 @@ CREATE POLICY "Team owners can manage invites"
 CREATE POLICY "Anyone can read invites by token"
   ON public.team_invites FOR SELECT
   USING (true);
+
