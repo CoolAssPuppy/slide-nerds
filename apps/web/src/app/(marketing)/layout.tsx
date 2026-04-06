@@ -1,6 +1,10 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 
-export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+export default async function MarketingLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between h-14 px-6 border-b border-[var(--border)]">
@@ -12,10 +16,10 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             Docs
           </Link>
           <Link
-            href="/login"
+            href={user ? '/slides' : '/login'}
             className="text-sm font-medium px-4 py-1.5 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
           >
-            Sign in
+            {user ? 'Dashboard' : 'Sign in'}
           </Link>
         </nav>
       </header>
