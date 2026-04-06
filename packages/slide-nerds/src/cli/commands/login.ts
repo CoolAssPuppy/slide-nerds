@@ -82,7 +82,7 @@ export const registerLoginCommand = (program: Command): void => {
   program
     .command('login')
     .description('Authenticate with slidenerds.com')
-    .option('--url <url>', 'Service URL', 'https://slidenerds.com')
+    .option('--url <url>', 'Service URL', 'https://www.slidenerds.com')
     .action(async (options: { url: string }) => {
       const success = await loginFlow(options.url)
       if (success) {

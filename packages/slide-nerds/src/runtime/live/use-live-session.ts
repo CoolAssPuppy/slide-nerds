@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react'
 
-const DEFAULT_SERVICE_URL = 'https://slidenerds.com'
+const DEFAULT_SERVICE_URL = 'https://www.slidenerds.com'
 const POLL_INTERVAL_MS = 5000
 
 const subscribe = () => () => {}

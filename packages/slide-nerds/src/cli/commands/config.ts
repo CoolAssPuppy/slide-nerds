@@ -54,5 +54,5 @@ export const saveProjectConfig = async (
 
 export const getServiceUrl = async (): Promise<string> => {
   const creds = await getCredentials()
-  return creds?.url ?? 'https://slidenerds.com'
+  return creds?.url ?? 'https://www.slidenerds.com'
 }
