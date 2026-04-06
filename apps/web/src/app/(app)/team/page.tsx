@@ -31,16 +31,24 @@ export default async function TeamPage() {
       ?? 'My Team'
     const slug = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'my-team'
 
-    const { data: newTeam } = await supabase
+    const { data: newTeam, error: teamError } = await supabase
       .from('teams')
       .insert({ name: `${displayName}'s Team`, slug: `${slug}-${Date.now()}`, owner_id: user!.id })
       .select()
       .single()
 
+    if (teamError) {
+      console.error('Team creation failed:', teamError.message, teamError.code)
+    }
+
     if (newTeam) {
-      await supabase
+      const { error: memberError } = await supabase
         .from('team_members')
         .insert({ team_id: newTeam.id, user_id: user!.id, role: 'owner' })
+
+      if (memberError) {
+        console.error('Team member insert failed:', memberError.message, memberError.code)
+      }
 
       return (
         <div className="max-w-3xl">
@@ -55,7 +63,9 @@ export default async function TeamPage() {
     return (
       <div className="max-w-2xl">
         <h1 className="text-2xl font-bold mb-8">Team</h1>
-        <p className="text-[var(--muted-foreground)]">Something went wrong. Please try again.</p>
+        <p className="text-[var(--muted-foreground)]">
+          Could not create your team. {teamError?.message ?? 'Please try again.'}
+        </p>
       </div>
     )
   }
