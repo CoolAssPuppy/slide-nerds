@@ -59,12 +59,16 @@ export const useLiveApi = (options: UseLiveSessionOptions) => {
     if (!sessionName || !deckId) return
 
     const resolve = async () => {
-      const resp = await fetch(
-        `${serviceUrl}/api/live/resolve?deck_id=${encodeURIComponent(deckId)}&name=${encodeURIComponent(sessionName)}`,
-      )
-      if (resp.ok) {
-        const data = await resp.json()
-        setResolvedSessionId(data.session_id)
+      try {
+        const resp = await fetch(
+          `${serviceUrl}/api/live/resolve?deck_id=${encodeURIComponent(deckId)}&name=${encodeURIComponent(sessionName)}`,
+        )
+        if (resp.ok) {
+          const data = await resp.json()
+          setResolvedSessionId(data.session_id)
+        }
+      } catch {
+        // Resolution failed, component will show "no session" state
       }
     }
     resolve()
@@ -127,10 +131,16 @@ export const usePolling = <T>(
     mountedRef.current = true
 
     const poll = async () => {
-      const result = await fetcher()
-      if (mountedRef.current) {
-        setData(result)
-        setIsLoading(false)
+      try {
+        const result = await fetcher()
+        if (mountedRef.current) {
+          setData(result)
+          setIsLoading(false)
+        }
+      } catch {
+        if (mountedRef.current) {
+          setIsLoading(false)
+        }
       }
     }
 

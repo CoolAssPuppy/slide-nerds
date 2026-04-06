@@ -8,7 +8,7 @@ import type { Deck } from '@/lib/supabase/types'
 type LiveSession = {
   id: string
   name: string | null
-  status: string
+  status: 'active' | 'ended'
   audience_count: number | null
   started_at: string
   ended_at: string | null
@@ -31,10 +31,13 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
   const supabase = createClient()
 
   const fetchSessions = useCallback(async () => {
-    const resp = await fetch(`/api/decks/${deck.id}/live-sessions`)
-    if (resp.ok) {
-      const data = await resp.json()
-      setSessions(data)
+    try {
+      const resp = await fetch(`/api/decks/${deck.id}/live-sessions`)
+      if (resp.ok) {
+        setSessions(await resp.json())
+      }
+    } catch {
+      // Network error, sessions will show stale data
     }
   }, [deck.id])
 
@@ -68,14 +71,18 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
   }
 
   const handleDeleteSession = async (sessionId: string) => {
-    await fetch(`/api/decks/${deck.id}/live-sessions/${sessionId}`, { method: 'DELETE' })
-    if (createdSessionId === sessionId) setCreatedSessionId(null)
-    await fetchSessions()
+    try {
+      await fetch(`/api/decks/${deck.id}/live-sessions/${sessionId}`, { method: 'DELETE' })
+      if (createdSessionId === sessionId) setCreatedSessionId(null)
+      await fetchSessions()
+    } catch {
+      setSessionError('Failed to delete session')
+    }
   }
 
   const handleSave = async () => {
     setSaving(true)
-    await supabase
+    const { error } = await supabase
       .from('decks')
       .update({
         name,
@@ -87,6 +94,10 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
       .eq('id', deck.id)
 
     setSaving(false)
+    if (error) {
+      setSessionError('Failed to save settings')
+      return
+    }
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
     router.refresh()

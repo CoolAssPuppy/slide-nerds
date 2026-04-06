@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { DeckGrid } from './DeckGrid'
 import type { Deck } from '@/lib/supabase/types'
@@ -13,7 +13,7 @@ type DeckListRealtimeProps = {
 
 export function DeckListRealtime({ initialDecks, viewerCounts, userId }: DeckListRealtimeProps) {
   const [decks, setDecks] = useState(initialDecks)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     setDecks(initialDecks)

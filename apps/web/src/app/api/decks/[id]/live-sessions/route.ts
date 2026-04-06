@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createApiClient } from '@/lib/supabase/api-client'
 import { z } from 'zod'
 
 type RouteContext = {
   params: Promise<{ id: string }>
 }
 
-export async function GET(_request: Request, { params }: RouteContext) {
+export async function GET(request: Request, { params }: RouteContext) {
   const { id: deckId } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { supabase, user } = await createApiClient(request)
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -32,7 +31,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     .order('started_at', { ascending: false })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
   }
 
   return NextResponse.json(data)
@@ -44,8 +43,7 @@ const CreateSessionSchema = z.object({
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { id: deckId } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { supabase, user } = await createApiClient(request)
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -86,7 +84,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     if (error.code === '23505') {
       return NextResponse.json({ error: 'A session with that name already exists' }, { status: 409 })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
   }
 
   return NextResponse.json(data, { status: 201 })

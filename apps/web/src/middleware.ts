@@ -17,7 +17,7 @@ export const middleware = async (request: NextRequest) => {
       return new NextResponse(null, { status: 204, headers: LIVE_API_CORS })
     }
 
-    const response = await updateSession(request)
+    const response = NextResponse.next()
     for (const [key, value] of Object.entries(LIVE_API_CORS)) {
       response.headers.set(key, value)
     }

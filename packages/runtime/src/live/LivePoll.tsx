@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useMemo } from 'react'
 
 import { useLiveApi, usePolling, useHasMounted } from './use-live-session.js'
 import type { LiveComponentProps, PollResult } from './types.js'
@@ -98,10 +98,11 @@ export const LivePoll: React.FC<LivePollProps> = ({
   serviceUrl,
 }) => {
   const mounted = useHasMounted()
-  const { post, get } = useLiveApi({ sessionId, sessionName, deckId, serviceUrl })
+  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, sessionName, deckId, serviceUrl })
   const [hasVoted, setHasVoted] = useState(false)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
+  const stableOptions = useMemo(() => options, [options.join('\0')])
   const hasCreatedRef = useRef(false)
 
   const ensurePollExists = useCallback(async (): Promise<PollResult | null> => {
@@ -116,7 +117,7 @@ export const LivePoll: React.FC<LivePollProps> = ({
       hasCreatedRef.current = true
       const createResp = await post('/poll', {
         question,
-        options,
+        options: stableOptions,
         slide_index: 0,
       })
       if (createResp && createResp.ok) {
@@ -127,13 +128,13 @@ export const LivePoll: React.FC<LivePollProps> = ({
           slide_index: 0,
           is_active: true,
           total_votes: 0,
-          options: options.map((label, index) => ({ label, index, votes: 0 })),
+          options: stableOptions.map((label, index) => ({ label, index, votes: 0 })),
         }
       }
     }
 
     return null
-  }, [get, post, question, options])
+  }, [get, post, question, stableOptions])
 
   const { data: pollResult } = usePolling(ensurePollExists)
 
@@ -153,7 +154,6 @@ export const LivePoll: React.FC<LivePollProps> = ({
     }
   }
 
-  const resolvedSessionId = useLiveApi({ sessionId, sessionName, deckId, serviceUrl }).sessionId
   if (!mounted || !resolvedSessionId) {
     return (
       <div style={styles.container}>
