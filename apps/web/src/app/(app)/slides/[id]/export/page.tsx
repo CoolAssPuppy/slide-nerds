@@ -31,42 +31,22 @@ export default async function ExportPage({ params }: PageProps) {
         <span className="text-sm text-[var(--muted-foreground)]">{deck.name}</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">
-          <h3 className="font-semibold mb-2">Export as PDF</h3>
-          <p className="text-sm text-[var(--muted-foreground)] mb-4">
-            Server-rendered PDF at 1920x1080. Pixel-perfect, handles all CSS and SVGs.
+      <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">
+        <h3 className="font-semibold mb-2">Export as PDF</h3>
+        <p className="text-sm text-[var(--muted-foreground)] mb-4">
+          Server-rendered PDF at 1920x1080. Pixel-perfect, handles all CSS and SVGs.
+        </p>
+        <button
+          className="px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
+          disabled={!deck.url && !deck.deployed_url}
+        >
+          Export PDF
+        </button>
+        {!deck.url && !deck.deployed_url && (
+          <p className="text-xs text-[var(--muted-foreground)] mt-2">
+            Add a deployed URL in settings first.
           </p>
-          <button
-            className="px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
-            disabled={!deck.url && !deck.deployed_url}
-          >
-            Export PDF
-          </button>
-          {!deck.url && !deck.deployed_url && (
-            <p className="text-xs text-[var(--muted-foreground)] mt-2">
-              Add a deployed URL in settings first.
-            </p>
-          )}
-        </div>
-
-        <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">
-          <h3 className="font-semibold mb-2">Export as PPTX</h3>
-          <p className="text-sm text-[var(--muted-foreground)] mb-4">
-            Native PowerPoint file with editable text, shapes, and images.
-          </p>
-          <button
-            className="px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
-            disabled={!deck.url && !deck.deployed_url}
-          >
-            Export PPTX
-          </button>
-          {!deck.url && !deck.deployed_url && (
-            <p className="text-xs text-[var(--muted-foreground)] mt-2">
-              Add a deployed URL in settings first.
-            </p>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )

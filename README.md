@@ -6,7 +6,7 @@ A presentation runtime for Next.js, a skill library that teaches LLMs to build g
 
 **The skill library** gives LLMs the procedural knowledge to build slides correctly. 20 skills covering layout, animation, data visualization, strategic frameworks, narrative structure, diagrams, live presentation components, accessibility, and more.
 
-**The CLI** scaffolds new decks, pushes them to slidenerds.com, manages brand configs, and exports to PDF and PPTX.
+**The CLI** scaffolds new decks, links them to slidenerds.com, manages brand configs, and exports to PDF.
 
 **The service** at slidenerds.com hosts your decks with shareable URLs, view analytics, access controls, team workspaces, brand management, live presentations, and server-side export.
 
@@ -246,7 +246,7 @@ slidenerds brand list              # List all saved brands
 | `data-visualization` | 13 chart types with Recharts |
 | `deck-templates` | Slide sequences for investor pitch, product launch, sales deck |
 | `diagrams` | Flowcharts, org charts, sequence diagrams, mind maps, C4 |
-| `export` | PDF, PPTX, Google Slides export |
+| `export` | PDF export |
 | `interactive` | Video embeds, QR codes, links, iframes, click-to-zoom |
 | `live` | Live polls, reactions, Q&A, word clouds, audience count |
 | `narrative-frameworks` | SCQA, Minto Pyramid, PAS, BAB, Sparkline |
@@ -266,7 +266,6 @@ slidenerds brand list              # List all saved brands
 # Create and develop
 slidenerds create my-talk         # Scaffold a new deck
 slidenerds export --pdf           # Export to PDF
-slidenerds export --pptx          # Export to PowerPoint
 
 # Register on slidenerds.com
 slidenerds login                  # Authenticate with the service
@@ -292,7 +291,7 @@ Push your deck and get:
 - **Team workspaces** with shared decks and brand configs
 - **Custom domains** with automatic SSL
 - **Live presentations** with real-time slide sync, polls, reactions, Q&A
-- **Server-side export** to PDF and PPTX from the web UI
+- **Server-side export** to PDF from the web UI
 - **Version history** with rollback to any previous push
 - **Comments** for slide-level feedback from reviewers
 

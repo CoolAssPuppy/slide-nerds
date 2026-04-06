@@ -1,28 +1,7 @@
 import type { NextConfig } from 'next'
-import webpack from 'webpack'
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve = config.resolve || {}
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        stream: false,
-        crypto: false,
-      }
-
-      config.plugins = [
-        ...(config.plugins || []),
-        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
-          resource.request = resource.request.replace(/^node:/, '')
-        }),
-      ]
-    }
-    return config
-  },
 }
 
 export default nextConfig

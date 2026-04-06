@@ -4,8 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { SlideContext } from './slide-context.js'
 import { useSlideNavigation } from './use-slide-navigation.js'
 import { usePresenterMode } from './use-presenter-mode.js'
-// Lazy import to avoid bundling pptxgenjs/jspdf in the client bundle
-const registerExportApi = () => import('./export-api.js').then((m) => m.registerExportApi())
+import { registerExportApi } from './export-api.js'
 import { SlideControls } from './slide-controls.js'
 import { PresenterView } from './presenter-view.js'
 import { LightTable } from './light-table.js'

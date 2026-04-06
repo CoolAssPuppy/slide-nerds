@@ -12,7 +12,7 @@ const PLANS = [
       'Full runtime + 20 skills',
       'Presenter mode + Light Table',
       'Embed any React component',
-      'CLI export to PDF and PPTX',
+      'CLI export to PDF',
       'No account required',
     ],
     highlighted: false,

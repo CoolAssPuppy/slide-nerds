@@ -163,15 +163,15 @@ export default function DocsPage() {
 
       {/* Step 8 */}
       <section className="mt-16">
-        <StepHeader number="8" title="Export to PDF or PowerPoint" />
+        <StepHeader number="8" title="Export to PDF" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Export from the deck detail page or from the CLI.
         </p>
         <div className="mt-4">
-          <CopyCodeBlock code={`slidenerds export --pdf\nslidenerds export --pptx`} />
+          <CopyCodeBlock code={`slidenerds export --pdf`} />
         </div>
         <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-          PDF export renders server-side at 1920x1080 with full CSS support. PPTX export extracts slide content into a native PowerPoint file.
+          PDF export renders server-side at 1920x1080 with full CSS support.
         </p>
       </section>
 
@@ -255,7 +255,7 @@ export default function DocsPage() {
                 ['data-visualization', 'Charts, graphs, and data displays'],
                 ['deck-templates', 'Complete deck scaffolds by type'],
                 ['diagrams', 'Flowcharts, architecture diagrams, timelines'],
-                ['export', 'PDF and PPTX export configuration'],
+                ['export', 'PDF export configuration'],
                 ['interactive', 'Interactive elements and live demos'],
                 ['narrative-frameworks', 'Story structures and presentation flow'],
                 ['react-component-embeds', 'Embedding React components in slides'],

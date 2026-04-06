@@ -2,7 +2,7 @@ import {
   Sparkles, BookOpen, Terminal, Monitor, LayoutGrid,
   Keyboard, Wand2, Code2, Blocks, Film,
   Radio, BarChart3, Link, Globe, Users, Palette, FileText,
-  FileSpreadsheet, History, MessageSquare, Eye, Lock,
+  History, MessageSquare, Eye, Lock,
 } from 'lucide-react'
 
 const OPEN_SOURCE_FEATURES = [
@@ -28,7 +28,6 @@ const SERVICE_FEATURES = [
   { icon: Radio, title: 'Live presentations', desc: 'Broadcast to an audience with real-time slide sync.' },
   { icon: Eye, title: 'Custom domains', desc: 'Host your deck on your own domain with SSL.' },
   { icon: FileText, title: 'PDF export', desc: 'Server-rendered PDF at 1920x1080. Pixel-perfect output.' },
-  { icon: FileSpreadsheet, title: 'PPTX export', desc: 'Native PowerPoint with editable text and shapes.' },
   { icon: History, title: 'Version history', desc: 'Roll back to any previous version of your deck.' },
   { icon: MessageSquare, title: 'Comments', desc: 'Collect feedback on specific slides from reviewers.' },
 ] as const

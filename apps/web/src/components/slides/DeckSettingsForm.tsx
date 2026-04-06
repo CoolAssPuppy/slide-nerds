@@ -22,7 +22,6 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
   const [url, setUrl] = useState(deck.url ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState('')
   const [sessions, setSessions] = useState<LiveSession[]>([])
   const [newSessionName, setNewSessionName] = useState('')
   const [creatingSession, setCreatingSession] = useState(false)
@@ -93,11 +92,6 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
     router.refresh()
   }
 
-  const handleDelete = async () => {
-    if (deleteConfirm !== deck.name) return
-    await supabase.from('decks').delete().eq('id', deck.id)
-    router.push('/slides')
-  }
 
   return (
     <div className="space-y-8">
@@ -283,32 +277,6 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
         </button>
       </div>
 
-      <section className="rounded-[var(--n-radius-lg)] border border-[var(--destructive)]/30 bg-[var(--card)] p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-[var(--destructive)] uppercase tracking-wider">
-          Danger zone
-        </h2>
-        <div>
-          <p className="text-sm mb-2">
-            Type <strong>{deck.name}</strong> to delete this deck permanently.
-          </p>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={deleteConfirm}
-              onChange={(e) => setDeleteConfirm(e.target.value)}
-              placeholder={deck.name}
-              className="flex-1 h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--destructive)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--destructive)]"
-            />
-            <button
-              onClick={handleDelete}
-              disabled={deleteConfirm !== deck.name}
-              className="px-4 h-10 rounded-[var(--n-radius-md)] bg-[var(--destructive)] text-[var(--destructive-foreground)] text-sm font-medium disabled:opacity-50 transition-opacity"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

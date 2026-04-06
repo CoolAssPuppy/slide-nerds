@@ -1,10 +1,8 @@
 import { getSlideElements } from './slide-dom.js'
 import { showAllSteps, hideAllSteps, setActiveSlideForExport } from './export-helpers.js'
 
-type ExportFormat = 'pdf' | 'pptx'
-
 type ExportOptions = {
-  format: ExportFormat
+  format: 'pdf'
   onProgress?: (current: number, total: number) => void
 }
 
@@ -138,28 +136,13 @@ const exportPdf = async (): Promise<void> => {
   }
 }
 
-const exportPptx = async (): Promise<void> => {
-  const progress = showProgress()
-  try {
-    const { exportNativePptx } = await import('./pptx-export.js')
-    await exportNativePptx(progress.update)
-  } finally {
-    progress.remove()
-  }
-}
-
 export const registerExportApi = (): void => {
   if (typeof window === 'undefined') return
 
   window.slidenerds = {
     export: async (options: ExportOptions) => {
-      switch (options.format) {
-        case 'pdf':
-          await exportPdf()
-          break
-        case 'pptx':
-          await exportPptx()
-          break
+      if (options.format === 'pdf') {
+        await exportPdf()
       }
     },
   }
