@@ -1,11 +1,19 @@
 import Link from 'next/link'
 import { CopyCodeBlock } from '@/components/home/CopyCodeBlock'
 
-export function DocsContent() {
+type DocsContentProps = {
+  variant?: 'marketing' | 'dashboard'
+}
+
+export function DocsContent({ variant = 'marketing' }: DocsContentProps) {
+  const isDashboard = variant === 'dashboard'
+
   return (
-    <div className="max-w-3xl mx-auto py-16 px-6">
-      <h1 className="text-4xl font-extrabold tracking-tight">Getting started</h1>
-      <p className="mt-4 text-lg text-[var(--muted-foreground)]">
+    <div className={isDashboard ? '' : 'max-w-3xl mx-auto py-16 px-6'}>
+      <h1 className={isDashboard ? 'text-2xl font-bold mb-2' : 'text-4xl font-extrabold tracking-tight'}>
+        {isDashboard ? 'Docs' : 'Getting started'}
+      </h1>
+      <p className={`${isDashboard ? 'mb-8' : 'mt-4'} text-sm text-[var(--muted-foreground)]`}>
         From first install to a live, analytics-enabled deck in under ten minutes.
       </p>
 
