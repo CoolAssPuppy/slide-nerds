@@ -78,7 +78,10 @@ export default function ReferencePage() {
           rows={[
             ['step-fade', 'Opacity 0 to 1', '350ms'],
             ['step-move-up', 'Slide up 24px + fade', '420ms'],
+            ['step-move-left', 'Slide left 30px + fade', '400ms'],
             ['step-scale-in', 'Scale 0.92 to 1 + fade', '350ms'],
+            ['step-pop', 'Scale 0.6 to 1 with spring overshoot', '400ms'],
+            ['step-wipe-right', 'Clip-path wipe from left to right', '500ms'],
             ['step-emphasis', 'Spring scale entrance', '500ms'],
           ]}
         />
@@ -95,7 +98,9 @@ export default function ReferencePage() {
           rows={[
             ['auto-fade', 'Fade in on slide enter'],
             ['auto-slide-up', 'Slide up + fade on enter'],
+            ['auto-slide-down', 'Slide down + fade on enter'],
             ['auto-pop', 'Scale pop on enter'],
+            ['auto-wipe-right', 'Clip-path wipe on enter'],
           ]}
         />
         <CodeBlock code={`<section data-slide="">

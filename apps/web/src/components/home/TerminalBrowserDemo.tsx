@@ -25,7 +25,7 @@ const COMMANDS = [
 
 const INTERACTIONS = [
   {
-    prompt: 'Create a 6-slide product launch deck for Q2. Title slide, problem, solution, metrics, team, and CTA.',
+    prompt: 'Create a product launch deck for Q2. Pull the latest status from https://linear.app/acme/project/q2-launch and build slides from it.',
     result: 'Created 6 slides in ./app/page.tsx',
     slideState: 'initial' as const,
   },
