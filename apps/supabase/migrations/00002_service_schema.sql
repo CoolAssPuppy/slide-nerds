@@ -1,6 +1,13 @@
 -- Service schema expansion for slidenerds.com
 -- Adds hosting, sharing, export, live presentations, and billing
 
+-- Enable pgcrypto for gen_random_bytes (used by share_links and team_invites)
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
+-- Make gen_random_bytes available without schema prefix
+CREATE OR REPLACE FUNCTION public.gen_random_bytes(int) RETURNS bytea
+  LANGUAGE sql AS $$ SELECT extensions.gen_random_bytes($1) $$;
+
 -- Expand decks table
 alter table public.decks add column if not exists slug text unique;
 alter table public.decks add column if not exists description text;
