@@ -1,7 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Users } from 'lucide-react'
+import { EmptyState } from '@/components/shared/EmptyState'
 
 type Teammate = {
   id: string
@@ -63,12 +64,11 @@ export function TeamMemberList({ teamId, teammates, canManage }: TeamMemberListP
 
   if (teammates.length === 0) {
     return (
-      <div className="mb-8 text-center py-12 rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)]">
-        <p className="text-[var(--muted-foreground)] mb-2">No teammates yet</p>
-        <p className="text-sm text-[var(--muted-foreground)]">
-          Invite someone to share decks, brands, and analytics.
-        </p>
-      </div>
+      <EmptyState
+        icon={Users}
+        title="No teammates yet"
+        description="Invite someone to share decks, brands, and analytics."
+      />
     )
   }
 

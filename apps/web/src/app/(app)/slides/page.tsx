@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
+import { Presentation } from 'lucide-react'
 import { DeckListRealtime } from '@/components/slides/DeckListRealtime'
 import { DeckGrid } from '@/components/slides/DeckGrid'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/PageHeader'
 import type { Deck } from '@/lib/supabase/types'
 
@@ -62,12 +64,11 @@ export default async function SlidesPage() {
       />
 
       {ownDecks.length === 0 && (
-        <div className="mb-8 text-center py-12 rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)]">
-          <p className="text-[var(--muted-foreground)] mb-2">No decks yet</p>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Deploy your deck and register it with <code className="text-[var(--primary)]">slidenerds link --url</code>
-          </p>
-        </div>
+        <EmptyState
+          icon={Presentation}
+          title="No decks yet"
+          description="Deploy your deck and register it with slidenerds link --url"
+        />
       )}
 
       {sharedDecks.length > 0 && (
