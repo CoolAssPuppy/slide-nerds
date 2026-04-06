@@ -9,7 +9,7 @@ const TOP_NAV = [
   { href: '/slides', label: 'Slides', icon: Presentation },
   { href: '/team', label: 'Team', icon: Users },
   { href: '/brand', label: 'Brand', icon: Palette },
-  { href: '/docs', label: 'Docs', icon: BookOpen },
+  { href: '/help', label: 'Docs', icon: BookOpen },
 ] as const
 
 const BOTTOM_NAV = [
