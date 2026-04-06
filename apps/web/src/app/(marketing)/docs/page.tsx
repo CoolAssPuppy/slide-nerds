@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { CopyCodeBlock } from '@/components/home/CopyCodeBlock'
 
 export const metadata = { title: 'Docs' }
@@ -21,6 +22,10 @@ export default function DocsPage() {
         </div>
         <p className="mt-4 text-sm text-[var(--muted-foreground)]">
           Open <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">http://localhost:3000</code> to see your deck running. Every change hot-reloads instantly.
+          All decks are code. See the{' '}
+          <Link href="/docs/reference" className="text-[var(--foreground)] font-medium hover:underline">
+            slide definition language reference
+          </Link>.
         </p>
       </section>
 
