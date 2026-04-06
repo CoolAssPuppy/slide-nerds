@@ -98,7 +98,7 @@ export default async function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Share slides with SlideNerds</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                Host your slides on our service, share them with colleagues, customers, and partners, and get analytics on what people read.
+                Three commands to go from local to live. Push your deck and get a shareable URL, per-slide analytics, and access controls. Keep it private or share with anyone.
               </p>
               <div className="mt-6 flex justify-center">
                 <div className="w-full max-w-2xl">
@@ -118,7 +118,7 @@ export default async function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Add live features and standardize brand</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                Every slide deck can host custom React components, including SlideNerds components for live polls, Q&A, and more.
+                Your slides are React components. Drop in a LivePoll, a Q&A feed, or a word cloud and your audience participates in real time. Build your own interactive components or use ours. Slides are just code now. Brand configs sync across every deck on your team.
               </p>
             </div>
             <div className="max-w-4xl mx-auto">
@@ -147,7 +147,7 @@ export default async function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Everything you need</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)]">
-                From creation to presentation, every feature built for developers who care about their slides.
+                One package. No plugins, no add-ons, no separate accounts. Everything from slide creation to live presenting to PDF export is included.
               </p>
             </div>
             <FeatureGrid />
@@ -159,7 +159,7 @@ export default async function HomePage() {
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-4xl font-extrabold tracking-tight">Start building today</h2>
             <p className="mt-4 text-lg text-[var(--muted-foreground)]">
-              Install the package, fire up your LLM, and have a deck ready in minutes.
+              The package is free. The CLI is free. Your first deck takes five minutes.
             </p>
             <div className="mt-10">
               <Link
