@@ -6,10 +6,31 @@ const AUTO_STEP_SELECTOR = '[data-auto-step]'
 
 const EXIT_CLASSES = [
   'exit-fade',
-  'exit-scale-out',
-  'exit-slide-up',
-  'exit-slide-down',
+  'exit-move-up',
+  'exit-move-down',
+  'exit-move-left',
+  'exit-move-right',
+  'exit-fly-out-left',
+  'exit-fly-out-right',
+  'exit-fly-out-top',
+  'exit-fly-out-bottom',
+  'exit-scale-down',
+  'exit-scale-up',
+  'exit-zoom-out',
+  'exit-spin-out',
+  'exit-flip-x',
+  'exit-flip-y',
   'exit-wipe-left',
+  'exit-wipe-right',
+  'exit-wipe-up',
+  'exit-wipe-down',
+  'exit-iris',
+  'exit-blur',
+  'exit-drop-off',
+  'exit-bounce-off',
+  'exit-pop',
+  'exit-shrink-rotate',
+  'exit-dissolve',
 ] as const
 
 const queryAll = (selector: string, root?: Element): NodeListOf<Element> => {
@@ -68,9 +89,7 @@ export const getStepEntries = (slideIndex: number): ReadonlyArray<StepEntry> => 
     const el = allSteps[i]
     const groupName = el.getAttribute('data-step-group')
     const isAuto = el.hasAttribute('data-auto-step')
-    const autoDelay = isAuto
-      ? parseInt(el.getAttribute('data-auto-step') || '300', 10)
-      : 0
+    const autoDelay = isAuto ? parseInt(el.getAttribute('data-auto-step') || '300', 10) : 0
 
     if (groupName) {
       const groupElements: Element[] = [el]
