@@ -40,7 +40,7 @@ export async function sendTeamInviteEmail({
         <div style="background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 32px;">
           <h2 style="font-size: 18px; font-weight: 600; color: #111; margin: 0 0 8px;">You're invited to collaborate</h2>
           <p style="font-size: 15px; color: #555; line-height: 1.6; margin: 0 0 24px;">
-            <strong>${inviterName}</strong> wants to share slide decks, brand settings, and analytics with you on SlideNerds.
+            <strong>${inviterName}</strong> wants to share slide decks, brand settings, and analytics with you in <strong>${teamName}</strong> on SlideNerds.
           </p>
 
           <a href="${inviteUrl}" style="display: inline-block; padding: 12px 28px; background-color: #3ECF8E; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px;">
