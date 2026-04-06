@@ -137,6 +137,20 @@ export default function SignupPage() {
             Sign in
           </Link>
         </p>
+
+        <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 space-y-2">
+          <p className="text-xs font-semibold text-[var(--foreground)]">Why create an account?</p>
+          <ul className="text-xs text-[var(--muted-foreground)] space-y-1.5">
+            <li>Save and sync brand configs across all your decks</li>
+            <li>Share decks and analytics with your team</li>
+            <li>Add live polls, Q&A, and audience reactions</li>
+            <li>Per-slide engagement analytics and viewer tracking</li>
+            <li>Export to PDF and PowerPoint from the web</li>
+          </ul>
+          <p className="text-xs text-[var(--muted-foreground)]">
+            The runtime and CLI are free and open source. An account is optional.
+          </p>
+        </div>
       </div>
     </div>
   )

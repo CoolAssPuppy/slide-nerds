@@ -1,0 +1,37 @@
+name: Supabase migrations
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/supabase/migrations/**']
+  pull_request:
+    branches: [main]
+    paths: ['apps/supabase/migrations/**']
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        working-directory: apps/supabase
+
+      - name: Push migrations (dry run on PR)
+        if: github.event_name == 'pull_request'
+        run: supabase db push --dry-run
+        working-directory: apps/supabase
+
+      - name: Push migrations (apply on main)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: supabase db push
+        working-directory: apps/supabase
