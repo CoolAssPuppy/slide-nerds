@@ -75,7 +75,7 @@ export default async function HomePage() {
             </a>
           </div>
           <div className="mt-16 w-full max-w-2xl">
-            <CopyCodeBlock code={INSTALL_CODE} />
+            <CopyCodeBlock code="npm install @strategicnerds/slide-nerds" />
           </div>
         </section>
 
@@ -87,6 +87,11 @@ export default async function HomePage() {
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
                 Point Claude or GPT at your project and describe what you want. The runtime ships with 19 skills that teach your LLM how to build slides that look like a human designer made them. Free and open source.
               </p>
+              <div className="mt-6 flex justify-center">
+                <div className="w-full max-w-2xl">
+                  <CopyCodeBlock code={INSTALL_CODE} />
+                </div>
+              </div>
             </div>
             <TerminalBrowserDemo />
           </div>
