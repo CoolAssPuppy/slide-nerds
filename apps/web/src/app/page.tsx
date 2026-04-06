@@ -85,7 +85,7 @@ export default async function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Build slides like you build code</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                Use your favorite LLM to generate gorgeous decks. The open-source package works locally with zero cost.
+                Point Claude or GPT at your project and describe what you want. The runtime ships with 19 skills that teach your LLM how to build slides that look like a human designer made them. Free and open source.
               </p>
             </div>
             <TerminalBrowserDemo />
