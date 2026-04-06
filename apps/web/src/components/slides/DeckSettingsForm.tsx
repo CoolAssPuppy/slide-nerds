@@ -99,8 +99,10 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
       return
     }
     setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-    router.refresh()
+    setTimeout(() => {
+      setSaved(false)
+      router.refresh()
+    }, 1500)
   }
 
 

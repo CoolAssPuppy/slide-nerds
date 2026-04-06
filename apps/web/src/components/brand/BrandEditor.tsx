@@ -161,31 +161,30 @@ function ColorSection({ colors, onUpdate, inputClass }: ColorSectionProps) {
       </h2>
       <div className="space-y-3">
         {COLOR_FIELDS.map(({ key, label, hint }) => (
-          <div key={key} className="flex items-center gap-3">
-            <label
-              htmlFor={`color-edit-${key}`}
-              className="relative w-10 h-10 rounded-[var(--n-radius-md)] border border-[var(--border)] overflow-hidden cursor-pointer hover:ring-2 hover:ring-[var(--ring)] transition-shadow shrink-0"
-              style={{ backgroundColor: colors[key] }}
-            >
-              <input
-                id={`color-edit-${key}`}
-                type="color"
-                value={colors[key]}
-                onChange={(e) => onUpdate(key, e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-            </label>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{label}</span>
-                <span className="text-xs text-[var(--muted-foreground)]">{hint}</span>
-              </div>
+          <div key={key}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm font-medium">{label}</span>
+              <span className="text-xs text-[var(--muted-foreground)]">{hint}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor={`color-edit-${key}`}
+                className="relative w-10 h-10 rounded-[var(--n-radius-md)] border border-[var(--border)] overflow-hidden cursor-pointer hover:ring-2 hover:ring-[var(--ring)] transition-shadow shrink-0"
+                style={{ backgroundColor: colors[key] }}
+              >
+                <input
+                  id={`color-edit-${key}`}
+                  type="color"
+                  value={colors[key]}
+                  onChange={(e) => onUpdate(key, e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </label>
               <input
                 type="text"
                 value={colors[key]}
                 onChange={(e) => onUpdate(key, e.target.value)}
                 className={inputClass}
-                style={{ marginTop: '4px' }}
               />
             </div>
           </div>
