@@ -127,12 +127,63 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
     line-height: 1.5;
     margin-bottom: 2rem;
   }
-  .hint {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.3);
+  .commands {
+    text-align: left;
+    margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid rgba(255,255,255,0.08);
   }
+  .commands h2 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .cmd-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .cmd-row code {
+    flex: 1;
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .copy-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .copy-btn.copied {
+    color: #3ECF8E;
+    border-color: rgba(62,207,142,0.3);
+  }
+  .copy-btn svg { width: 14px; height: 14px; }
   .brand {
     font-size: 0.75rem;
     font-weight: 600;
@@ -140,8 +191,21 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-top: 2rem;
+    text-align: center;
   }
 </style>
+<script>
+function copyCmd(btn, text) {
+  navigator.clipboard.writeText(text).then(function() {
+    btn.classList.add('copied');
+    btn.textContent = '\u2713';
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      btn.textContent = '\u2398';
+    }, 1500);
+  });
+}
+</script>
 </head>
 <body>
   <div class="card">
@@ -150,7 +214,27 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
     </div>
     <h1>You're in</h1>
     <p class="subtitle">Your terminal is now connected to SlideNerds.<br>You can close this window.</p>
-    <p class="hint">Head back to your terminal to continue working.</p>
+
+    <div class="commands">
+      <h2>Try these next</h2>
+      <div class="cmd-row">
+        <code>slidenerds create my-talk</code>
+        <button class="copy-btn" onclick="copyCmd(this,'slidenerds create my-talk')" title="Copy">\u2398</button>
+      </div>
+      <div class="cmd-row">
+        <code>slidenerds link --name my-talk --url https://...</code>
+        <button class="copy-btn" onclick="copyCmd(this,'slidenerds link --name my-talk --url ')" title="Copy">\u2398</button>
+      </div>
+      <div class="cmd-row">
+        <code>slidenerds brand set &quot;My Brand&quot;</code>
+        <button class="copy-btn" onclick="copyCmd(this,'slidenerds brand set &quot;My Brand&quot;')" title="Copy">\u2398</button>
+      </div>
+      <div class="cmd-row">
+        <code>slidenerds export --pdf</code>
+        <button class="copy-btn" onclick="copyCmd(this,'slidenerds export --pdf')" title="Copy">\u2398</button>
+      </div>
+    </div>
+
     <p class="brand">SlideNerds</p>
   </div>
 </body>
