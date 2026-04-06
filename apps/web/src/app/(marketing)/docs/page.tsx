@@ -213,14 +213,35 @@ export default function DocsPage() {
       <section className="mt-16">
         <StepHeader number="11" title="Add live interaction" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Embed live components in your slides for real-time audience interaction during presentations. These use SlideNerds live APIs and an active live session while your deck remains hosted externally.
+          Add real-time audience interaction to your slides. Polls, reactions, Q&A, word clouds, and audience counts.
         </p>
-        <div className="mt-4">
-          <CopyCodeBlock code={`import { LivePoll, LiveReactions, LiveQA } from '@strategicnerds/slide-nerds'\n\n<section data-slide="">\n  <LivePoll\n    question="What is your biggest challenge?"\n    options={['Speed', 'Reliability', 'Cost']}\n  />\n</section>`} />
+
+        <h3 className="mt-8 text-sm font-semibold">1. Create a live session</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Go to your deck&apos;s settings page and scroll to <strong>Live sessions</strong>. Give your session a name (e.g. &quot;Q2 All-Hands&quot;) and click Create. You&apos;ll get a session ID and code snippet.
+        </p>
+
+        <h3 className="mt-6 text-sm font-semibold">2. Add live components to your slides</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Import the component and add it to a slide. The poll auto-creates itself when the slide loads.
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`import { LivePoll } from '@strategicnerds/slide-nerds'\n\n<section data-slide="">\n  <LivePoll\n    question="What is your biggest challenge?"\n    options={['Speed', 'Reliability', 'Cost']}\n  />\n</section>`} />
         </div>
 
+        <h3 className="mt-6 text-sm font-semibold">3. Share with your audience</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Share the session URL with your audience. Either hardcode the session ID in the component, or pass it as a URL parameter:
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`https://my-deck.vercel.app?session=SESSION_ID`} />
+        </div>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          The audience opens the link, navigates to the poll slide, and votes. Results update in real time.
+        </p>
+
         <div className="mt-6 space-y-4">
-          <FeatureCard title="LivePoll" description="Real-time audience polls with clickable options and live bar chart results." />
+          <FeatureCard title="LivePoll" description="Real-time audience polls with clickable options and live bar chart results. Auto-creates the poll when the slide loads." />
           <FeatureCard title="LiveReactions" description="Floating emoji reactions (thumbsup, clap, heart, fire, mind blown)." />
           <FeatureCard title="LiveQA" description="Question submission with answered badges. Unanswered questions surface first." />
           <FeatureCard title="LiveWordCloud" description="Audience submits one word. Words display as a cloud sized by frequency." />
