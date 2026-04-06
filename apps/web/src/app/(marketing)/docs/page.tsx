@@ -8,7 +8,7 @@ export default function DocsPage() {
     <div className="max-w-3xl mx-auto py-16 px-6">
       <h1 className="text-4xl font-extrabold tracking-tight">Getting started</h1>
       <p className="mt-4 text-lg text-[var(--muted-foreground)]">
-        From first install to a hosted, shareable deck in under ten minutes.
+        From first install to an externally hosted, analytics-enabled deck in under ten minutes.
       </p>
 
       {/* Step 1 */}
@@ -102,15 +102,15 @@ export default function DocsPage() {
 
       {/* Step 4 */}
       <section className="mt-16">
-        <StepHeader number="4" title="Host on SlideNerds" />
+        <StepHeader number="4" title="Link your deployed deck" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Push your deck to slidenerds.com to get a shareable URL, analytics, and access controls.
+          Deploy your deck anywhere, then link it to SlideNerds for Pro analytics, sharing controls, and live services.
         </p>
         <div className="mt-4">
           <CopyCodeBlock code={`slidenerds login\nslidenerds link --name my-talk --url https://my-talk.vercel.app`} />
         </div>
         <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-          Deploy your deck to Vercel, Netlify, or any static host first, then register the URL with SlideNerds. Your deck is now tracked at <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">slidenerds.com/d/my-talk</code>.
+          Deploy your deck to Vercel, Netlify, or any static host first, then register the URL with SlideNerds. <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">slidenerds link</code> also provisions built-in SlideNerds telemetry so your deck can securely send per-slide events to the service.
         </p>
       </section>
 
@@ -132,15 +132,15 @@ export default function DocsPage() {
 
       {/* Step 6 */}
       <section className="mt-16">
-        <StepHeader number="6" title="Track engagement" />
+        <StepHeader number="6" title="Use Pro analytics dashboards" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          See who viewed your deck, how long they spent on each slide, and when they viewed it. Open the Analytics panel from the deck detail page.
+          On Pro, open the deck analytics panel to inspect granular slide telemetry while the deck itself stays hosted on your own infrastructure.
         </p>
 
         <div className="mt-6 space-y-4">
-          <FeatureCard title="View counts and unique viewers" description="Track total views and unique visitors across all your decks." />
-          <FeatureCard title="Per-slide dwell time" description="See which slides hold attention and which get skipped." />
-          <FeatureCard title="Views over time" description="Chart of daily views over the last 30 days." />
+          <FeatureCard title="Granular slide events" description="Track per-slide enters/exits and dwell time from linked decks." />
+          <FeatureCard title="Viewer-level timelines" description="Inspect how long each viewer spent on each slide across a session." />
+          <FeatureCard title="Share + live correlation" description="Combine engagement metrics with share links and live interaction data." />
         </div>
       </section>
 
@@ -196,7 +196,7 @@ export default function DocsPage() {
       <section className="mt-16">
         <StepHeader number="10" title="Add live interaction" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Embed live components in your slides for real-time audience interaction during presentations. These require a hosted deck with an active live session.
+          Embed live components in your slides for real-time audience interaction during presentations. These use SlideNerds live APIs and an active live session while your deck remains hosted externally.
         </p>
         <div className="mt-4">
           <CopyCodeBlock code={`import { LivePoll, LiveReactions, LiveQA } from '@strategicnerds/slide-nerds'\n\n<section data-slide="">\n  <LivePoll\n    question="What is your biggest challenge?"\n    options={['Speed', 'Reliability', 'Cost']}\n  />\n</section>`} />

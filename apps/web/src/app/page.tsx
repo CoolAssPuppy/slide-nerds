@@ -98,7 +98,7 @@ export default async function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Share slides with SlideNerds</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                Three commands to go from local to live. Push your deck and get a shareable URL, per-slide analytics, and access controls. Keep it private or share with anyone.
+                Three commands to go from local to linked. Deploy anywhere, then link to SlideNerds for secure per-slide analytics, sharing controls, and live features.
               </p>
               <div className="mt-6 flex justify-center">
                 <div className="w-full max-w-2xl">
