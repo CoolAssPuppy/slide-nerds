@@ -204,6 +204,7 @@ export default function DocsPage() {
                 ['visual-design', 'Color theory, typography, visual hierarchy'],
                 ['analytics', 'Setting up view tracking'],
                 ['accessibility', 'Accessible slide design'],
+                ['live', 'Live polls, reactions, Q&A, word clouds, audience count'],
               ].map(([skill, desc]) => (
                 <tr key={skill} className="border-b border-[var(--border)] last:border-0">
                   <td className="px-4 py-2.5 font-mono text-xs">{skill}</td>

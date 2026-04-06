@@ -219,34 +219,15 @@ const [zoomed, setZoomed] = useState(false)
 
 ## Audience interaction patterns
 
-### Live poll (requires backend)
+### Live components (SlideNerds service)
 
-For real-time polling during presentations, integrate with a polling service or build a custom WebSocket solution:
+For real-time polls, reactions, Q&A, word clouds, and audience counting, use the built-in live components. These require the deck to be hosted on slidenerds.com with an active live session. See the **live** skill for full documentation and examples.
 
 ```tsx
+import { LivePoll, LiveReactions, LiveQA, LiveAudienceCount, LiveWordCloud } from '@strategicnerds/slide-nerds'
+
 <section data-slide="">
-  <div className="flex flex-col items-center justify-center w-full min-h-screen"
-    style={{ padding: '4rem 6rem' }}>
-    <h2 className="text-[2.5rem] font-bold mb-4">Quick poll</h2>
-    <p className="text-lg mb-10" style={{ color: 'var(--color-text-secondary)' }}>
-      What is your biggest deployment challenge?
-    </p>
-    <div className="card-surface p-6 w-full" style={{ maxWidth: 600 }}>
-      {/* Poll results render here -- driven by real-time data */}
-      <div className="space-y-3">
-        {['Speed', 'Reliability', 'Cost', 'Complexity'].map((option) => (
-          <div key={option} className="flex items-center gap-3">
-            <div className="h-8 rounded"
-              style={{ width: `${Math.random() * 80 + 20}%`, background: 'var(--color-accent)', opacity: 0.6 }} />
-            <span className="text-sm">{option}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-    <p className="mt-8 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-      Vote at acme.dev/poll
-    </p>
-  </div>
+  <LivePoll question="What is your biggest challenge?" options={['Speed', 'Reliability', 'Cost', 'Complexity']} />
 </section>
 ```
 
