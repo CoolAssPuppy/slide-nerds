@@ -47,11 +47,24 @@ export default async function InvitePage({ searchParams }: PageProps) {
 
   const teamName = (invite as Record<string, unknown>).teams as { name: string } | null
 
+  // Get inviter's name
+  const { data: inviterProfile } = await supabase
+    .from('profiles')
+    .select('display_name, first_name, last_name')
+    .eq('id', invite.invited_by)
+    .single()
+
+  const inviterName =
+    inviterProfile?.display_name
+    ?? [inviterProfile?.first_name, inviterProfile?.last_name].filter(Boolean).join(' ')
+    ?? 'Someone'
+
   return (
     <div className="max-w-md mx-auto mt-20">
       <AcceptInvite
         inviteId={invite.id}
         teamName={teamName?.name ?? 'a team'}
+        inviterName={inviterName}
         role={invite.role}
         token={token}
       />

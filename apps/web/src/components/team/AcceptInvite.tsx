@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation'
 type AcceptInviteProps = {
   inviteId: string
   teamName: string
+  inviterName: string
   role: string
   token: string
 }
 
-export function AcceptInvite({ teamName, role, token }: AcceptInviteProps) {
+export function AcceptInvite({ teamName, inviterName, role, token }: AcceptInviteProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -48,7 +49,7 @@ export function AcceptInvite({ teamName, role, token }: AcceptInviteProps) {
     <div className="rounded-[var(--n-radius-xl)] border border-[var(--border)] bg-[var(--card)] p-8 text-center">
       <h1 className="text-2xl font-bold mb-2">You have been invited</h1>
       <p className="text-[var(--muted-foreground)] mb-6">
-        Join <strong>{teamName}</strong> as a <strong>{role}</strong>.
+        <strong>{inviterName}</strong> invited you to join <strong>{teamName}</strong> as a <strong>{role}</strong>.
       </p>
 
       {error && <p className="text-sm text-[var(--destructive)] mb-4">{error}</p>}

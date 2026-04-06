@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Presentation, Users, Palette, User, Settings, LogOut } from 'lucide-react'
+import { Presentation, Users, Palette, BookOpen, User, Settings, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const TOP_NAV = [
   { href: '/slides', label: 'Slides', icon: Presentation },
   { href: '/team', label: 'Team', icon: Users },
   { href: '/brand', label: 'Brand', icon: Palette },
+  { href: '/docs', label: 'Docs', icon: BookOpen },
 ] as const
 
 const BOTTOM_NAV = [

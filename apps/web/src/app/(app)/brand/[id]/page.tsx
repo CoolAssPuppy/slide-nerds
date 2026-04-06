@@ -11,6 +11,9 @@ export default async function BrandDetailPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) notFound()
+
   const { data } = await supabase
     .from('brand_configs')
     .select('*')
@@ -20,5 +23,5 @@ export default async function BrandDetailPage({ params }: PageProps) {
   const brand = data as BrandConfig | null
   if (!brand) notFound()
 
-  return <BrandEditor brand={brand} />
+  return <BrandEditor brand={brand} userId={user.id} />
 }

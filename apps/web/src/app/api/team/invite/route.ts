@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendTeamInviteEmail } from '@/lib/email'
 import { z } from 'zod'
 
 const inviteSchema = z.object({
   team_id: z.string().uuid(),
   email: z.string().email(),
   role: z.enum(['admin', 'member']),
+})
+
+const deleteSchema = z.object({
+  team_id: z.string().uuid(),
+  invite_id: z.string().uuid(),
 })
 
 export async function POST(request: Request) {
@@ -64,7 +70,72 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // In production, send an email with the invite link
-  // For now, the invite is created and can be accepted via the accept endpoint
+  // Get the inviter's display name
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('display_name, first_name, last_name')
+    .eq('id', user.id)
+    .single()
+
+  const inviterName =
+    profile?.display_name
+    ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+    ?? 'A teammate'
+
+  // Get the team name
+  const { data: teamData } = await supabase
+    .from('teams')
+    .select('name')
+    .eq('id', team_id)
+    .single()
+
+  const origin = request.headers.get('origin') ?? 'https://slidenerds.com'
+
+  try {
+    await sendTeamInviteEmail({
+      to: email,
+      inviterName,
+      teamName: teamData?.name ?? 'your team',
+      token: invite.token,
+      origin,
+    })
+  } catch (emailError) {
+    console.error('[invite] Failed to send invite email:', emailError)
+  }
+
   return NextResponse.json(invite)
+}
+
+export async function DELETE(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  const parsed = deleteSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+
+  const { team_id, invite_id } = parsed.data
+
+  // Verify the user is an owner or admin of the team
+  const { data: membership } = await supabase
+    .from('team_members')
+    .select('role')
+    .eq('team_id', team_id)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership || !['owner', 'admin'].includes(membership.role)) {
+    return NextResponse.json({ error: 'Only team owners and admins can delete invites.' }, { status: 403 })
+  }
+
+  await supabase
+    .from('team_invites')
+    .delete()
+    .eq('id', invite_id)
+    .eq('team_id', team_id)
+
+  return NextResponse.json({ deleted: true })
 }

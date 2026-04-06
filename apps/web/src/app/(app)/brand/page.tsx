@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { BrandListRealtime } from '@/components/brand/BrandListRealtime'
 import { BrandGrid } from '@/components/brand/BrandGrid'
 import { BrandPageHeader } from '@/components/brand/BrandPageHeader'
 import type { BrandConfig } from '@/lib/supabase/types'
@@ -39,18 +40,12 @@ export default async function BrandPage() {
     <div>
       <BrandPageHeader />
 
-      {ownBrands.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
-            My brands
-          </h2>
-          <BrandGrid brands={ownBrands} />
-        </div>
-      )}
-
-      {ownBrands.length === 0 && filteredTeamBrands.length === 0 && (
-        <BrandGrid brands={[]} />
-      )}
+      <div className="mb-8">
+        <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
+          My brands
+        </h2>
+        <BrandListRealtime initialBrands={ownBrands} userId={user!.id} />
+      </div>
 
       {filteredTeamBrands.length > 0 && (
         <div>

@@ -1,6 +1,9 @@
 import { Command } from 'commander'
 import path from 'node:path'
 import fs from 'fs-extra'
+import { pipeline } from 'node:stream/promises'
+import { Readable } from 'node:stream'
+import { createWriteStream } from 'node:fs'
 import { getCredentials, getServiceUrl } from './config.js'
 
 type BrandConfigResponse = {
@@ -11,6 +14,12 @@ type BrandConfigResponse = {
   team_id: string | null
   created_at: string
   updated_at: string
+}
+
+type BrandLogo = {
+  src: string
+  width?: number
+  height?: number
 }
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
@@ -27,6 +36,31 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Re
       ...options.headers,
     },
   })
+}
+
+const extractExtensionFromUrl = (url: string): string => {
+  const pathname = new URL(url).pathname
+  const ext = path.extname(pathname).replace(/^\./, '')
+  return ext || 'png'
+}
+
+const downloadLogoToPublic = async (logoUrl: string): Promise<string> => {
+  const ext = extractExtensionFromUrl(logoUrl)
+  const localFilename = `brand-logo.${ext}`
+  const publicDir = path.join(process.cwd(), 'public')
+  await fs.ensureDir(publicDir)
+  const destPath = path.join(publicDir, localFilename)
+
+  const resp = await fetch(logoUrl)
+  if (!resp.ok || !resp.body) {
+    throw new Error(`Failed to download logo from ${logoUrl}: ${resp.status}`)
+  }
+
+  const nodeReadable = Readable.fromWeb(resp.body as import('node:stream/web').ReadableStream)
+  await pipeline(nodeReadable, createWriteStream(destPath))
+
+  console.info(`Downloaded logo to public/${localFilename}`)
+  return `/${localFilename}`
 }
 
 const brandGet = async (name: string): Promise<void> => {
@@ -46,6 +80,13 @@ const brandGet = async (name: string): Promise<void> => {
   }
 
   const config = configs[0].config
+  const logo = config.logo as BrandLogo | undefined
+
+  if (logo?.src && !logo.src.startsWith('/')) {
+    const localPath = await downloadLogoToPublic(logo.src)
+    config.logo = { ...logo, src: localPath }
+  }
+
   const filePath = path.join(process.cwd(), 'brand.config.ts')
 
   const fileContent = `import type { BrandConfig } from '@strategicnerds/slide-nerds'
@@ -55,6 +96,51 @@ export default ${JSON.stringify(config, null, 2)} satisfies BrandConfig
 
   await fs.writeFile(filePath, fileContent, 'utf-8')
   console.info(`Wrote brand config "${name}" to brand.config.ts`)
+}
+
+const uploadLocalLogo = async (localPath: string, serviceUrl: string): Promise<string> => {
+  const publicDir = path.join(process.cwd(), 'public')
+  const fullPath = path.join(publicDir, localPath.replace(/^\//, ''))
+
+  if (!(await fs.pathExists(fullPath))) {
+    throw new Error(`Logo file not found at public${localPath}`)
+  }
+
+  const fileBuffer = await fs.readFile(fullPath)
+  const ext = path.extname(fullPath).replace(/^\./, '')
+  const mimeMap: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+    svg: 'image/svg+xml',
+  }
+  const contentType = mimeMap[ext] || 'application/octet-stream'
+  const storagePath = `cli/${Date.now()}-${path.basename(fullPath)}`
+
+  const creds = await getCredentials()
+  if (!creds) {
+    throw new Error('Not logged in. Run `slidenerds login` first.')
+  }
+
+  const uploadUrl = `${serviceUrl}/storage/v1/object/brand-logos/${storagePath}`
+  const uploadResp = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${creds.access_token}`,
+      'Content-Type': contentType,
+    },
+    body: fileBuffer,
+  })
+
+  if (!uploadResp.ok) {
+    const err = await uploadResp.text()
+    throw new Error(`Failed to upload logo: ${err}`)
+  }
+
+  const publicUrl = `${serviceUrl}/storage/v1/object/public/brand-logos/${storagePath}`
+  console.info(`Uploaded logo to storage: ${storagePath}`)
+  return publicUrl
 }
 
 const brandSet = async (name: string): Promise<void> => {
@@ -74,6 +160,12 @@ const brandSet = async (name: string): Promise<void> => {
 
   if (!config || typeof config !== 'object') {
     throw new Error('brand.config.ts must export a default object.')
+  }
+
+  const logo = config.logo as BrandLogo | undefined
+  if (logo?.src && logo.src.startsWith('/')) {
+    const publicUrl = await uploadLocalLogo(logo.src, serviceUrl)
+    config.logo = { ...logo, src: publicUrl }
   }
 
   // Check if a config with this name already exists

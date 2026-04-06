@@ -1,5 +1,3 @@
-Using workdir /Users/prashant/Developer/utils/slide-nerds/apps
-Connecting to db 5432
 export type Json =
   | string
   | number

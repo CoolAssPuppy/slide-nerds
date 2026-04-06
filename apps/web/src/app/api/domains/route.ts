@@ -85,7 +85,7 @@ export async function DELETE(request: Request) {
     .eq('id', id)
     .single()
 
-  if (!domain) {
+  if (!domain || !domain.deck_id) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

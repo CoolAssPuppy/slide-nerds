@@ -8,7 +8,7 @@ export default function DocsPage() {
     <div className="max-w-3xl mx-auto py-16 px-6">
       <h1 className="text-4xl font-extrabold tracking-tight">Getting started</h1>
       <p className="mt-4 text-lg text-[var(--muted-foreground)]">
-        From first install to an externally hosted, analytics-enabled deck in under ten minutes.
+        From first install to a live, analytics-enabled deck in under ten minutes.
       </p>
 
       {/* Step 1 */}
@@ -29,7 +29,7 @@ export default function DocsPage() {
         </p>
       </section>
 
-      {/* Slides are code */}
+      {/* Step 2 */}
       <section className="mt-16">
         <StepHeader number="2" title="Slides are code" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
@@ -117,99 +117,135 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Step 5 */}
+      {/* Step 5: Animations */}
       <section className="mt-16">
-        <StepHeader number="5" title="Link your deployed deck" />
+        <StepHeader number="5" title="Animate your slides" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Deploy your deck anywhere, then link it to SlideNerds for Pro analytics, sharing controls, and live services.
+          Over 100 CSS animations are built into the runtime. Add a class to any element to animate it.
+        </p>
+
+        <h3 className="mt-8 text-sm font-semibold">Entrance animations (step-*)</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Elements with <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">data-step</code> start hidden and animate in when revealed. Add an animation class to control how they appear.
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`<p data-step="" className="step-fade">Fades in</p>\n<p data-step="" className="step-pop">Pops in with scale</p>\n<p data-step="" className="step-slide-in-left">Slides from left</p>\n<p data-step="" className="step-bounce">Bounces in</p>`} />
+        </div>
+        <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+          Available: step-fade, step-pop, step-bounce, step-elastic, step-fly-in-*, step-move-*, step-scale-*, step-spin-in, step-flip-*, step-wipe-*, step-blur-in, step-typewriter, step-letter-spread, and more. See the <strong>animation</strong> skill for the full list.
+        </p>
+
+        <h3 className="mt-8 text-sm font-semibold">Exit animations (exit-*)</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Elements with <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">data-exit-step</code> animate out before the slide transitions.
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`<p data-exit-step="" className="exit-fade">Fades out</p>\n<p data-exit-step="" className="exit-zoom-out">Zooms out</p>`} />
+        </div>
+
+        <h3 className="mt-8 text-sm font-semibold">Emphasis animations (emphasis-*)</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Replay an animation on a visible element to draw attention. Triggered on second click.
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`<p data-step="" className="emphasis-pulse">Pulses on emphasis</p>\n<p data-step="" className="emphasis-shake">Shakes on emphasis</p>`} />
+        </div>
+        <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+          Available: emphasis-pulse, emphasis-bounce, emphasis-shake, emphasis-wobble, emphasis-rubber-band, emphasis-tada, emphasis-heartbeat, emphasis-flash, emphasis-spin, emphasis-glow, and more.
+        </p>
+
+        <h3 className="mt-8 text-sm font-semibold">Auto-build animations (auto-*)</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Elements animate automatically when the slide becomes active. No click needed.
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`<div className="auto-fade">Fades in automatically</div>\n<div className="auto-pop" style={{ animationDelay: '200ms' }}>Pops in after 200ms</div>`} />
+        </div>
+
+        <h3 className="mt-8 text-sm font-semibold">Slide transitions (data-transition)</h3>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Set the transition between slides with the <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">data-transition</code> attribute on a slide.
+        </p>
+        <div className="mt-3">
+          <CopyCodeBlock code={`<section data-slide="" data-transition="cube-left">\n  <h1>This slide transitions with a 3D cube effect</h1>\n</section>`} />
+        </div>
+        <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+          Available: fade, dissolve, push-*, slide-*, cover-*, uncover-*, zoom-in, zoom-out, flip-x, flip-y, cube-left, cube-right, iris, split-horizontal, split-vertical, morph.
+        </p>
+      </section>
+
+      {/* Step 6: Create account (optional) */}
+      <section className="mt-16">
+        <StepHeader number="6" title="Create a SlideNerds account (optional)" />
+        <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
+          Create a free account to save your slides, manage brand settings, and access live features like polls, Q&A, and audience reactions. Deploy your deck anywhere, then link it to SlideNerds.
         </p>
         <div className="mt-4">
           <CopyCodeBlock code={`slidenerds login\nslidenerds link --name my-talk --url https://my-talk.vercel.app`} />
         </div>
-        <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-          Deploy your deck to Vercel, Netlify, or any static host first, then register the URL with SlideNerds. <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">slidenerds link</code> also provisions built-in SlideNerds telemetry so your deck can securely send per-slide events to the service.
-        </p>
       </section>
 
-      {/* Step 6 */}
+      {/* Step 7: Team */}
       <section className="mt-16">
-        <StepHeader number="6" title="Share and control access" />
+        <StepHeader number="7" title="Invite your team" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Decks are private by default. Share them with specific people or make them public.
+          Share your decks, brand configurations, and analytics with teammates. Invite anyone by email from the Team page in the dashboard.
         </p>
 
         <div className="mt-6 space-y-4">
-          <FeatureCard title="Public sharing" description="Toggle a deck to public and anyone with the link can view it." />
-          <FeatureCard title="Email-restricted links" description="Create a share link that only works for specific email addresses." />
-          <FeatureCard title="Domain-restricted links" description="Allow anyone with a company email domain (e.g. @acme.com) to view." />
-          <FeatureCard title="Password-protected links" description="Set a password on a share link. Recipients enter it before viewing." />
-          <FeatureCard title="Expiring links" description="Set an expiration date on any share link." />
+          <FeatureCard title="Shared decks" description="Teammates see each other's decks in their dashboard." />
+          <FeatureCard title="Shared brands" description="Brand configs are shared across the team so every deck stays on brand." />
+          <FeatureCard title="Shared analytics" description="View engagement data across all team decks." />
+          <FeatureCard title="Email invites" description="Invite teammates by email. They accept or decline from the link." />
         </div>
       </section>
 
-      {/* Step 7 */}
+      {/* Step 8: Analytics */}
       <section className="mt-16">
-        <StepHeader number="7" title="Use Pro analytics dashboards" />
+        <StepHeader number="8" title="Analytics" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          On Pro, open the deck analytics panel to inspect granular slide telemetry while the deck itself stays hosted on your own infrastructure.
+          Get per-slide analytics automatically when you link your deck to SlideNerds. Or bring your own analytics provider.
         </p>
 
         <div className="mt-6 space-y-4">
-          <FeatureCard title="Granular slide events" description="Track per-slide enters/exits and dwell time from linked decks." />
-          <FeatureCard title="Viewer-level timelines" description="Inspect how long each viewer spent on each slide across a session." />
-          <FeatureCard title="Share + live correlation" description="Combine engagement metrics with share links and live interaction data." />
+          <FeatureCard title="Built-in slide analytics" description="Per-slide dwell time, unique viewers, and engagement trends. Available in the deck analytics panel." />
+          <FeatureCard title="Bring your own analytics" description="Add PostHog, Google Analytics 4, Google Tag Manager, Plausible, or a custom provider with one CLI command." />
+        </div>
+        <div className="mt-4">
+          <CopyCodeBlock code={`slidenerds analytics --posthog phc_XXXXXXXXXX\nslidenerds analytics --ga4 G-XXXXXXXXXX\nslidenerds analytics --gtm GTM-XXXXXX`} />
         </div>
       </section>
 
-      {/* Step 8 */}
+      {/* Step 9: Export */}
       <section className="mt-16">
-        <StepHeader number="8" title="Export to PDF" />
+        <StepHeader number="9" title="Export to PDF or PowerPoint" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Export from the deck detail page or from the CLI.
+          Export from the deck detail page or from the CLI. PDF renders server-side at 1920x1080. PPTX generates a native PowerPoint file with editable text.
         </p>
         <div className="mt-4">
-          <CopyCodeBlock code={`slidenerds export --pdf`} />
-        </div>
-        <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-          PDF export renders server-side at 1920x1080 with full CSS support.
-        </p>
-      </section>
-
-      {/* Step 9 */}
-      <section className="mt-16">
-        <StepHeader number="9" title="Collaborate with your team" />
-        <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          On the Team plan, create a workspace where members share decks, brand configs, and analytics.
-        </p>
-
-        <div className="mt-6 space-y-4">
-          <FeatureCard title="Team workspaces" description="Invite team members. Everyone sees team decks in their dashboard." />
-          <FeatureCard title="Shared brand configs" description="Set team-wide colors, fonts, and logos. Every deck stays on brand." />
-          <FeatureCard title="Custom domains" description="Host your decks on your own domain with automatic SSL." />
-          <FeatureCard title="Version history" description="Every push creates a version. Roll back to any previous version from the settings panel." />
-          <FeatureCard title="Comments" description="Reviewers can leave feedback on specific slides." />
+          <CopyCodeBlock code={`slidenerds export --pdf\nslidenerds export --pptx`} />
         </div>
       </section>
 
-      {/* Step 10 */}
+      {/* Step 10: Brand */}
       <section className="mt-16">
         <StepHeader number="10" title="Manage brand configs" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Save and reuse brand configurations across decks. Create brands from the web UI or sync from the CLI.
+          Save and reuse brand configurations across decks. Upload your logo, set colors, fonts, and spacing. Create brands from the web UI or sync from the CLI.
         </p>
         <div className="mt-4">
           <CopyCodeBlock code={`slidenerds brand set "Acme Corp"\nslidenerds brand get "Acme Corp"\nslidenerds brand list`} />
         </div>
 
         <div className="mt-6 space-y-4">
-          <FeatureCard title="Save from CLI" description="Run brand set to upload your current brand.config.ts to the service with a name." />
+          <FeatureCard title="Logo upload" description="Upload your brand logo. It's stored in SlideNerds and downloaded into your deck when you run brand get." />
+          <FeatureCard title="Save from CLI" description="Run brand set to upload your current brand.config.ts (including logo) to the service." />
           <FeatureCard title="Apply from CLI" description="Run brand get to download a saved brand and write it to your local brand.config.ts." />
-          <FeatureCard title="Create from web" description="Use the Brand page in the dashboard to create brands with color pickers and a live preview." />
-          <FeatureCard title="Team brands" description="On the Team plan, brand configs are shared across the workspace so every deck stays on brand." />
+          <FeatureCard title="Create from web" description="Use the Brand page in the dashboard to create brands with color pickers, font selection, and logo upload." />
         </div>
       </section>
 
-      {/* Step 11 */}
+      {/* Step 11: Live */}
       <section className="mt-16">
         <StepHeader number="11" title="Add live interaction" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
@@ -252,9 +288,25 @@ export default function DocsPage() {
         </p>
       </section>
 
+      {/* Step 12: Share */}
+      <section className="mt-16">
+        <StepHeader number="12" title="Share and control access" />
+        <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
+          Decks are private by default. Share them with specific people or make them public.
+        </p>
+
+        <div className="mt-6 space-y-4">
+          <FeatureCard title="Public sharing" description="Toggle a deck to public and anyone with the link can view it." />
+          <FeatureCard title="Email-restricted links" description="Create a share link that only works for specific email addresses." />
+          <FeatureCard title="Domain-restricted links" description="Allow anyone with a company email domain (e.g. @acme.com) to view." />
+          <FeatureCard title="Password-protected links" description="Set a password on a share link. Recipients enter it before viewing." />
+          <FeatureCard title="Expiring links" description="Set an expiration date on any share link." />
+        </div>
+      </section>
+
       {/* Skills reference */}
       <section className="mt-16">
-        <StepHeader number="12" title="Skills reference" />
+        <StepHeader number="13" title="Skills reference" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Every deck ships with 20 skill files that teach your LLM how to use SlideNerds effectively. Reference them in your prompts to get better results.
         </p>
@@ -271,12 +323,12 @@ export default function DocsPage() {
               {[
                 ['layout', 'Slide layout patterns and spacing'],
                 ['advanced-layouts', 'Multi-column, grid, and complex compositions'],
-                ['animation', 'CSS animations and data-step reveals'],
-                ['brand', 'Brand config usage and theming'],
+                ['animation', '100+ CSS animations: entrance, exit, emphasis, auto-build, transitions'],
+                ['brand', 'Brand config usage, theming, and logo integration'],
                 ['data-visualization', 'Charts, graphs, and data displays'],
                 ['deck-templates', 'Complete deck scaffolds by type'],
                 ['diagrams', 'Flowcharts, architecture diagrams, timelines'],
-                ['export', 'PDF export configuration'],
+                ['export', 'PDF and PPTX export configuration'],
                 ['interactive', 'Interactive elements and live demos'],
                 ['narrative-frameworks', 'Story structures and presentation flow'],
                 ['react-component-embeds', 'Embedding React components in slides'],
@@ -286,7 +338,7 @@ export default function DocsPage() {
                 ['speaker-notes', 'Adding and formatting speaker notes'],
                 ['strategic-frameworks', 'Business frameworks (SWOT, etc.)'],
                 ['visual-design', 'Color theory, typography, visual hierarchy'],
-                ['analytics', 'Setting up view tracking'],
+                ['analytics', 'Built-in and third-party analytics setup'],
                 ['accessibility', 'Accessible slide design'],
                 ['live', 'Live polls, reactions, Q&A, word clouds, audience count'],
               ].map(([skill, desc]) => (

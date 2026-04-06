@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Upload, X } from 'lucide-react'
 import type { Json } from '@/lib/supabase/database.types'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -13,6 +13,7 @@ import { BrandPreview } from './BrandPreview'
 
 type BrandEditorProps = {
   brand: BrandConfig
+  userId: string
 }
 
 const COLOR_FIELDS = [
@@ -35,7 +36,7 @@ const SPACING_FIELDS = [
   { key: 'element' as const, label: 'Element gap', hint: 'px' },
 ]
 
-export function BrandEditor({ brand }: BrandEditorProps) {
+export function BrandEditor({ brand, userId }: BrandEditorProps) {
   const initial = parseBrandConfig(brand.config)
   const [name, setName] = useState(brand.name)
   const [config, setConfig] = useState<BrandConfigData>(initial)
@@ -130,9 +131,10 @@ export function BrandEditor({ brand }: BrandEditorProps) {
             onUpdate={updateSpacing}
             inputClass={inputClass}
           />
-          <LogoSection
+          <LogoUploadSection
             logo={config.logo}
             onUpdate={updateLogo}
+            userId={userId}
             inputClass={inputClass}
           />
         </div>
@@ -264,61 +266,156 @@ function SpacingSection({ spacing, onUpdate, inputClass }: SpacingSectionProps) 
   )
 }
 
-type LogoSectionProps = {
+type LogoUploadSectionProps = {
   logo: BrandConfigData['logo']
   onUpdate: (field: 'src' | 'width' | 'height', value: string | number) => void
+  userId: string
   inputClass: string
 }
 
-function LogoSection({ logo, onUpdate, inputClass }: LogoSectionProps) {
+function LogoUploadSection({ logo, onUpdate, userId, inputClass }: LogoUploadSectionProps) {
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File must be under 2MB')
+      return
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
+    if (!allowedTypes.includes(file.type)) {
+      alert('Only JPEG, PNG, WebP, and SVG are supported')
+      return
+    }
+
+    setUploading(true)
+    const storagePath = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('brand-logos')
+      .upload(storagePath, file, { upsert: true })
+
+    if (uploadError) {
+      alert(uploadError.message)
+      setUploading(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('brand-logos')
+      .getPublicUrl(storagePath)
+
+    onUpdate('src', publicUrl)
+    setUploading(false)
+  }
+
+  const handleRemove = async () => {
+    if (!logo?.src) return
+
+    const url = logo.src
+    const bucketPrefix = '/storage/v1/object/public/brand-logos/'
+    const prefixIndex = url.indexOf(bucketPrefix)
+
+    if (prefixIndex !== -1) {
+      const objectPath = url.slice(prefixIndex + bucketPrefix.length).split('?')[0]
+      await supabase.storage.from('brand-logos').remove([objectPath])
+    }
+
+    onUpdate('src', '')
+  }
+
   return (
     <section className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6 space-y-4">
       <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
         Logo (optional)
       </h2>
-      <div>
-        <label htmlFor="logo-src" className="block text-sm font-medium mb-1">
-          Logo URL
-        </label>
-        <input
-          id="logo-src"
-          type="url"
-          value={logo?.src ?? ''}
-          onChange={(e) => onUpdate('src', e.target.value)}
-          placeholder="https://example.com/logo.svg"
-          className={inputClass}
-        />
-      </div>
-      {logo?.src && (
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="logo-width" className="block text-sm font-medium mb-1">
-              Width
-            </label>
-            <input
-              id="logo-width"
-              type="number"
-              value={logo?.width ?? ''}
-              onChange={(e) => onUpdate('width', parseInt(e.target.value, 10) || 0)}
-              placeholder="Auto"
-              className={inputClass}
-            />
+
+      {logo?.src ? (
+        <div className="space-y-3">
+          <div className="flex items-start gap-4">
+            <div className="w-24 h-24 rounded-[var(--n-radius-md)] border border-[var(--border)] bg-[var(--background)] flex items-center justify-center overflow-hidden">
+              <img
+                src={logo.src}
+                alt="Brand logo"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="px-3 py-1.5 rounded-[var(--n-radius-md)] border border-[var(--border)] text-sm font-medium hover:bg-[var(--accent)] transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Upload size={14} />
+                {uploading ? 'Uploading...' : 'Replace'}
+              </button>
+              <button
+                onClick={handleRemove}
+                className="px-3 py-1.5 rounded-[var(--n-radius-md)] border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 transition-colors flex items-center gap-1.5"
+              >
+                <X size={14} />
+                Remove logo
+              </button>
+            </div>
           </div>
-          <div>
-            <label htmlFor="logo-height" className="block text-sm font-medium mb-1">
-              Height
-            </label>
-            <input
-              id="logo-height"
-              type="number"
-              value={logo?.height ?? ''}
-              onChange={(e) => onUpdate('height', parseInt(e.target.value, 10) || 0)}
-              placeholder="Auto"
-              className={inputClass}
-            />
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="logo-width" className="block text-sm font-medium mb-1">
+                Width
+              </label>
+              <input
+                id="logo-width"
+                type="number"
+                value={logo?.width ?? ''}
+                onChange={(e) => onUpdate('width', parseInt(e.target.value, 10) || 0)}
+                placeholder="Auto"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="logo-height" className="block text-sm font-medium mb-1">
+                Height
+              </label>
+              <input
+                id="logo-height"
+                type="number"
+                value={logo?.height ?? ''}
+                onChange={(e) => onUpdate('height', parseInt(e.target.value, 10) || 0)}
+                placeholder="Auto"
+                className={inputClass}
+              />
+            </div>
           </div>
         </div>
+      ) : (
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="w-full py-8 rounded-[var(--n-radius-md)] border-2 border-dashed border-[var(--border)] hover:border-[var(--primary)] hover:bg-[var(--accent)] transition-colors flex flex-col items-center gap-2 disabled:opacity-50"
+        >
+          <Upload size={24} className="text-[var(--muted-foreground)]" />
+          <span className="text-sm text-[var(--muted-foreground)]">
+            {uploading ? 'Uploading...' : 'Click to upload a logo'}
+          </span>
+          <span className="text-xs text-[var(--muted-foreground)]">
+            JPEG, PNG, WebP, or SVG. Max 2MB.
+          </span>
+        </button>
       )}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/svg+xml"
+        className="hidden"
+        onChange={handleUpload}
+      />
     </section>
   )
 }
