@@ -67,42 +67,187 @@ export default function ReferencePage() {
 </section>`} />
       </section>
 
-      {/* Animation classes */}
+      {/* Entrance animations */}
       <section className="mt-16">
-        <h2 className="text-2xl font-bold mb-4">Animation classes</h2>
+        <h2 className="text-2xl font-bold mb-4">Entrance animations (step-*)</h2>
         <p className="text-[var(--muted-foreground)] leading-relaxed mb-4">
-          Apply these to <Code>data-step</Code> elements to control how they appear.
+          Apply to <Code>data-step</Code> elements to control how they appear when revealed.
         </p>
-        <Table
-          headers={['Class', 'Effect', 'Duration']}
-          rows={[
-            ['step-fade', 'Opacity 0 to 1', '350ms'],
-            ['step-move-up', 'Slide up 24px + fade', '420ms'],
-            ['step-move-left', 'Slide left 30px + fade', '400ms'],
-            ['step-scale-in', 'Scale 0.92 to 1 + fade', '350ms'],
-            ['step-pop', 'Scale 0.6 to 1 with spring overshoot', '400ms'],
-            ['step-wipe-right', 'Clip-path wipe from left to right', '500ms'],
-            ['step-emphasis', 'Spring scale entrance', '500ms'],
-          ]}
-        />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Fades</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-fade', 'Opacity 0 to 1'],
+          ['step-fade-slow', 'Slow fade in'],
+          ['step-dissolve', 'Dissolve in'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Slides and flies</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-move-up', 'Slide up + fade'],
+          ['step-move-down', 'Slide down + fade'],
+          ['step-move-left', 'Slide left + fade'],
+          ['step-move-right', 'Slide right + fade'],
+          ['step-fly-in-left', 'Fly in from far left'],
+          ['step-fly-in-right', 'Fly in from far right'],
+          ['step-fly-in-top', 'Fly in from top'],
+          ['step-fly-in-bottom', 'Fly in from bottom'],
+          ['step-float-up', 'Float up gently'],
+          ['step-float-down', 'Float down gently'],
+          ['step-slide-in-left', 'Slide in from left'],
+          ['step-slide-in-right', 'Slide in from right'],
+          ['step-glide-up', 'Glide up'],
+          ['step-glide-down', 'Glide down'],
+          ['step-peek-left', 'Peek in from left'],
+          ['step-peek-right', 'Peek in from right'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Scales and zooms</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-scale-in', 'Scale 0.92 to 1 + fade'],
+          ['step-scale-up', 'Scale up from small'],
+          ['step-scale-down', 'Scale down from large'],
+          ['step-zoom-in', 'Zoom in from tiny'],
+          ['step-zoom-in-rotate', 'Zoom in with rotation'],
+          ['step-grow', 'Grow from nothing'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Pops and bounces</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-pop', 'Scale pop with spring overshoot'],
+          ['step-bounce', 'Bounce in'],
+          ['step-bounce-left', 'Bounce in from left'],
+          ['step-bounce-right', 'Bounce in from right'],
+          ['step-elastic', 'Elastic spring entrance'],
+          ['step-drop', 'Drop in from above'],
+          ['step-rise', 'Rise up from below'],
+          ['step-swing-in', 'Swing in with rotation'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Spins and flips</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-spin-in', 'Spin in with rotation'],
+          ['step-spin-in-slow', 'Slow spin in'],
+          ['step-flip-x', 'Flip on X axis'],
+          ['step-flip-y', 'Flip on Y axis'],
+          ['step-rotate-in', 'Rotate in from angle'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Wipes and reveals</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-wipe-right', 'Clip-path wipe right'],
+          ['step-wipe-left', 'Clip-path wipe left'],
+          ['step-wipe-up', 'Clip-path wipe up'],
+          ['step-wipe-down', 'Clip-path wipe down'],
+          ['step-iris', 'Iris circle reveal'],
+          ['step-diamond-reveal', 'Diamond shape reveal'],
+          ['step-split-horizontal', 'Split open horizontally'],
+          ['step-split-vertical', 'Split open vertically'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Filters</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-blur-in', 'Blur to sharp'],
+          ['step-unblur', 'Unblur reveal'],
+          ['step-brightness', 'Brighten in'],
+          ['step-saturate', 'Saturate colors in'],
+        ]} />
+
+        <h3 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mt-6 mb-3">Text</h3>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['step-typewriter', 'Typewriter character reveal'],
+          ['step-text-reveal', 'Text clip reveal'],
+          ['step-letter-spread', 'Letters spread from center'],
+        ]} />
+      </section>
+
+      {/* Exit animations */}
+      <section className="mt-16">
+        <h2 className="text-2xl font-bold mb-4">Exit animations (exit-*)</h2>
+        <p className="text-[var(--muted-foreground)] leading-relaxed mb-4">
+          Apply to <Code>data-exit-step</Code> elements. They animate out before the slide transitions.
+        </p>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['exit-fade', 'Fade out'],
+          ['exit-move-up', 'Slide up + fade out'],
+          ['exit-move-down', 'Slide down + fade out'],
+          ['exit-move-left', 'Slide left + fade out'],
+          ['exit-move-right', 'Slide right + fade out'],
+          ['exit-fly-out-left', 'Fly out to far left'],
+          ['exit-fly-out-right', 'Fly out to far right'],
+          ['exit-fly-out-top', 'Fly out to top'],
+          ['exit-fly-out-bottom', 'Fly out to bottom'],
+          ['exit-scale-down', 'Scale down + fade out'],
+          ['exit-scale-up', 'Scale up + fade out'],
+          ['exit-zoom-out', 'Zoom out to nothing'],
+          ['exit-spin-out', 'Spin out with rotation'],
+          ['exit-flip-x', 'Flip away on X axis'],
+          ['exit-flip-y', 'Flip away on Y axis'],
+          ['exit-wipe-left', 'Wipe away left'],
+          ['exit-wipe-right', 'Wipe away right'],
+          ['exit-wipe-up', 'Wipe away up'],
+          ['exit-wipe-down', 'Wipe away down'],
+          ['exit-iris', 'Iris circle close'],
+          ['exit-blur', 'Blur out'],
+          ['exit-drop-off', 'Drop off screen'],
+          ['exit-bounce-off', 'Bounce off screen'],
+          ['exit-pop', 'Pop away'],
+          ['exit-shrink-rotate', 'Shrink and rotate away'],
+          ['exit-dissolve', 'Dissolve out'],
+        ]} />
+      </section>
+
+      {/* Emphasis animations */}
+      <section className="mt-16">
+        <h2 className="text-2xl font-bold mb-4">Emphasis animations (emphasis-*)</h2>
+        <p className="text-[var(--muted-foreground)] leading-relaxed mb-4">
+          Apply to <Code>data-step</Code> elements. Triggered on second click to draw attention to a visible element.
+        </p>
+        <Table headers={['Class', 'Effect']} rows={[
+          ['emphasis-pulse', 'Scale pulse'],
+          ['emphasis-bounce', 'Bounce in place'],
+          ['emphasis-shake', 'Horizontal shake'],
+          ['emphasis-wobble', 'Wobble rotation'],
+          ['emphasis-jiggle', 'Quick jiggle'],
+          ['emphasis-rubber-band', 'Rubber band stretch'],
+          ['emphasis-swing', 'Pendulum swing'],
+          ['emphasis-tada', 'Attention-getting tada'],
+          ['emphasis-heartbeat', 'Heartbeat pulse'],
+          ['emphasis-flash', 'Flash opacity'],
+          ['emphasis-spin', 'Full spin'],
+          ['emphasis-float', 'Float up and down'],
+          ['emphasis-glow', 'Glow effect'],
+          ['emphasis-color-pulse', 'Color shift pulse'],
+          ['emphasis-teeter', 'Teeter back and forth'],
+          ['emphasis-flicker', 'Quick flicker'],
+          ['emphasis-grow', 'Grow slightly'],
+          ['emphasis-shrink', 'Shrink slightly'],
+        ]} />
       </section>
 
       {/* Auto-build animations */}
       <section className="mt-16">
-        <h2 className="text-2xl font-bold mb-4">Auto-build animations</h2>
+        <h2 className="text-2xl font-bold mb-4">Auto-build animations (auto-*)</h2>
         <p className="text-[var(--muted-foreground)] leading-relaxed mb-4">
-          These classes animate elements automatically when a slide enters, without requiring <Code>data-step</Code>. Use for decorative elements, cards, and layout pieces.
+          Animate elements automatically when a slide becomes active. No <Code>data-step</Code> needed. Stagger with <Code>animationDelay</Code>.
         </p>
-        <Table
-          headers={['Class', 'Effect']}
-          rows={[
-            ['auto-fade', 'Fade in on slide enter'],
-            ['auto-slide-up', 'Slide up + fade on enter'],
-            ['auto-slide-down', 'Slide down + fade on enter'],
-            ['auto-pop', 'Scale pop on enter'],
-            ['auto-wipe-right', 'Clip-path wipe on enter'],
-          ]}
-        />
+        <Table headers={['Class', 'Effect']} rows={[
+          ['auto-fade', 'Fade in on slide enter'],
+          ['auto-slide-up', 'Slide up + fade'],
+          ['auto-slide-down', 'Slide down + fade'],
+          ['auto-slide-left', 'Slide left + fade'],
+          ['auto-slide-right', 'Slide right + fade'],
+          ['auto-pop', 'Scale pop'],
+          ['auto-scale-in', 'Scale in'],
+          ['auto-zoom-in', 'Zoom in'],
+          ['auto-wipe-right', 'Wipe right'],
+          ['auto-wipe-left', 'Wipe left'],
+          ['auto-blur-in', 'Blur to sharp'],
+          ['auto-fly-in-left', 'Fly in from left'],
+          ['auto-fly-in-right', 'Fly in from right'],
+          ['auto-bounce', 'Bounce in'],
+          ['auto-spin-in', 'Spin in'],
+          ['auto-flip-x', 'Flip on X axis'],
+        ]} />
         <CodeBlock code={`<section data-slide="">
   <h2>Our team</h2>
   <div className="auto-fade" style={{ animationDelay: '0.2s' }}>
@@ -111,6 +256,45 @@ export default function ReferencePage() {
   <div className="auto-fade" style={{ animationDelay: '0.4s' }}>
     Card 2
   </div>
+</section>`} />
+      </section>
+
+      {/* Slide transitions */}
+      <section className="mt-16">
+        <h2 className="text-2xl font-bold mb-4">Slide transitions (data-transition)</h2>
+        <p className="text-[var(--muted-foreground)] leading-relaxed mb-4">
+          Set the <Code>data-transition</Code> attribute on a slide to control how it transitions to/from the next slide.
+        </p>
+        <Table headers={['Value', 'Effect']} rows={[
+          ['fade', 'Cross-fade (default)'],
+          ['dissolve', 'Dissolve blend'],
+          ['push-left', 'Push left'],
+          ['push-right', 'Push right'],
+          ['push-up', 'Push up'],
+          ['push-down', 'Push down'],
+          ['slide-left', 'Slide left'],
+          ['slide-right', 'Slide right'],
+          ['cover-left', 'Cover from right'],
+          ['cover-right', 'Cover from left'],
+          ['cover-up', 'Cover from bottom'],
+          ['cover-down', 'Cover from top'],
+          ['uncover-left', 'Uncover to left'],
+          ['uncover-right', 'Uncover to right'],
+          ['uncover-up', 'Uncover to top'],
+          ['uncover-down', 'Uncover to bottom'],
+          ['zoom-in', 'Zoom in'],
+          ['zoom-out', 'Zoom out'],
+          ['flip-x', '3D flip on X axis'],
+          ['flip-y', '3D flip on Y axis'],
+          ['cube-left', '3D cube rotate left'],
+          ['cube-right', '3D cube rotate right'],
+          ['iris', 'Iris circle reveal'],
+          ['split-horizontal', 'Split open horizontally'],
+          ['split-vertical', 'Split open vertically'],
+          ['morph', 'Morph blend'],
+        ]} />
+        <CodeBlock code={`<section data-slide="" data-transition="cube-left">
+  <h1>This slide uses a 3D cube transition</h1>
 </section>`} />
       </section>
 
