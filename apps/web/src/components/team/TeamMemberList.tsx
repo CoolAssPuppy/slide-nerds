@@ -37,18 +37,22 @@ export function TeamMemberList({ teamId, teammates, canManage }: TeamMemberListP
   const router = useRouter()
 
   const handleDelete = async (teammate: Teammate) => {
-    if (teammate.type === 'invite') {
-      await fetch('/api/team/invite', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ team_id: teamId, invite_id: teammate.id }),
-      })
-    } else if (teammate.user_id) {
-      await fetch('/api/team/members', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ team_id: teamId, user_id: teammate.user_id }),
-      })
+    try {
+      if (teammate.type === 'invite') {
+        await fetch('/api/team/invite', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ team_id: teamId, invite_id: teammate.id }),
+        })
+      } else if (teammate.user_id) {
+        await fetch('/api/team/members', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ team_id: teamId, user_id: teammate.user_id }),
+        })
+      }
+    } catch {
+      // Network error, refresh will show current state
     }
     router.refresh()
   }
