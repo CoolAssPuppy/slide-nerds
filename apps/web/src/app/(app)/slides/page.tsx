@@ -71,7 +71,7 @@ export default async function SlidesPage() {
         <div className="mb-8 text-center py-12 rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)]">
           <p className="text-[var(--muted-foreground)] mb-2">No decks yet</p>
           <p className="text-sm text-[var(--muted-foreground)]">
-            Create a deck and push from the CLI with <code className="text-[var(--primary)]">slidenerds push</code>
+            Deploy your deck and register it with <code className="text-[var(--primary)]">slidenerds link --url</code>
           </p>
         </div>
       )}

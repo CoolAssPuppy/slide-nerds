@@ -14,8 +14,7 @@ npm install
 npm run dev`
 
 const SHARE_CODE = `slidenerds login
-slidenerds link --name my-talk
-slidenerds push`
+slidenerds link --name my-talk --url https://my-talk.vercel.app`
 
 const BRAND_CODE = `slidenerds brand set "Acme Corp"
 slidenerds brand get "Acme Corp"

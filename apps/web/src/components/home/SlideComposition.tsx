@@ -138,7 +138,7 @@ export function SlideComposition() {
         <StepCard
           number="3"
           title="Push"
-          code="slidenerds push"
+          code="slidenerds link --url"
           delay={40}
         />
       </div>

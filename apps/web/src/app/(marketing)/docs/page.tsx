@@ -107,10 +107,10 @@ export default function DocsPage() {
           Push your deck to slidenerds.com to get a shareable URL, analytics, and access controls.
         </p>
         <div className="mt-4">
-          <CopyCodeBlock code={`slidenerds login\nslidenerds link --name my-talk\nslidenerds push`} />
+          <CopyCodeBlock code={`slidenerds login\nslidenerds link --name my-talk --url https://my-talk.vercel.app`} />
         </div>
         <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-          The CLI builds your deck as a static export, zips it, and uploads it to SlideNerds. You get a URL like <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">slidenerds.com/d/my-talk</code>.
+          Deploy your deck to Vercel, Netlify, or any static host first, then register the URL with SlideNerds. Your deck is now tracked at <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">slidenerds.com/d/my-talk</code>.
         </p>
       </section>
 

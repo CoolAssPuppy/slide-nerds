@@ -99,7 +99,7 @@ export function DeckDetailClient({ deck }: DeckDetailClientProps) {
           <div className="text-center">
             <p className="text-[var(--muted-foreground)]">No content yet</p>
             <p className="text-sm text-[var(--muted-foreground)] mt-1">
-              Run <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded-[var(--n-radius-sm)]">slidenerds push</code> to upload your deck.
+              Deploy your deck and run <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded-[var(--n-radius-sm)]">slidenerds link --url your-url</code> to connect it.
             </p>
           </div>
         </div>

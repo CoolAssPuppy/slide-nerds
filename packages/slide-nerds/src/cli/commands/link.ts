@@ -28,12 +28,13 @@ const isSlidenerdProject = async (dir: string): Promise<boolean> => {
 
 export const linkProject = async (options: {
   name?: string
+  url: string
   deckId?: string
   serviceUrl: string
   accessToken: string
 }): Promise<{ deckId: string; deckName: string }> => {
   const dir = process.cwd()
-  const { serviceUrl, accessToken } = options
+  const { serviceUrl, accessToken, url } = options
 
   // If a deck ID is provided, just link to it
   if (options.deckId) {
@@ -52,7 +53,7 @@ export const linkProject = async (options: {
     return { deckId: deck.id, deckName: deck.name }
   }
 
-  // Otherwise, create a new deck
+  // Otherwise, create a new deck with the deployed URL
   const name = options.name ?? await detectProjectName(dir)
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
@@ -62,7 +63,7 @@ export const linkProject = async (options: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ name, slug, source_type: 'push' }),
+    body: JSON.stringify({ name, slug, url, deployed_url: url, source_type: 'url' }),
   })
 
   if (!resp.ok) {
@@ -85,9 +86,10 @@ export const registerLinkCommand = (program: Command): void => {
   program
     .command('link')
     .description('Link this project to a deck on slidenerds.com')
+    .requiredOption('--url <url>', 'Deployed URL of your deck (e.g. https://my-talk.vercel.app)')
     .option('--name <name>', 'Deck name (defaults to package name)')
     .option('--deck-id <id>', 'Link to an existing deck by ID')
-    .action(async (options: { name?: string; deckId?: string }) => {
+    .action(async (options: { url: string; name?: string; deckId?: string }) => {
       const dir = process.cwd()
 
       if (!(await isSlidenerdProject(dir))) {
@@ -113,13 +115,15 @@ export const registerLinkCommand = (program: Command): void => {
         const serviceUrl = await getServiceUrl()
         const { deckId, deckName } = await linkProject({
           name: options.name,
+          url: options.url,
           deckId: options.deckId,
           serviceUrl,
           accessToken: creds.access_token,
         })
 
         console.log(`Linked to "${deckName}" (${deckId})`)
-        console.log('Run `slidenerds push` to upload your deck.')
+        console.log(`Deck URL: ${options.url}`)
+        console.log('Your deck is now registered on slidenerds.com.')
       } catch (err) {
         console.error(`Link failed: ${err instanceof Error ? err.message : err}`)
         process.exit(1)

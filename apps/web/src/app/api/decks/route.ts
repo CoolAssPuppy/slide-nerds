@@ -31,9 +31,10 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { name, url, description } = body as {
+  const { name, url, deployed_url, description } = body as {
     name: string
     url?: string
+    deployed_url?: string
     description?: string
   }
 
@@ -50,8 +51,9 @@ export async function POST(request: Request) {
       slug,
       owner_id: user.id,
       url: url?.trim() || null,
+      deployed_url: deployed_url?.trim() || url?.trim() || null,
       description: description?.trim() || null,
-      source_type: url?.trim() ? 'url' : 'push',
+      source_type: 'url',
     })
     .select()
     .single()

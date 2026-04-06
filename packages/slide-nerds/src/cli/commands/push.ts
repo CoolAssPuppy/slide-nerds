@@ -153,38 +153,12 @@ export const pushDeck = async (options: {
 export const registerPushCommand = (program: Command): void => {
   program
     .command('push')
-    .description('Build and upload your deck to slidenerds.com')
-    .option('--skip-build', 'Skip the build step (use existing out/ directory)')
-    .action(async (options: { skipBuild?: boolean }) => {
-      const dir = process.cwd()
-
-      const config = await getProjectConfig(dir)
-      if (!config) {
-        console.error('Project not linked. Run `slidenerds link` first.')
-        process.exit(1)
-      }
-
-      const creds = await getCredentials()
-      if (!creds) {
-        console.error('Not logged in. Run `slidenerds login` first.')
-        process.exit(1)
-      }
-
-      try {
-        const serviceUrl = await getServiceUrl()
-        const { version, url } = await pushDeck({
-          dir,
-          deckId: config.deck_id,
-          serviceUrl,
-          accessToken: creds.access_token,
-          skipBuild: options.skipBuild,
-        })
-
-        console.log(`\nPushed version ${version}`)
-        console.log(`View at: ${url}\n`)
-      } catch (err) {
-        console.error(`Push failed: ${err instanceof Error ? err.message : err}`)
-        process.exit(1)
-      }
+    .description('(Deprecated) Deploy your deck to your own host and use slidenerds link --url instead')
+    .action(async () => {
+      console.log('Direct upload to SlideNerds has been deprecated.\n')
+      console.log('Deploy your deck to Vercel, Netlify, or any static host, then register it:\n')
+      console.log('  npx vercel deploy --prod')
+      console.log('  slidenerds link --name my-talk --url https://my-talk.vercel.app\n')
+      process.exit(1)
     })
 }

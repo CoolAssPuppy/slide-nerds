@@ -21,15 +21,18 @@ npm run dev
 
 Open a second terminal, start Claude Code (or your preferred LLM), and talk to it while hot reload updates your browser.
 
-## Push to slidenerds.com
+## Register with slidenerds.com
+
+Deploy your deck to Vercel, Netlify, or any static host, then register the URL:
 
 ```bash
+npx vercel deploy --prod
+
 slidenerds login
-slidenerds link --name my-talk
-slidenerds push
+slidenerds link --name my-talk --url https://my-talk.vercel.app
 ```
 
-Your deck is now hosted at `slidenerds.com/d/my-talk` with analytics, sharing controls, and export.
+Your deck is now registered at `slidenerds.com/d/my-talk` with analytics, sharing controls, and export.
 
 ## What you get
 
@@ -251,10 +254,9 @@ slidenerds create my-talk         # Scaffold a new deck
 slidenerds export --pdf           # Export to PDF
 slidenerds export --pptx          # Export to PowerPoint
 
-# Host on slidenerds.com
+# Register on slidenerds.com
 slidenerds login                  # Authenticate with the service
-slidenerds link --name my-talk    # Link project to a hosted deck
-slidenerds push                   # Build and upload
+slidenerds link --name my-talk --url https://my-talk.vercel.app
 
 # Brand management
 slidenerds brand set "My Brand"   # Save current brand to service

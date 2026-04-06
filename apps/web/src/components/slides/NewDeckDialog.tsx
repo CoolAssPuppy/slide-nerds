@@ -115,8 +115,7 @@ export function NewDeckDialog({ onClose }: NewDeckDialogProps) {
               </p>
               <pre className="text-sm text-[var(--muted-foreground)] whitespace-pre-wrap">
                 <code>{`slidenerds login
-slidenerds link
-slidenerds push`}</code>
+slidenerds link --name my-deck --url https://my-deck.vercel.app`}</code>
               </pre>
             </div>
           )}
