@@ -62,21 +62,13 @@ export default async function HomePage() {
           <p className="mt-6 text-lg text-[var(--muted-foreground)] max-w-xl">
             Use Claude or Codex to build effective, compelling, and stunning presentations that communicate.
           </p>
-          <div className="mt-10 flex gap-4">
+          <div className="mt-10">
             <Link
               href="/signup"
               className="px-6 py-2.5 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Get started free
             </Link>
-            <a
-              href="https://www.npmjs.com/package/@strategicnerds/slide-nerds"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-2.5 rounded-[var(--n-radius-md)] border border-[var(--border)] text-sm font-medium hover:bg-[var(--accent)] transition-colors"
-            >
-              npm install
-            </a>
           </div>
           <div className="mt-16 w-full max-w-2xl">
             <CopyCodeBlock code="npm install @strategicnerds/slide-nerds" />
@@ -175,13 +167,8 @@ export default async function HomePage() {
             <p className="mt-4 text-lg text-[var(--muted-foreground)]">
               The package is free. The CLI is free. Your first deck takes five minutes.
             </p>
-            <div className="mt-10">
-              <Link
-                href="/signup"
-                className="px-8 py-3 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Get started free
-              </Link>
+            <div className="mt-10 w-full max-w-2xl mx-auto">
+              <CopyCodeBlock code="npm install @strategicnerds/slide-nerds" />
             </div>
           </div>
         </section>
