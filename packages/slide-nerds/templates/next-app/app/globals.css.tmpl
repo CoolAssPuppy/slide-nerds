@@ -27,9 +27,14 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  perspective: 1600px;
 }
 
-[data-slide].active {
+[data-slide].active,
+[data-slide].entering,
+[data-slide].exiting {
   display: flex;
 }
 
@@ -43,225 +48,705 @@ body {
 }
 
 /* ==========================================================================
-   STEP ANIMATIONS (click-to-reveal, controlled by runtime)
-   Add these classes to data-step elements. Runtime adds step-visible on click.
+   UNIVERSAL ANIMATION FOUNDATIONS
    ========================================================================== */
 
-[data-step], [data-auto-step] {
+:root {
+  --slide-transition-duration: 560ms;
+}
+
+[data-step],
+[data-auto-step] {
+  --anim-duration: 420ms;
+  --anim-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: hidden;
+  opacity: 0;
+  transform: none;
+  filter: none;
+  clip-path: inset(0 0 0 0);
+  transition:
+    opacity var(--anim-duration) var(--anim-ease),
+    transform var(--anim-duration) var(--anim-ease),
+    filter var(--anim-duration) var(--anim-ease),
+    clip-path var(--anim-duration) var(--anim-ease),
+    letter-spacing var(--anim-duration) var(--anim-ease),
+    visibility var(--anim-duration) var(--anim-ease);
+}
+
+[data-step].step-visible,
+[data-auto-step].step-visible {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) rotate(0deg) !important;
+  filter: blur(0) brightness(1) saturate(1) grayscale(0) !important;
+  clip-path: inset(0 0 0 0) !important;
+  letter-spacing: normal;
+}
+
+/* ==========================================================================
+   ENTRANCE ANIMATIONS (step-*)
+   ========================================================================== */
+
+/* Fades */
+.step-fade { --anim-duration: 350ms; }
+.step-fade-slow { --anim-duration: 700ms; }
+.step-dissolve {
+  --anim-duration: 500ms;
+  filter: contrast(1.7) saturate(0.2);
+}
+
+/* Slides and flies */
+.step-move-up { --anim-duration: 420ms; transform: translateY(24px); }
+.step-move-down { --anim-duration: 420ms; transform: translateY(-24px); }
+.step-move-left { --anim-duration: 400ms; transform: translateX(-30px); }
+.step-move-right { --anim-duration: 400ms; transform: translateX(30px); }
+.step-fly-in-left { --anim-duration: 500ms; transform: translateX(-130vw); }
+.step-fly-in-right { --anim-duration: 500ms; transform: translateX(130vw); }
+.step-fly-in-top { --anim-duration: 500ms; transform: translateY(-130vh); }
+.step-fly-in-bottom { --anim-duration: 500ms; transform: translateY(130vh); }
+.step-float-up {
+  --anim-duration: 600ms;
+  --anim-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(44px);
+}
+.step-float-down {
+  --anim-duration: 600ms;
+  --anim-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-44px);
+}
+
+/* Scales and zooms */
+.step-scale-in { --anim-duration: 350ms; transform: scale(0.92); }
+.step-scale-up { --anim-duration: 400ms; transform: scale(0.5); }
+.step-scale-down { --anim-duration: 400ms; transform: scale(1.5); }
+.step-zoom-in { --anim-duration: 450ms; transform: scale(0); }
+.step-zoom-in-rotate { --anim-duration: 500ms; transform: scale(0) rotate(-90deg); }
+.step-grow {
+  --anim-duration: 500ms;
+  transform: scale(0);
+  transition-timing-function: cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+/* Pops and bounces */
+.step-pop {
+  --anim-duration: 400ms;
+  --anim-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.6);
+}
+.step-bounce,
+.step-bounce-left,
+.step-bounce-right,
+.step-elastic,
+.step-drop,
+.step-rise,
+.step-swing-in,
+.step-spin-in,
+.step-spin-in-slow,
+.step-flip-x,
+.step-flip-y,
+.step-rotate-in {
   visibility: hidden;
   opacity: 0;
 }
 
-[data-step].step-fade, [data-auto-step].step-fade {
-  transition:
-    opacity 350ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 350ms cubic-bezier(0.4, 0, 0.2, 1);
+.step-bounce.step-visible { animation: step-bounce-in var(--anim-duration, 600ms) both; }
+.step-bounce-left.step-visible { animation: step-bounce-left-in var(--anim-duration, 600ms) both; }
+.step-bounce-right.step-visible { animation: step-bounce-right-in var(--anim-duration, 600ms) both; }
+.step-elastic.step-visible { animation: step-elastic-in var(--anim-duration, 700ms) both; }
+.step-drop.step-visible { animation: step-drop-in var(--anim-duration, 500ms) both; }
+.step-rise.step-visible { animation: step-rise-in var(--anim-duration, 500ms) both; }
+
+/* Spins and flips */
+.step-spin-in.step-visible { animation: step-spin-in-key var(--anim-duration, 600ms) both; }
+.step-spin-in-slow.step-visible { animation: step-spin-in-slow-key var(--anim-duration, 1000ms) both; }
+.step-flip-x.step-visible { animation: step-flip-x-in var(--anim-duration, 500ms) both; transform-origin: center; }
+.step-flip-y.step-visible { animation: step-flip-y-in var(--anim-duration, 500ms) both; transform-origin: center; }
+.step-swing-in.step-visible { animation: step-swing-in-key var(--anim-duration, 600ms) both; transform-origin: top center; }
+.step-rotate-in.step-visible { animation: step-rotate-in-key var(--anim-duration, 400ms) both; }
+
+/* Wipes and reveals */
+.step-wipe-right { --anim-duration: 500ms; clip-path: inset(0 100% 0 0); }
+.step-wipe-left { --anim-duration: 500ms; clip-path: inset(0 0 0 100%); }
+.step-wipe-up { --anim-duration: 500ms; clip-path: inset(100% 0 0 0); }
+.step-wipe-down { --anim-duration: 500ms; clip-path: inset(0 0 100% 0); }
+.step-iris { --anim-duration: 500ms; clip-path: circle(0% at 50% 50%); }
+.step-diamond-reveal { --anim-duration: 500ms; clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
+.step-split-horizontal { --anim-duration: 500ms; clip-path: inset(0 50% 0 50%); }
+.step-split-vertical { --anim-duration: 500ms; clip-path: inset(50% 0 50% 0); }
+.step-diamond-reveal.step-visible {
+  clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%) !important;
 }
 
-[data-step].step-move-up, [data-auto-step].step-move-up {
-  transform: translateY(24px);
-  transition:
-    opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 400ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 400ms cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Blur and filter */
+.step-blur-in { --anim-duration: 400ms; filter: blur(10px); }
+.step-unblur { --anim-duration: 500ms; filter: blur(20px); opacity: 1; }
+.step-brightness { --anim-duration: 400ms; filter: brightness(0); }
+.step-saturate { --anim-duration: 500ms; filter: grayscale(1); }
 
-[data-step].step-scale-in, [data-auto-step].step-scale-in {
-  transform: scale(0.92);
-  transition:
-    opacity 350ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 350ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 350ms cubic-bezier(0.16, 1, 0.3, 1);
+/**** Text-specific ****/
+.step-typewriter {
+  --anim-duration: 1000ms;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  border-right: 0.08em solid currentColor;
+  opacity: 1;
 }
-
-[data-step].step-move-left, [data-auto-step].step-move-left {
-  transform: translateX(-30px);
-  transition:
-    opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 400ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 400ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-[data-step].step-pop, [data-auto-step].step-pop {
-  transform: scale(0.6);
-  transition:
-    opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    visibility 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-[data-step].step-wipe-right, [data-auto-step].step-wipe-right {
-  clip-path: inset(0 100% 0 0);
-  transition:
-    clip-path 500ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Visible state applied by runtime */
-.step-visible {
+.step-typewriter.step-visible {
   visibility: visible !important;
-  opacity: 1 !important;
-  transform: translateY(0) translateX(0) scale(1) !important;
+  animation: step-typewriter-key var(--anim-duration, 1000ms) steps(40, end) forwards,
+    typewriter-caret 700ms step-end infinite;
 }
-
-.step-wipe-right.step-visible {
-  clip-path: inset(0 0 0 0) !important;
-}
-
-/* Emphasis entrance for big stats */
-.step-emphasis.step-visible {
-  animation: emphasis-land 500ms cubic-bezier(0.16, 1, 0.3, 1) 1;
-}
-
-@keyframes emphasis-land {
-  0% { transform: scale(0.85); opacity: 0; }
-  60% { transform: scale(1.03); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* ==========================================================================
-   AUTO-BUILD ANIMATIONS (trigger on slide load, no click needed)
-   Add these classes directly to elements. They animate when the parent
-   slide gets the .active class. Use style={{ animationDelay }} for stagger.
-   ========================================================================== */
-
-.auto-fade {
-  opacity: 0;
-}
-
-[data-slide].active .auto-fade {
-  animation: auto-fade-in 350ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes auto-fade-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-.auto-pop {
-  opacity: 0;
-  transform: scale(0.6);
-}
-
-[data-slide].active .auto-pop {
-  animation: pop-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes pop-in {
-  0% { transform: scale(0.6); opacity: 0; }
-  70% { transform: scale(1.08); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.auto-wipe-right {
+.step-text-reveal {
+  --anim-duration: 600ms;
   clip-path: inset(0 100% 0 0);
-  opacity: 0;
+}
+.step-letter-spread {
+  --anim-duration: 500ms;
+  letter-spacing: -0.4em;
 }
 
-[data-slide].active .auto-wipe-right {
-  animation: wipe-right-in 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+/* Slides and glides */
+.step-slide-in-left {
+  --anim-duration: 500ms;
+  --anim-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(-72px);
 }
-
-@keyframes wipe-right-in {
-  0% { clip-path: inset(0 100% 0 0); opacity: 0; }
-  1% { opacity: 1; }
-  100% { clip-path: inset(0 0 0 0); opacity: 1; }
+.step-slide-in-right {
+  --anim-duration: 500ms;
+  --anim-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(72px);
 }
-
-.auto-slide-down {
-  opacity: 0;
-  transform: translateY(-30px);
+.step-glide-up {
+  --anim-duration: 500ms;
+  --anim-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(56px);
 }
-
-[data-slide].active .auto-slide-down {
-  animation: slide-down-in 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.step-glide-down {
+  --anim-duration: 500ms;
+  --anim-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-56px);
 }
-
-@keyframes slide-down-in {
-  0% { transform: translateY(-30px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+.step-peek-left {
+  --anim-duration: 400ms;
+  transform: translateX(-28px);
+  clip-path: inset(0 0 0 50%);
 }
-
-.auto-slide-up {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-[data-slide].active .auto-slide-up {
-  animation: slide-up-in 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes slide-up-in {
-  0% { transform: translateY(30px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+.step-peek-right {
+  --anim-duration: 400ms;
+  transform: translateX(28px);
+  clip-path: inset(0 50% 0 0);
 }
 
 /* ==========================================================================
-   EXIT ANIMATIONS (trigger when leaving a slide)
-   Add these classes to elements. They animate when the parent slide gets
-   the .exiting class (added by runtime before slide transition).
-   Author-controlled exits use data-exit-step + exit-visible class.
+   EXIT ANIMATIONS (exit-*)
    ========================================================================== */
 
-[data-exit-step] {
-  /* Exit steps are visible by default, hidden when exit-visible is applied */
+[data-slide].exiting .exit-fade,
+[data-exit-step].exit-visible.exit-fade { opacity: 0 !important; }
+
+[data-slide].exiting .exit-move-up,
+[data-exit-step].exit-visible.exit-move-up { opacity: 0 !important; transform: translateY(-24px) !important; }
+[data-slide].exiting .exit-move-down,
+[data-exit-step].exit-visible.exit-move-down { opacity: 0 !important; transform: translateY(24px) !important; }
+[data-slide].exiting .exit-move-left,
+[data-exit-step].exit-visible.exit-move-left { opacity: 0 !important; transform: translateX(-30px) !important; }
+[data-slide].exiting .exit-move-right,
+[data-exit-step].exit-visible.exit-move-right { opacity: 0 !important; transform: translateX(30px) !important; }
+[data-slide].exiting .exit-fly-out-left,
+[data-exit-step].exit-visible.exit-fly-out-left { opacity: 0 !important; transform: translateX(-120vw) !important; }
+[data-slide].exiting .exit-fly-out-right,
+[data-exit-step].exit-visible.exit-fly-out-right { opacity: 0 !important; transform: translateX(120vw) !important; }
+[data-slide].exiting .exit-fly-out-top,
+[data-exit-step].exit-visible.exit-fly-out-top { opacity: 0 !important; transform: translateY(-120vh) !important; }
+[data-slide].exiting .exit-fly-out-bottom,
+[data-exit-step].exit-visible.exit-fly-out-bottom { opacity: 0 !important; transform: translateY(120vh) !important; }
+
+[data-slide].exiting .exit-scale-down,
+[data-exit-step].exit-visible.exit-scale-down,
+[data-slide].exiting .exit-zoom-out,
+[data-exit-step].exit-visible.exit-zoom-out { opacity: 0 !important; transform: scale(0) !important; }
+[data-slide].exiting .exit-scale-up,
+[data-exit-step].exit-visible.exit-scale-up { opacity: 0 !important; transform: scale(1.5) !important; }
+[data-slide].exiting .exit-spin-out,
+[data-exit-step].exit-visible.exit-spin-out { opacity: 0 !important; transform: rotate(360deg) scale(0.85) !important; }
+[data-slide].exiting .exit-flip-x,
+[data-exit-step].exit-visible.exit-flip-x { opacity: 0 !important; transform: perspective(900px) rotateX(90deg) !important; }
+[data-slide].exiting .exit-flip-y,
+[data-exit-step].exit-visible.exit-flip-y { opacity: 0 !important; transform: perspective(900px) rotateY(90deg) !important; }
+
+[data-slide].exiting .exit-wipe-left,
+[data-exit-step].exit-visible.exit-wipe-left { clip-path: inset(0 100% 0 0) !important; opacity: 0 !important; }
+[data-slide].exiting .exit-wipe-right,
+[data-exit-step].exit-visible.exit-wipe-right { clip-path: inset(0 0 0 100%) !important; opacity: 0 !important; }
+[data-slide].exiting .exit-wipe-up,
+[data-exit-step].exit-visible.exit-wipe-up { clip-path: inset(100% 0 0 0) !important; opacity: 0 !important; }
+[data-slide].exiting .exit-wipe-down,
+[data-exit-step].exit-visible.exit-wipe-down { clip-path: inset(0 0 100% 0) !important; opacity: 0 !important; }
+[data-slide].exiting .exit-iris,
+[data-exit-step].exit-visible.exit-iris { clip-path: circle(0% at 50% 50%) !important; opacity: 0 !important; }
+[data-slide].exiting .exit-blur,
+[data-exit-step].exit-visible.exit-blur { filter: blur(20px) !important; opacity: 0 !important; }
+
+[data-slide].exiting .exit-drop-off,
+[data-exit-step].exit-visible.exit-drop-off { animation: exit-drop-off-key 500ms both; }
+[data-slide].exiting .exit-bounce-off,
+[data-exit-step].exit-visible.exit-bounce-off { animation: exit-bounce-off-key 500ms both; }
+[data-slide].exiting .exit-pop,
+[data-exit-step].exit-visible.exit-pop { animation: exit-pop-key 420ms both; }
+[data-slide].exiting .exit-shrink-rotate,
+[data-exit-step].exit-visible.exit-shrink-rotate { animation: exit-shrink-rotate-key 500ms both; }
+[data-slide].exiting .exit-dissolve,
+[data-exit-step].exit-visible.exit-dissolve { filter: blur(6px) saturate(2); opacity: 0 !important; }
+
+[class*='exit-'] {
+  transition:
+    opacity var(--anim-duration, 420ms) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+    transform var(--anim-duration, 420ms) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+    filter var(--anim-duration, 420ms) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+    clip-path var(--anim-duration, 420ms) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.exit-fade {
-  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ==========================================================================
+   EMPHASIS ANIMATIONS (emphasis-*)
+   Runtime toggles .emphasis-active for replayable emphasis effects.
+   ========================================================================== */
 
-[data-slide].exiting .exit-fade {
+.emphasis-pulse.emphasis-active { animation: emphasis-pulse-key 600ms both; }
+.emphasis-bounce.emphasis-active { animation: emphasis-bounce-key 500ms both; }
+.emphasis-shake.emphasis-active { animation: emphasis-shake-key 400ms both; }
+.emphasis-wobble.emphasis-active { animation: emphasis-wobble-key 600ms both; }
+.emphasis-jiggle.emphasis-active { animation: emphasis-jiggle-key 300ms both; }
+.emphasis-rubber-band.emphasis-active { animation: emphasis-rubber-band-key 500ms both; }
+.emphasis-swing.emphasis-active { transform-origin: top center; animation: emphasis-swing-key 700ms both; }
+.emphasis-tada.emphasis-active { animation: emphasis-tada-key 700ms both; }
+.emphasis-heartbeat.emphasis-active { animation: emphasis-heartbeat-key 800ms both; }
+.emphasis-flash.emphasis-active { animation: emphasis-flash-key 400ms both; }
+.emphasis-spin.emphasis-active { animation: emphasis-spin-key 600ms both; }
+.emphasis-float.emphasis-active { animation: emphasis-float-key 600ms both; }
+.emphasis-glow.emphasis-active { animation: emphasis-glow-key 800ms both; }
+.emphasis-color-pulse.emphasis-active {
+  --emphasis-color: rgba(255, 234, 128, 0.7);
+  animation: emphasis-color-pulse-key 600ms both;
+}
+.emphasis-teeter.emphasis-active { animation: emphasis-teeter-key 500ms both; }
+.emphasis-flicker.emphasis-active { animation: emphasis-flicker-key 300ms both; }
+.emphasis-grow.emphasis-active { animation: emphasis-grow-key 300ms forwards; }
+.emphasis-shrink.emphasis-active { animation: emphasis-shrink-key 300ms forwards; }
+
+/* ==========================================================================
+   AUTO-BUILD ANIMATIONS (auto-*)
+   ========================================================================== */
+
+[class*='auto-'] {
+  --anim-duration: 420ms;
+  visibility: hidden;
   opacity: 0;
 }
 
-.exit-scale-out {
-  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+[data-slide].active [class*='auto-'] {
+  visibility: visible;
 }
 
-[data-slide].exiting .exit-scale-out {
+.auto-fade { --anim-duration: 350ms; }
+.auto-slide-up { --anim-duration: 420ms; transform: translateY(24px); }
+.auto-slide-down { --anim-duration: 420ms; transform: translateY(-24px); }
+.auto-slide-left { --anim-duration: 420ms; transform: translateX(-24px); }
+.auto-slide-right { --anim-duration: 420ms; transform: translateX(24px); }
+.auto-pop { --anim-duration: 400ms; transform: scale(0.6); }
+.auto-scale-in { --anim-duration: 350ms; transform: scale(0.8); }
+.auto-zoom-in { --anim-duration: 450ms; transform: scale(0); }
+.auto-wipe-right { --anim-duration: 500ms; clip-path: inset(0 100% 0 0); }
+.auto-wipe-left { --anim-duration: 500ms; clip-path: inset(0 0 0 100%); }
+.auto-blur-in { --anim-duration: 400ms; filter: blur(10px); }
+.auto-fly-in-left { --anim-duration: 500ms; transform: translateX(-120vw); }
+.auto-fly-in-right { --anim-duration: 500ms; transform: translateX(120vw); }
+
+[data-slide].active .auto-fade,
+[data-slide].active .auto-slide-up,
+[data-slide].active .auto-slide-down,
+[data-slide].active .auto-slide-left,
+[data-slide].active .auto-slide-right,
+[data-slide].active .auto-pop,
+[data-slide].active .auto-scale-in,
+[data-slide].active .auto-zoom-in,
+[data-slide].active .auto-wipe-right,
+[data-slide].active .auto-wipe-left,
+[data-slide].active .auto-blur-in,
+[data-slide].active .auto-fly-in-left,
+[data-slide].active .auto-fly-in-right {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+  clip-path: inset(0 0 0 0);
+  transition:
+    opacity var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+    transform var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+    filter var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+    clip-path var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.auto-bounce,
+.auto-spin-in,
+.auto-flip-x {
   opacity: 0;
-  transform: scale(0.92);
 }
 
-.exit-slide-up {
-  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+[data-slide].active .auto-bounce { animation: step-bounce-in 600ms both; }
+[data-slide].active .auto-spin-in { animation: step-spin-in-key 600ms both; }
+[data-slide].active .auto-flip-x { animation: step-flip-x-in 500ms both; }
+
+/* ==========================================================================
+   SLIDE TRANSITIONS (data-transition)
+   Runtime adds: .entering/.exiting + .transition-{name}
+   ========================================================================== */
+
+[data-slide].entering,
+[data-slide].exiting {
+  will-change: transform, opacity, clip-path, filter;
+  backface-visibility: hidden;
 }
 
-[data-slide].exiting .exit-slide-up {
-  opacity: 0;
-  transform: translateY(-30px);
+.transition-fade.entering { animation: slide-fade-in var(--slide-transition-duration) both; }
+.transition-fade.exiting { animation: slide-fade-out var(--slide-transition-duration) both; }
+.transition-dissolve.entering { animation: slide-dissolve-in var(--slide-transition-duration) both; }
+.transition-dissolve.exiting { animation: slide-dissolve-out var(--slide-transition-duration) both; }
+.transition-push-left.entering,
+.transition-slide-left.entering,
+.transition-cover-left.entering,
+.transition-uncover-right.entering,
+.transition-wipe-right.entering { animation: slide-enter-right var(--slide-transition-duration) both; }
+.transition-push-left.exiting,
+.transition-slide-left.exiting,
+.transition-uncover-left.exiting,
+.transition-cover-right.exiting,
+.transition-wipe-left.exiting { animation: slide-exit-left var(--slide-transition-duration) both; }
+.transition-push-right.entering,
+.transition-slide-right.entering,
+.transition-cover-right.entering,
+.transition-uncover-left.entering,
+.transition-wipe-left.entering { animation: slide-enter-left var(--slide-transition-duration) both; }
+.transition-push-right.exiting,
+.transition-slide-right.exiting,
+.transition-uncover-right.exiting,
+.transition-cover-left.exiting,
+.transition-wipe-right.exiting { animation: slide-exit-right var(--slide-transition-duration) both; }
+.transition-push-up.entering,
+.transition-cover-up.entering,
+.transition-wipe-up.entering { animation: slide-enter-bottom var(--slide-transition-duration) both; }
+.transition-push-up.exiting,
+.transition-uncover-up.exiting,
+.transition-cover-down.exiting,
+.transition-wipe-down.exiting { animation: slide-exit-top var(--slide-transition-duration) both; }
+.transition-push-down.entering,
+.transition-cover-down.entering,
+.transition-wipe-down.entering { animation: slide-enter-top var(--slide-transition-duration) both; }
+.transition-push-down.exiting,
+.transition-uncover-down.exiting,
+.transition-cover-up.exiting,
+.transition-wipe-up.exiting { animation: slide-exit-bottom var(--slide-transition-duration) both; }
+.transition-zoom-in.entering { animation: slide-zoom-in var(--slide-transition-duration) both; }
+.transition-zoom-out.exiting { animation: slide-zoom-out var(--slide-transition-duration) both; }
+.transition-flip-x.entering { animation: slide-flip-x-in var(--slide-transition-duration) both; }
+.transition-flip-x.exiting { animation: slide-flip-x-out var(--slide-transition-duration) both; }
+.transition-flip-y.entering { animation: slide-flip-y-in var(--slide-transition-duration) both; }
+.transition-flip-y.exiting { animation: slide-flip-y-out var(--slide-transition-duration) both; }
+.transition-cube-left.entering { transform-origin: left center; animation: slide-cube-left-in var(--slide-transition-duration) both; }
+.transition-cube-left.exiting { transform-origin: right center; animation: slide-cube-left-out var(--slide-transition-duration) both; }
+.transition-cube-right.entering { transform-origin: right center; animation: slide-cube-right-in var(--slide-transition-duration) both; }
+.transition-cube-right.exiting { transform-origin: left center; animation: slide-cube-right-out var(--slide-transition-duration) both; }
+.transition-iris.entering { animation: slide-iris-in var(--slide-transition-duration) both; }
+.transition-iris.exiting { animation: slide-iris-out var(--slide-transition-duration) both; }
+.transition-split-horizontal.entering { animation: slide-split-horizontal-in var(--slide-transition-duration) both; }
+.transition-split-horizontal.exiting { animation: slide-fade-out var(--slide-transition-duration) both; }
+.transition-split-vertical.entering { animation: slide-split-vertical-in var(--slide-transition-duration) both; }
+.transition-split-vertical.exiting { animation: slide-fade-out var(--slide-transition-duration) both; }
+.transition-morph.entering { animation: slide-fade-in var(--slide-transition-duration) both; }
+.transition-morph.exiting { animation: slide-fade-out var(--slide-transition-duration) both; }
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+
+@keyframes step-bounce-in {
+  0% { opacity: 0; transform: translateY(-100px); }
+  55% { opacity: 1; transform: translateY(12px); }
+  75% { transform: translateY(-7px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes step-bounce-left-in {
+  0% { opacity: 0; transform: translateX(-120px); }
+  60% { opacity: 1; transform: translateX(14px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes step-bounce-right-in {
+  0% { opacity: 0; transform: translateX(120px); }
+  60% { opacity: 1; transform: translateX(-14px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes step-elastic-in {
+  0% { opacity: 0; transform: scale(0.2); }
+  55% { opacity: 1; transform: scale(1.12); }
+  72% { transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes step-drop-in {
+  0% { opacity: 0; transform: translateY(-120px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes step-rise-in {
+  0% { opacity: 0; transform: translateY(120px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes step-spin-in-key {
+  0% { opacity: 0; transform: rotate(-360deg) scale(0.6); }
+  100% { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+@keyframes step-spin-in-slow-key {
+  0% { opacity: 0; transform: rotate(-720deg) scale(0.4); }
+  100% { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+@keyframes step-flip-x-in {
+  0% { opacity: 0; transform: perspective(900px) rotateX(-90deg); }
+  100% { opacity: 1; transform: perspective(900px) rotateX(0); }
+}
+@keyframes step-flip-y-in {
+  0% { opacity: 0; transform: perspective(900px) rotateY(-90deg); }
+  100% { opacity: 1; transform: perspective(900px) rotateY(0); }
+}
+@keyframes step-swing-in-key {
+  0% { opacity: 0; transform: rotate(-80deg); }
+  65% { opacity: 1; transform: rotate(12deg); }
+  100% { opacity: 1; transform: rotate(0deg); }
+}
+@keyframes step-rotate-in-key {
+  0% { opacity: 0; transform: rotate(-90deg) scale(0.92); }
+  100% { opacity: 1; transform: rotate(0) scale(1); }
+}
+@keyframes step-typewriter-key {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes typewriter-caret {
+  50% { border-color: transparent; }
 }
 
-.exit-slide-down {
-  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes exit-drop-off-key {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(130px); }
+}
+@keyframes exit-bounce-off-key {
+  0% { opacity: 1; transform: translateY(0); }
+  40% { transform: translateY(-20px); }
+  100% { opacity: 0; transform: translateY(120px); }
+}
+@keyframes exit-pop-key {
+  0% { opacity: 1; transform: scale(1); }
+  30% { transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(0.35); }
+}
+@keyframes exit-shrink-rotate-key {
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0) rotate(30deg); }
 }
 
-[data-slide].exiting .exit-slide-down {
-  opacity: 0;
-  transform: translateY(30px);
+@keyframes emphasis-pulse-key {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+@keyframes emphasis-bounce-key {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+@keyframes emphasis-shake-key {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+@keyframes emphasis-wobble-key {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-5deg); }
+  40% { transform: rotate(4deg); }
+  60% { transform: rotate(-3deg); }
+  80% { transform: rotate(2deg); }
+}
+@keyframes emphasis-jiggle-key {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3px, 1px); }
+  50% { transform: translate(3px, -1px); }
+  75% { transform: translate(-2px, 0); }
+}
+@keyframes emphasis-rubber-band-key {
+  0%, 100% { transform: scale(1, 1); }
+  30% { transform: scale(1.2, 0.8); }
+  55% { transform: scale(0.9, 1.1); }
+}
+@keyframes emphasis-swing-key {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(12deg); }
+  40% { transform: rotate(-8deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-3deg); }
+}
+@keyframes emphasis-tada-key {
+  0%, 100% { transform: scale(1) rotate(0); }
+  20%, 60% { transform: scale(1.12) rotate(-3deg); }
+  40%, 80% { transform: scale(1.12) rotate(3deg); }
+}
+@keyframes emphasis-heartbeat-key {
+  0%, 100% { transform: scale(1); }
+  14%, 42% { transform: scale(1.12); }
+  28%, 56% { transform: scale(1); }
+}
+@keyframes emphasis-flash-key {
+  0%, 100% { opacity: 1; }
+  35%, 65% { opacity: 0; }
+}
+@keyframes emphasis-spin-key {
+  to { transform: rotate(360deg); }
+}
+@keyframes emphasis-float-key {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes emphasis-glow-key {
+  0%, 100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+  50% { box-shadow: 0 0 22px rgba(255, 255, 255, 0.85); }
+}
+@keyframes emphasis-color-pulse-key {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: var(--emphasis-color, rgba(255, 234, 128, 0.7)); }
+}
+@keyframes emphasis-teeter-key {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+@keyframes emphasis-flicker-key {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.2; }
+  40% { opacity: 0.85; }
+  60% { opacity: 0.3; }
+  80% { opacity: 0.9; }
+}
+@keyframes emphasis-grow-key {
+  from { transform: scale(1); }
+  to { transform: scale(1.2); }
+}
+@keyframes emphasis-shrink-key {
+  from { transform: scale(1); }
+  to { transform: scale(0.8); }
 }
 
-.exit-wipe-left {
-  transition: clip-path 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes slide-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-
-[data-slide].exiting .exit-wipe-left {
-  clip-path: inset(0 0 0 100%);
-  opacity: 0;
+@keyframes slide-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
-
-/* Author-controlled exit steps: runtime adds exit-visible to trigger */
-[data-exit-step].exit-visible {
-  opacity: 0 !important;
-  transform: scale(0.95) !important;
-  transition: opacity 300ms ease, transform 300ms ease;
+@keyframes slide-dissolve-in {
+  from { opacity: 0; filter: blur(7px); }
+  to { opacity: 1; filter: blur(0); }
+}
+@keyframes slide-dissolve-out {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(7px); }
+}
+@keyframes slide-enter-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slide-exit-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@keyframes slide-enter-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slide-exit-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes slide-enter-top {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+@keyframes slide-exit-bottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+@keyframes slide-enter-bottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes slide-exit-top {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+@keyframes slide-zoom-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slide-zoom-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.12); }
+}
+@keyframes slide-flip-x-in {
+  from { opacity: 0; transform: perspective(1200px) rotateX(-90deg); }
+  to { opacity: 1; transform: perspective(1200px) rotateX(0); }
+}
+@keyframes slide-flip-x-out {
+  from { opacity: 1; transform: perspective(1200px) rotateX(0); }
+  to { opacity: 0; transform: perspective(1200px) rotateX(90deg); }
+}
+@keyframes slide-flip-y-in {
+  from { opacity: 0; transform: perspective(1200px) rotateY(-90deg); }
+  to { opacity: 1; transform: perspective(1200px) rotateY(0); }
+}
+@keyframes slide-flip-y-out {
+  from { opacity: 1; transform: perspective(1200px) rotateY(0); }
+  to { opacity: 0; transform: perspective(1200px) rotateY(90deg); }
+}
+@keyframes slide-cube-left-in {
+  from { opacity: 0.4; transform: rotateY(90deg) translateX(100%); }
+  to { opacity: 1; transform: rotateY(0) translateX(0); }
+}
+@keyframes slide-cube-left-out {
+  from { opacity: 1; transform: rotateY(0) translateX(0); }
+  to { opacity: 0.4; transform: rotateY(-90deg) translateX(-100%); }
+}
+@keyframes slide-cube-right-in {
+  from { opacity: 0.4; transform: rotateY(-90deg) translateX(-100%); }
+  to { opacity: 1; transform: rotateY(0) translateX(0); }
+}
+@keyframes slide-cube-right-out {
+  from { opacity: 1; transform: rotateY(0) translateX(0); }
+  to { opacity: 0.4; transform: rotateY(90deg) translateX(100%); }
+}
+@keyframes slide-iris-in {
+  from { clip-path: circle(0% at 50% 50%); }
+  to { clip-path: circle(150% at 50% 50%); }
+}
+@keyframes slide-iris-out {
+  from { clip-path: circle(150% at 50% 50%); }
+  to { clip-path: circle(0% at 50% 50%); }
+}
+@keyframes slide-split-horizontal-in {
+  from { clip-path: inset(0 50% 0 50%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes slide-split-vertical-in {
+  from { clip-path: inset(50% 0 50% 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 
 /* ==========================================================================
    BRAND LOGO WATERMARK
-   Place a small logo in the corner of each slide.
    ========================================================================== */
 
 .slide-logo {

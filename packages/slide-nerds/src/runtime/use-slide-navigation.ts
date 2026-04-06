@@ -10,6 +10,7 @@ import {
 
 const EXIT_ANIMATION_DURATION = 400
 const MAGIC_MOVE_DURATION = 420
+const SLIDE_TRANSITION_DURATION = 560
 
 type SlideNavigationState = {
   currentSlide: number
@@ -48,10 +49,7 @@ const toggleClassByThreshold = (
   }
 }
 
-const applyStepVisibility = (
-  slideIndex: number,
-  visibleSteps: number,
-): void => {
+const applyStepVisibility = (slideIndex: number, visibleSteps: number): void => {
   const entries = getStepEntries(slideIndex)
   for (const [i, entry] of entries.entries()) {
     const isVisible = i < visibleSteps
@@ -64,8 +62,53 @@ const applyStepVisibility = (
 const setActiveSlide = (slides: NodeListOf<Element>, targetIndex: number): void => {
   slides.forEach((slide, index) => {
     slide.classList.toggle('active', index === targetIndex)
-    if (index !== targetIndex) slide.classList.remove('exiting')
+    if (index !== targetIndex) {
+      slide.classList.remove('exiting')
+      slide.classList.remove('entering')
+    }
   })
+}
+
+const getTransitionName = (
+  currentSlide: Element | undefined,
+  targetSlide: Element | undefined,
+): string => {
+  const candidate =
+    targetSlide?.getAttribute('data-transition') ??
+    currentSlide?.getAttribute('data-transition') ??
+    'fade'
+  return candidate.trim() || 'fade'
+}
+
+const applySlideTransitionClasses = (
+  currentSlide: Element,
+  targetSlide: Element,
+  transitionName: string,
+): ReturnType<typeof setTimeout> => {
+  const transitionClass = `transition-${transitionName}`
+  currentSlide.classList.add('active', 'exiting', transitionClass)
+  targetSlide.classList.add('active', 'entering', transitionClass)
+
+  return setTimeout(() => {
+    currentSlide.classList.remove('active', 'exiting', transitionClass)
+    targetSlide.classList.remove('entering', transitionClass)
+  }, SLIDE_TRANSITION_DURATION)
+}
+
+const hasEmphasisClass = (el: Element): boolean => {
+  return Array.from(el.classList).some((className) => className.startsWith('emphasis-'))
+}
+
+const triggerEmphasisOnEntry = (elements: ReadonlyArray<Element>): void => {
+  for (const el of elements) {
+    if (!hasEmphasisClass(el)) continue
+    el.classList.remove('emphasis-active')
+    void (el as HTMLElement).offsetWidth
+    el.classList.add('emphasis-active')
+    const clearClass = () => el.classList.remove('emphasis-active')
+    el.addEventListener('animationend', clearClass, { once: true })
+    setTimeout(clearClass, 1200)
+  }
 }
 
 export const useSlideNavigation = (): SlideNavigationState => {
@@ -77,9 +120,11 @@ export const useSlideNavigation = (): SlideNavigationState => {
   const totalSlidesRef = useRef(0)
   const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoStepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const slideTransitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const currentExitStep = useRef(0)
   const cachedStepEntriesRef = useRef<ReturnType<typeof getStepEntries>>([])
   const cachedExitStepCountRef = useRef(0)
+  const emphasizedStepsRef = useRef<Set<number>>(new Set())
 
   useEffect(() => {
     const count = getSlideElements().length
@@ -100,6 +145,9 @@ export const useSlideNavigation = (): SlideNavigationState => {
     return () => {
       if (exitTimeoutRef.current !== null) clearTimeout(exitTimeoutRef.current)
       if (autoStepTimeoutRef.current !== null) clearTimeout(autoStepTimeoutRef.current)
+      if (slideTransitionTimeoutRef.current !== null) {
+        clearTimeout(slideTransitionTimeoutRef.current)
+      }
     }
   }, [])
 
@@ -115,6 +163,7 @@ export const useSlideNavigation = (): SlideNavigationState => {
       const slides = getSlideElements()
       const prevEl = slides[currentSlide]
       const nextEl = slides[targetSlide]
+      const transitionName = getTransitionName(prevEl, nextEl)
 
       const previousMagicIds = new Set<string>()
       if (prevEl) {
@@ -124,7 +173,20 @@ export const useSlideNavigation = (): SlideNavigationState => {
         })
       }
 
-      setActiveSlide(slides, targetSlide)
+      if (slideTransitionTimeoutRef.current !== null) {
+        clearTimeout(slideTransitionTimeoutRef.current)
+        slideTransitionTimeoutRef.current = null
+      }
+
+      if (prevEl && nextEl && prevEl !== nextEl) {
+        slideTransitionTimeoutRef.current = applySlideTransitionClasses(
+          prevEl,
+          nextEl,
+          transitionName,
+        )
+      } else {
+        setActiveSlide(slides, targetSlide)
+      }
 
       if (nextEl && previousMagicIds.size > 0) {
         nextEl.querySelectorAll('[data-magic-id]').forEach((el) => {
@@ -143,8 +205,7 @@ export const useSlideNavigation = (): SlideNavigationState => {
 
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              htmlEl.style.transition =
-                `opacity ${MAGIC_MOVE_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1), transform ${MAGIC_MOVE_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+              htmlEl.style.transition = `opacity ${MAGIC_MOVE_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1), transform ${MAGIC_MOVE_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
               htmlEl.style.opacity = '1'
               htmlEl.style.transform = 'scale(1)'
               htmlEl.addEventListener('transitionend', cleanupStyles, { once: true })
@@ -158,6 +219,7 @@ export const useSlideNavigation = (): SlideNavigationState => {
       setCurrentStep(0)
       setIsExiting(false)
       currentExitStep.current = 0
+      emphasizedStepsRef.current = new Set()
     },
     [currentSlide],
   )
@@ -205,6 +267,16 @@ export const useSlideNavigation = (): SlideNavigationState => {
     const logicalSteps = cachedStepEntriesRef.current.length
     const exitSteps = cachedExitStepCountRef.current
 
+    const previousStepIndex = currentStep - 1
+    if (previousStepIndex >= 0 && !emphasizedStepsRef.current.has(previousStepIndex)) {
+      const previousEntry = cachedStepEntriesRef.current[previousStepIndex]
+      if (previousEntry && previousEntry.elements.some(hasEmphasisClass)) {
+        triggerEmphasisOnEntry(previousEntry.elements)
+        emphasizedStepsRef.current.add(previousStepIndex)
+        return
+      }
+    }
+
     if (currentStep < logicalSteps) {
       setCurrentStep(currentStep + 1)
     } else if (exitSteps > 0 && currentExitStep.current < exitSteps) {
@@ -235,6 +307,7 @@ export const useSlideNavigation = (): SlideNavigationState => {
       )
     } else if (currentStep > 0) {
       clearAutoStepTimer()
+      emphasizedStepsRef.current.delete(currentStep - 1)
       setCurrentStep(currentStep - 1)
     } else if (currentSlide > 0) {
       clearAutoStepTimer()
