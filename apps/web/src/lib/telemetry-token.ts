@@ -1,12 +1,15 @@
 import { createHmac, timingSafeEqual } from 'crypto'
+import { z } from 'zod'
 
-type TelemetryTokenPayload = {
-  v: 1
-  deckId: string
-  ownerId: string
-  iat: number
-  exp: number
-}
+const TelemetryTokenPayloadSchema = z.object({
+  v: z.literal(1),
+  deckId: z.string().min(1),
+  ownerId: z.string().min(1),
+  iat: z.number().int(),
+  exp: z.number().int(),
+})
+
+type TelemetryTokenPayload = z.infer<typeof TelemetryTokenPayloadSchema>
 
 const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 365
 const TOKEN_PREFIX = 'sn_tlm_'
@@ -66,13 +69,11 @@ export const verifyTelemetryToken = (
 
   let payload: TelemetryTokenPayload
   try {
-    payload = JSON.parse(decodeBase64Url(encodedPayload)) as TelemetryTokenPayload
+    const raw = JSON.parse(decodeBase64Url(encodedPayload))
+    payload = TelemetryTokenPayloadSchema.parse(raw)
   } catch {
     return null
   }
-
-  if (payload.v !== 1) return null
-  if (!payload.deckId || !payload.ownerId) return null
 
   const now = Math.floor(Date.now() / 1000)
   if (payload.exp <= now) return null

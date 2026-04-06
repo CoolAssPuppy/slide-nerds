@@ -33,8 +33,13 @@ const EXIT_CLASSES = [
   'exit-dissolve',
 ] as const
 
-const queryAll = (selector: string, root?: Element): NodeListOf<Element> => {
+const emptyNodeList = (): NodeListOf<Element> => {
   if (typeof document === 'undefined') return [] as unknown as NodeListOf<Element>
+  return document.createDocumentFragment().querySelectorAll('*')
+}
+
+const queryAll = (selector: string, root?: Element): NodeListOf<Element> => {
+  if (typeof document === 'undefined') return emptyNodeList()
   const target = root ?? document
   return target.querySelectorAll(selector)
 }
@@ -45,11 +50,6 @@ export const getSlideElements = (): NodeListOf<Element> => {
 
 export const getSlideAt = (index: number): Element | null => {
   return getSlideElements()[index] ?? null
-}
-
-const emptyNodeList = (): NodeListOf<Element> => {
-  if (typeof document === 'undefined') return [] as unknown as NodeListOf<Element>
-  return document.createDocumentFragment().querySelectorAll('*')
 }
 
 const queryWithinSlide = (slideIndex: number, selector: string): NodeListOf<Element> => {
@@ -110,10 +110,12 @@ export const getStepEntries = (slideIndex: number): ReadonlyArray<StepEntry> => 
   return entries
 }
 
+const EXIT_COMPOUND_SELECTOR = EXIT_CLASSES.map((cls) => `.${cls}`).join(', ')
+
 export const hasExitAnimations = (slideIndex: number): boolean => {
   const slide = getSlideAt(slideIndex)
   if (!slide) return false
-  return EXIT_CLASSES.some((cls) => slide.querySelector(`.${cls}`) !== null)
+  return slide.querySelector(EXIT_COMPOUND_SELECTOR) !== null
 }
 
 export const getSlidesInfo = (): ReadonlyArray<{ index: number; textContent: string }> => {

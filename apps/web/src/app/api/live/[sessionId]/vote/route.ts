@@ -1,16 +1,25 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getVoterHash } from '@/lib/ip-hash'
+import { z } from 'zod'
+
+const VoteSchema = z.object({
+  poll_id: z.string().min(1),
+  option_index: z.number().int().min(0),
+})
 
 export async function POST(request: Request) {
   const supabase = await createClient()
 
-  const body = await request.json()
-  const { poll_id, option_index } = body as { poll_id: string; option_index: number }
-
-  if (!poll_id || option_index === undefined) {
+  let body: z.infer<typeof VoteSchema>
+  try {
+    const raw = await request.json()
+    body = VoteSchema.parse(raw)
+  } catch {
     return NextResponse.json({ error: 'poll_id and option_index required' }, { status: 400 })
   }
+
+  const { poll_id, option_index } = body
 
   const voterHash = getVoterHash(request, poll_id)
 

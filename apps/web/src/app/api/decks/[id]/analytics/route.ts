@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
-import { createHash } from 'crypto'
+import { getIpHash } from '@/lib/ip-hash'
+import { z } from 'zod'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -30,21 +31,28 @@ export async function GET(_request: Request, { params }: RouteContext) {
   return NextResponse.json(data)
 }
 
+const AnalyticsPayloadSchema = z.object({
+  slide_index: z.number().int().min(0).max(5000),
+  dwell_seconds: z.number().min(0).max(28800),
+  share_link_id: z.string().optional(),
+})
+
 export async function POST(request: Request, { params }: RouteContext) {
   const { id } = await params
   const supabase = await createClient()
 
-  const body = await request.json()
-  const { slide_index, dwell_seconds, share_link_id } = body as {
-    slide_index: number
-    dwell_seconds: number
-    share_link_id?: string
+  let body: z.infer<typeof AnalyticsPayloadSchema>
+  try {
+    const raw = await request.json()
+    body = AnalyticsPayloadSchema.parse(raw)
+  } catch {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
+  const { slide_index, dwell_seconds, share_link_id } = body
+
+  const ipHash = getIpHash(request, 16)
   const headersList = await headers()
-  const forwarded = headersList.get('x-forwarded-for')
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
-  const ipHash = createHash('sha256').update(ip).digest('hex').slice(0, 16)
   const userAgent = headersList.get('user-agent') || undefined
 
   const { data: { user } } = await supabase.auth.getUser()

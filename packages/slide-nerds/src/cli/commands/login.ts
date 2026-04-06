@@ -31,7 +31,7 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
 
   return new Promise((resolve) => {
     const timeout = setTimeout(() => {
-      console.log('Login timed out.')
+      console.info('Login timed out.')
       server.close()
       resolve(false)
     }, 5 * 60 * 1000)
@@ -71,8 +71,8 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
 
     server.listen(port, () => {
       const loginUrl = `${serviceUrl}/cli/auth?callback=${encodeURIComponent(callbackUrl)}`
-      console.log(`\nOpening browser to log in...\n`)
-      console.log(`If the browser doesn't open, visit:\n${loginUrl}\n`)
+      console.info(`\nOpening browser to log in...\n`)
+      console.info(`If the browser doesn't open, visit:\n${loginUrl}\n`)
       openBrowser(loginUrl)
     })
   })
@@ -86,7 +86,7 @@ export const registerLoginCommand = (program: Command): void => {
     .action(async (options: { url: string }) => {
       const success = await loginFlow(options.url)
       if (success) {
-        console.log('Logged in successfully.')
+        console.info('Logged in successfully.')
       } else {
         console.error('Login failed.')
         process.exit(1)
@@ -98,6 +98,6 @@ export const registerLoginCommand = (program: Command): void => {
     .description('Clear stored credentials')
     .action(async () => {
       await clearCredentials()
-      console.log('Logged out.')
+      console.info('Logged out.')
     })
 }

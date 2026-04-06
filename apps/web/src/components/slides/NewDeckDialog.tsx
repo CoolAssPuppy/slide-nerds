@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { slugify } from '@/lib/slugify'
 
 type NewDeckDialogProps = {
   onClose: () => void
@@ -29,7 +30,7 @@ export function NewDeckDialog({ onClose }: NewDeckDialogProps) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('Not authenticated'); setLoading(false); return }
 
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    const slug = slugify(name)
 
     const { error: insertError } = await supabase.from('decks').insert({
       name: name.trim(),

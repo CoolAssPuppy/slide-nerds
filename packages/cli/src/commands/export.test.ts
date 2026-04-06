@@ -3,7 +3,7 @@ import { exportDeck } from './export.js'
 
 describe('exportDeck', () => {
   it('should log Google Slides import guidance after generating PPTX', async () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const logSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
 
     vi.mock('puppeteer', () => ({
       default: {

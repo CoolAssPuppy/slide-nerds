@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { createHash } from 'crypto'
 import { createClient } from '@/lib/supabase/server'
+import { getIpHash } from '@/lib/ip-hash'
 import { getTelemetrySecret, verifyTelemetryToken } from '@/lib/telemetry-token'
+import { z } from 'zod'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -9,12 +10,14 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-type TelemetryPayload = {
-  deck_id: string
-  slide_index: number
-  dwell_seconds?: number
-  telemetry_token: string
-}
+const MAX_DWELL_SECONDS = 60 * 60 * 8
+
+const TelemetryPayloadSchema = z.object({
+  deck_id: z.string().min(1),
+  slide_index: z.number().int().min(0).max(5000),
+  dwell_seconds: z.number().min(0).max(MAX_DWELL_SECONDS).optional(),
+  telemetry_token: z.string().min(1),
+})
 
 const badRequest = (message: string) => {
   return NextResponse.json({ error: message }, { status: 400, headers: CORS_HEADERS })
@@ -25,28 +28,15 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
-  let body: TelemetryPayload
+  let body: z.infer<typeof TelemetryPayloadSchema>
   try {
-    body = await request.json() as TelemetryPayload
+    const raw = await request.json()
+    body = TelemetryPayloadSchema.parse(raw)
   } catch {
-    return badRequest('Invalid JSON payload')
+    return badRequest('Invalid payload')
   }
 
-  if (!body.deck_id || typeof body.deck_id !== 'string') {
-    return badRequest('deck_id is required')
-  }
-
-  if (typeof body.slide_index !== 'number' || body.slide_index < 0 || body.slide_index > 5000) {
-    return badRequest('slide_index must be a number between 0 and 5000')
-  }
-
-  if (!body.telemetry_token || typeof body.telemetry_token !== 'string') {
-    return badRequest('telemetry_token is required')
-  }
-
-  const dwellSeconds = Number.isFinite(body.dwell_seconds)
-    ? Math.max(0, Math.min(Math.floor(body.dwell_seconds ?? 0), 60 * 60 * 8))
-    : 0
+  const dwellSeconds = Math.floor(body.dwell_seconds ?? 0)
 
   let tokenPayload
   try {
@@ -64,18 +54,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Telemetry token/deck mismatch' }, { status: 403, headers: CORS_HEADERS })
   }
 
-  const headersList = request.headers
-  const forwarded = headersList.get('x-forwarded-for')
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
-  const ipHash = createHash('sha256').update(ip).digest('hex').slice(0, 16)
-  const userAgent = headersList.get('user-agent') || null
+  const ipHash = getIpHash(request, 16)
+  const userAgent = request.headers.get('user-agent') || null
 
   const supabase = await createClient()
   const { error } = await supabase
     .from('deck_views')
     .insert({
       deck_id: body.deck_id,
-      slide_index: Math.floor(body.slide_index),
+      slide_index: body.slide_index,
       dwell_seconds: dwellSeconds,
       ip_hash: ipHash,
       user_agent: userAgent,

@@ -54,7 +54,7 @@ export default ${JSON.stringify(config, null, 2)} satisfies BrandConfig
 `
 
   await fs.writeFile(filePath, fileContent, 'utf-8')
-  console.log(`Wrote brand config "${name}" to brand.config.ts`)
+  console.info(`Wrote brand config "${name}" to brand.config.ts`)
 }
 
 const brandSet = async (name: string): Promise<void> => {
@@ -98,7 +98,7 @@ const brandSet = async (name: string): Promise<void> => {
       throw new Error(err.error ?? `Failed to update brand config: ${resp.status}`)
     }
 
-    console.log(`Updated brand config "${name}"`)
+    console.info(`Updated brand config "${name}"`)
   } else {
     // Create new
     const resp = await fetchWithAuth(`${serviceUrl}/api/brands`, {
@@ -111,7 +111,7 @@ const brandSet = async (name: string): Promise<void> => {
       throw new Error(err.error ?? `Failed to create brand config: ${resp.status}`)
     }
 
-    console.log(`Created brand config "${name}"`)
+    console.info(`Created brand config "${name}"`)
   }
 }
 
@@ -127,15 +127,15 @@ const brandList = async (): Promise<void> => {
   const configs = (await resp.json()) as BrandConfigResponse[]
 
   if (configs.length === 0) {
-    console.log('No brand configs found.')
+    console.info('No brand configs found.')
     return
   }
 
-  console.log(`Found ${configs.length} brand config(s):\n`)
+  console.info(`Found ${configs.length} brand config(s):\n`)
   for (const c of configs) {
     const scope = c.team_id ? 'team' : 'personal'
     const updated = new Date(c.updated_at).toLocaleDateString()
-    console.log(`  ${c.name} (${scope}) -- updated ${updated}`)
+    console.info(`  ${c.name} (${scope}) -- updated ${updated}`)
   }
 }
 

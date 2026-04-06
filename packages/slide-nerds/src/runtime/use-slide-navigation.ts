@@ -63,8 +63,7 @@ const setActiveSlide = (slides: NodeListOf<Element>, targetIndex: number): void 
   slides.forEach((slide, index) => {
     slide.classList.toggle('active', index === targetIndex)
     if (index !== targetIndex) {
-      slide.classList.remove('exiting')
-      slide.classList.remove('entering')
+      slide.classList.remove('exiting', 'entering')
     }
   })
 }
@@ -103,6 +102,7 @@ const triggerEmphasisOnEntry = (elements: ReadonlyArray<Element>): void => {
   for (const el of elements) {
     if (!hasEmphasisClass(el)) continue
     el.classList.remove('emphasis-active')
+    // Force browser reflow so re-adding the class restarts the CSS animation
     void (el as HTMLElement).offsetWidth
     el.classList.add('emphasis-active')
     const clearClass = () => el.classList.remove('emphasis-active')
@@ -226,10 +226,13 @@ export const useSlideNavigation = (): SlideNavigationState => {
 
   const startExitTransition = useCallback(
     (targetSlide: number) => {
-      const slides = getSlideElements()
-      const currentEl = slides[currentSlide]
+      if (!hasExitAnimations(currentSlide)) {
+        performSlideTransition(targetSlide)
+        return
+      }
 
-      if (!currentEl || !hasExitAnimations(currentSlide)) {
+      const currentEl = getSlideElements()[currentSlide]
+      if (!currentEl) {
         performSlideTransition(targetSlide)
         return
       }

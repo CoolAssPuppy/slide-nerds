@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+
+const CreateSessionSchema = z.object({
+  deck_id: z.string().min(1),
+})
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -9,12 +14,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await request.json()
-  const { deck_id } = body as { deck_id: string }
-
-  if (!deck_id) {
+  let body: z.infer<typeof CreateSessionSchema>
+  try {
+    const raw = await request.json()
+    body = CreateSessionSchema.parse(raw)
+  } catch {
     return NextResponse.json({ error: 'deck_id required' }, { status: 400 })
   }
+
+  const { deck_id } = body
 
   const { data, error } = await supabase
     .from('live_sessions')

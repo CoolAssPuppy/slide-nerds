@@ -62,13 +62,13 @@ export const registerCreateCommand = (program: Command): void => {
         process.exit(1)
       }
 
-      console.log(`Creating slidenerds deck: ${name}`)
+      console.info(`Creating slidenerds deck: ${name}`)
       const files = await scaffoldProject(name, targetDir)
-      console.log(`Created ${files.length} files in ./${name}`)
-      console.log('')
-      console.log('Next steps:')
-      console.log(`  cd ${name}`)
-      console.log('  npm install')
-      console.log('  npm run dev')
+      console.info(`Created ${files.length} files in ./${name}`)
+      console.info('')
+      console.info('Next steps:')
+      console.info(`  cd ${name}`)
+      console.info('  npm install')
+      console.info('  npm run dev')
     })
 }

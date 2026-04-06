@@ -1,19 +1,24 @@
 import { getSlideElements, getNotesForSlide } from './slide-dom.js'
+import { showAllSteps, hideAllSteps, setActiveSlideForExport } from './export-helpers.js'
 
 const SLIDE_W_IN = 13.333
 const SLIDE_H_IN = 7.5
 
-let slideOriginX = 0
-let slideOriginY = 0
-let pxPerInchX = 1920 / SLIDE_W_IN
-let pxPerInchY = 1080 / SLIDE_H_IN
+type SlideCalibration = {
+  originX: number
+  originY: number
+  pxPerInchX: number
+  pxPerInchY: number
+}
 
-const calibrateToSlide = (slideEl: Element): void => {
+const calibrateToSlide = (slideEl: Element): SlideCalibration => {
   const rect = slideEl.getBoundingClientRect()
-  slideOriginX = rect.left
-  slideOriginY = rect.top
-  pxPerInchX = rect.width / SLIDE_W_IN
-  pxPerInchY = rect.height / SLIDE_H_IN
+  return {
+    originX: rect.left,
+    originY: rect.top,
+    pxPerInchX: rect.width / SLIDE_W_IN,
+    pxPerInchY: rect.height / SLIDE_H_IN,
+  }
 }
 
 type PptxSlide = {
@@ -50,12 +55,12 @@ const pxToFontPt = (pxStr: string): number => {
   return Math.round(px * 0.75)
 }
 
-const getRect = (el: Element): { x: number; y: number; w: number; h: number } => {
+const getRect = (el: Element, cal: SlideCalibration): { x: number; y: number; w: number; h: number } => {
   const rect = el.getBoundingClientRect()
-  const x = (rect.left - slideOriginX) / pxPerInchX
-  const y = (rect.top - slideOriginY) / pxPerInchY
-  const w = rect.width / pxPerInchX
-  const h = rect.height / pxPerInchY
+  const x = (rect.left - cal.originX) / cal.pxPerInchX
+  const y = (rect.top - cal.originY) / cal.pxPerInchY
+  const w = rect.width / cal.pxPerInchX
+  const h = rect.height / cal.pxPerInchY
   return {
     x: Math.max(0, x),
     y: Math.max(0, y),
@@ -94,12 +99,12 @@ const getTextContent = (el: Element): string => {
   return text
 }
 
-const addTextElement = (slide: PptxSlide, el: Element): void => {
+const addTextElement = (slide: PptxSlide, el: Element, cal: SlideCalibration): void => {
   const text = getTextContent(el).trim()
   if (!text) return
 
   const cs = window.getComputedStyle(el)
-  const rect = getRect(el)
+  const rect = getRect(el, cal)
 
   if (rect.w < 0.1 || rect.h < 0.1) return
 
@@ -133,9 +138,9 @@ const addTextElement = (slide: PptxSlide, el: Element): void => {
   })
 }
 
-const addCardSurface = (slide: PptxSlide, el: Element): void => {
+const addCardSurface = (slide: PptxSlide, el: Element, cal: SlideCalibration): void => {
   const cs = window.getComputedStyle(el)
-  const rect = getRect(el)
+  const rect = getRect(el, cal)
 
   if (rect.w < 0.1 || rect.h < 0.1) return
 
@@ -143,7 +148,7 @@ const addCardSurface = (slide: PptxSlide, el: Element): void => {
   if (bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') return
 
   const borderRadius = parseFloat(cs.borderRadius) || 0
-  const rectRadius = Math.min(borderRadius / pxPerInchX, 0.2)
+  const rectRadius = Math.min(borderRadius / cal.pxPerInchX, 0.2)
 
   slide.addShape('roundRect', {
     x: rect.x,
@@ -187,8 +192,8 @@ const imgToBase64 = async (img: HTMLImageElement): Promise<string | null> => {
   }
 }
 
-const addImageElement = async (slide: PptxSlide, el: HTMLImageElement): Promise<void> => {
-  const rect = getRect(el)
+const addImageElement = async (slide: PptxSlide, el: HTMLImageElement, cal: SlideCalibration): Promise<void> => {
+  const rect = getRect(el, cal)
   if (rect.w < 0.1 || rect.h < 0.1) return
 
   const data = await imgToBase64(el)
@@ -207,8 +212,8 @@ const addImageElement = async (slide: PptxSlide, el: HTMLImageElement): Promise<
   }
 }
 
-const addSvgElement = (slide: PptxSlide, el: SVGSVGElement): void => {
-  const rect = getRect(el)
+const addSvgElement = (slide: PptxSlide, el: SVGSVGElement, cal: SlideCalibration): void => {
+  const rect = getRect(el, cal)
   if (rect.w < 0.1 || rect.h < 0.1) return
 
   const cs = window.getComputedStyle(el)
@@ -245,39 +250,42 @@ const addSvgElement = (slide: PptxSlide, el: SVGSVGElement): void => {
   }
 }
 
-const processedElements = new Set<Element>()
+type WalkContext = {
+  cal: SlideCalibration
+  processed: Set<Element>
+}
 
-const walkElement = async (slide: PptxSlide, el: Element): Promise<void> => {
-  if (processedElements.has(el)) return
+const walkElement = async (slide: PptxSlide, el: Element, ctx: WalkContext): Promise<void> => {
+  if (ctx.processed.has(el)) return
   if (!isVisible(el)) return
   if (el.hasAttribute('data-notes')) return
 
   const tag = el.tagName.toLowerCase()
 
   if (tag === 'img') {
-    await addImageElement(slide, el as HTMLImageElement)
-    processedElements.add(el)
+    await addImageElement(slide, el as HTMLImageElement, ctx.cal)
+    ctx.processed.add(el)
     return
   }
 
   if (tag === 'svg') {
-    addSvgElement(slide, el as SVGSVGElement)
-    processedElements.add(el)
+    addSvgElement(slide, el as SVGSVGElement, ctx.cal)
+    ctx.processed.add(el)
     return
   }
 
   if (el.classList.contains('card-surface')) {
-    addCardSurface(slide, el)
+    addCardSurface(slide, el, ctx.cal)
   }
 
   if (isTextNode(el) && !hasTextChildren(el)) {
-    addTextElement(slide, el)
-    processedElements.add(el)
+    addTextElement(slide, el, ctx.cal)
+    ctx.processed.add(el)
     return
   }
 
   for (const child of Array.from(el.children)) {
-    await walkElement(slide, child)
+    await walkElement(slide, child, ctx)
   }
 }
 
@@ -324,64 +332,32 @@ export const exportNativePptx = async (
 
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total)
-    processedElements.clear()
 
-    slides.forEach((s, idx) => {
-      const el = s as HTMLElement
-      el.classList.toggle('active', idx === i)
-    })
+    setActiveSlideForExport(slides, i)
 
     const slideEl = slides[i] as HTMLElement
-    slideEl.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      step.classList.add('step-visible')
-      const htmlEl = step as HTMLElement
-      htmlEl.style.setProperty('visibility', 'visible', 'important')
-      htmlEl.style.setProperty('opacity', '1', 'important')
-      htmlEl.style.setProperty('transform', 'none', 'important')
-      htmlEl.style.setProperty('animation', 'none', 'important')
-    })
-    slideEl.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
-      const htmlEl = el as HTMLElement
-      htmlEl.style.setProperty('opacity', '1', 'important')
-      htmlEl.style.setProperty('transform', 'none', 'important')
-      htmlEl.style.setProperty('animation', 'none', 'important')
-    })
+    showAllSteps(slideEl)
 
     await new Promise((r) => setTimeout(r, 50))
 
-    calibrateToSlide(slideEl)
+    const cal = calibrateToSlide(slideEl)
+    const ctx: WalkContext = { cal, processed: new Set() }
 
     const pptxSlide = pptx.addSlide()
     pptxSlide.background = { color: getSlideBackground(slideEl) }
 
     const inner = slideEl.firstElementChild || slideEl
-    await walkElement(pptxSlide, inner)
+    await walkElement(pptxSlide, inner, ctx)
 
     const notes = getNotesForSlide(i)
     if (notes.length > 0) {
       pptxSlide.addNotes(notes.join('\n'))
     }
 
-    slideEl.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      step.classList.remove('step-visible')
-      const htmlEl = step as HTMLElement
-      htmlEl.style.removeProperty('visibility')
-      htmlEl.style.removeProperty('opacity')
-      htmlEl.style.removeProperty('transform')
-      htmlEl.style.removeProperty('animation')
-    })
-    slideEl.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
-      const htmlEl = el as HTMLElement
-      htmlEl.style.removeProperty('opacity')
-      htmlEl.style.removeProperty('transform')
-      htmlEl.style.removeProperty('animation')
-    })
+    hideAllSteps(slideEl)
   }
 
-  slides.forEach((s, idx) => {
-    const el = s as HTMLElement
-    el.classList.toggle('active', idx === originalIndex)
-  })
+  setActiveSlideForExport(slides, originalIndex)
 
   const blob = (await pptx.write({ outputType: 'blob' })) as Blob
   const url = URL.createObjectURL(blob)

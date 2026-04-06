@@ -50,7 +50,7 @@ const exportPdf = async (url: string): Promise<void> => {
     printBackground: true,
   })
   await browser.close()
-  console.log('Exported: deck.pdf')
+  console.info('Exported: deck.pdf')
 }
 
 const exportPptx = async (url: string): Promise<void> => {
@@ -90,12 +90,12 @@ const exportPptx = async (url: string): Promise<void> => {
   }
 
   await pptx.writeFile({ fileName: 'deck.pptx' })
-  console.log('Exported: deck.pptx')
+  console.info('Exported: deck.pptx')
 }
 
 const exportGslides = async (url: string): Promise<void> => {
   await exportPptx(url)
-  console.log(
+  console.info(
     'Google Slides: Import the generated deck.pptx into Google Slides via File > Import.',
   )
 }

@@ -1,4 +1,5 @@
 import { getSlideElements } from './slide-dom.js'
+import { showAllSteps, hideAllSteps, setActiveSlideForExport } from './export-helpers.js'
 
 type ExportFormat = 'pdf' | 'pptx'
 
@@ -40,31 +41,10 @@ const captureSlides = async (
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total)
 
-    slides.forEach((s, idx) => {
-      const el = s as HTMLElement
-      el.classList.toggle('active', idx === i)
-      el.classList.remove('exiting')
-    })
+    setActiveSlideForExport(slides, i)
 
     const slideEl = slides[i] as HTMLElement
-    slideEl.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      step.classList.add('step-visible')
-      const el = step as HTMLElement
-      el.style.setProperty('visibility', 'visible', 'important')
-      el.style.setProperty('opacity', '1', 'important')
-      el.style.setProperty('transform', 'none', 'important')
-      el.style.setProperty('clip-path', 'none', 'important')
-      el.style.setProperty('transition', 'none', 'important')
-      el.style.setProperty('animation', 'none', 'important')
-    })
-
-    slideEl.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
-      const htmlEl = el as HTMLElement
-      htmlEl.style.setProperty('opacity', '1', 'important')
-      htmlEl.style.setProperty('transform', 'none', 'important')
-      htmlEl.style.setProperty('clip-path', 'none', 'important')
-      htmlEl.style.setProperty('animation', 'none', 'important')
-    })
+    showAllSteps(slideEl)
 
     if (overlay) {
       overlay.style.zIndex = '99999'
@@ -90,33 +70,12 @@ const captureSlides = async (
 
     images.push(canvas.toDataURL('image/jpeg', 0.92))
 
-    slideEl.querySelectorAll('[data-step], [data-auto-step]').forEach((step) => {
-      step.classList.remove('step-visible')
-      const el = step as HTMLElement
-      el.style.removeProperty('visibility')
-      el.style.removeProperty('opacity')
-      el.style.removeProperty('transform')
-      el.style.removeProperty('clip-path')
-      el.style.removeProperty('transition')
-      el.style.removeProperty('animation')
-    })
-
-    slideEl.querySelectorAll('.auto-fade, .auto-pop, .auto-wipe-right, .auto-slide-down, .auto-slide-up').forEach((el) => {
-      const htmlEl = el as HTMLElement
-      htmlEl.style.removeProperty('opacity')
-      htmlEl.style.removeProperty('transform')
-      htmlEl.style.removeProperty('clip-path')
-      htmlEl.style.removeProperty('animation')
-    })
+    hideAllSteps(slideEl)
 
     await yieldToMain()
   }
 
-  slides.forEach((s, idx) => {
-    const el = s as HTMLElement
-    el.classList.toggle('active', idx === originalIndex)
-    el.classList.remove('exiting')
-  })
+  setActiveSlideForExport(slides, originalIndex)
 
   return images
 }

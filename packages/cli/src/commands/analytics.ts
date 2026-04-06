@@ -54,7 +54,7 @@ export const registerAnalyticsCommand = (program: Command): void => {
 
       const targetDir = process.cwd()
       const outputPath = await injectAnalytics(matched, analyticsId, targetDir)
-      console.log(`Analytics component created: ${path.relative(targetDir, outputPath)}`)
-      console.log('Import this component in your root layout to activate analytics.')
+      console.info(`Analytics component created: ${path.relative(targetDir, outputPath)}`)
+      console.info('Import this component in your root layout to activate analytics.')
     })
 }

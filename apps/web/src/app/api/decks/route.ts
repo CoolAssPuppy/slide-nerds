@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createApiClient } from '@/lib/supabase/api-client'
+import { slugify } from '@/lib/slugify'
+import { z } from 'zod'
+
+const CreateDeckSchema = z.object({
+  name: z.string().min(1),
+  url: z.string().url().optional(),
+  deployed_url: z.string().url().optional(),
+  description: z.string().optional(),
+  source_type: z.enum(['url', 'push']).optional(),
+})
 
 export async function GET() {
   const supabase = await createClient()
@@ -30,19 +40,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await request.json()
-  const { name, url, deployed_url, description } = body as {
-    name: string
-    url?: string
-    deployed_url?: string
-    description?: string
-  }
-
-  if (!name?.trim()) {
+  let body: z.infer<typeof CreateDeckSchema>
+  try {
+    const raw = await request.json()
+    body = CreateDeckSchema.parse(raw)
+  } catch {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 })
   }
 
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const { name, url, deployed_url, description } = body
+
+  const slug = slugify(name)
 
   const { data, error } = await supabase
     .from('decks')
