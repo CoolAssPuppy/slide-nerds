@@ -1,6 +1,6 @@
 {
   "name": "@strategicnerds/slide-nerds",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Presentation runtime, CLI, and LLM skill library for Next.js",
   "type": "module",
   "main": "./dist/runtime/index.js",
