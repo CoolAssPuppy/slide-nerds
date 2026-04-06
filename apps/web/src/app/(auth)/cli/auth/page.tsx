@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 
 export default function CliAuthPage() {
   return (
@@ -40,7 +41,6 @@ function CliAuthContent() {
 
   useEffect(() => {
     if (!callbackUrl) return
-
     const checkExistingSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
@@ -54,44 +54,21 @@ function CliAuthContent() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
-
-    if (data.session) {
-      redirectToCli(data.session.access_token, data.session.refresh_token)
-    }
+    if (error) { setError(error.message); setLoading(false); return }
+    if (data.session) redirectToCli(data.session.access_token, data.session.refresh_token)
   }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
-
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
-
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        },
-      },
+      email, password,
+      options: { data: { full_name: fullName, first_name: firstName.trim(), last_name: lastName.trim() } },
     })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
-
+    if (error) { setError(error.message); setLoading(false); return }
     if (data.session) {
       redirectToCli(data.session.access_token, data.session.refresh_token)
     } else {
@@ -102,40 +79,34 @@ function CliAuthContent() {
 
   if (!callbackUrl) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--destructive)]">Missing callback</h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-2">
-            This page should be opened by the SlideNerds CLI.
-          </p>
+      <AuthLayout>
+        <div className="text-center lg:text-left">
+          <h2 className="text-2xl font-bold text-[var(--destructive)]">Missing callback</h2>
+          <p className="text-sm text-[var(--muted-foreground)] mt-2">This page should be opened by the SlideNerds CLI.</p>
         </div>
-      </div>
+      </AuthLayout>
     )
   }
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--primary)]">Logged in</h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-2">
-            You can close this window and return to your terminal.
-          </p>
+      <AuthLayout>
+        <div className="text-center lg:text-left">
+          <h2 className="text-2xl font-bold text-[var(--primary)]">Logged in</h2>
+          <p className="text-sm text-[var(--muted-foreground)] mt-2">You can close this window and return to your terminal.</p>
         </div>
-      </div>
+      </AuthLayout>
     )
   }
 
   const inputClass = 'w-full h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]'
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--primary)]">SlideNerds</h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-2">
-            {mode === 'login' ? 'Sign in to connect your terminal' : 'Create an account to get started'}
-          </p>
+    <AuthLayout>
+      <div className="space-y-6">
+        <div className="text-center lg:text-left">
+          <h2 className="text-2xl font-bold">{mode === 'login' ? 'Connect your terminal' : 'Create your account'}</h2>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">{mode === 'login' ? 'Sign in to link the SlideNerds CLI' : 'Get started with SlideNerds'}</p>
         </div>
 
         {mode === 'login' ? (
@@ -148,9 +119,7 @@ function CliAuthContent() {
               <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
               <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className={inputClass} />
             </div>
-
             {error && <p className="text-sm text-[var(--destructive)]">{error}</p>}
-
             <button type="submit" disabled={loading} className="w-full h-10 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -175,39 +144,21 @@ function CliAuthContent() {
               <label htmlFor="signupPassword" className="block text-sm font-medium mb-1">Password</label>
               <input id="signupPassword" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className={inputClass} />
             </div>
-
             {error && <p className="text-sm text-[var(--destructive)]">{error}</p>}
-
             <button type="submit" disabled={loading} className="w-full h-10 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
               {loading ? 'Creating account...' : 'Create account'}
             </button>
           </form>
         )}
 
-        <p className="text-center text-sm text-[var(--muted-foreground)]">
+        <p className="text-center lg:text-left text-sm text-[var(--muted-foreground)]">
           {mode === 'login' ? (
             <>No account? <button onClick={() => { setMode('signup'); setError(null) }} className="text-[var(--primary)] hover:underline">Create one</button></>
           ) : (
             <>Already have an account? <button onClick={() => { setMode('login'); setError(null) }} className="text-[var(--primary)] hover:underline">Sign in</button></>
           )}
         </p>
-
-        {mode === 'signup' && (
-          <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 space-y-2">
-            <p className="text-xs font-semibold text-[var(--foreground)]">Why create an account?</p>
-            <ul className="text-xs text-[var(--muted-foreground)] space-y-1.5">
-              <li>Save and sync brand configs across all your decks</li>
-              <li>Share decks and analytics with your team</li>
-              <li>Add live polls, Q&A, and audience reactions</li>
-              <li>Per-slide engagement analytics and viewer tracking</li>
-              <li>Export to PDF and PowerPoint from the web</li>
-            </ul>
-            <p className="text-xs text-[var(--muted-foreground)]">
-              The runtime and CLI are free and open source. An account is optional.
-            </p>
-          </div>
-        )}
       </div>
-    </div>
+    </AuthLayout>
   )
 }
