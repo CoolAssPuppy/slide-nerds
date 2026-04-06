@@ -40,12 +40,18 @@ export default async function BrandPage() {
     <div>
       <BrandPageHeader />
 
-      <div className="mb-8">
-        <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
-          My brands
-        </h2>
-        <BrandListRealtime initialBrands={ownBrands} userId={user!.id} />
-      </div>
+      {ownBrands.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
+            My brands
+          </h2>
+          <BrandListRealtime initialBrands={ownBrands} userId={user!.id} />
+        </div>
+      )}
+
+      {ownBrands.length === 0 && filteredTeamBrands.length === 0 && (
+        <BrandGrid brands={[]} />
+      )}
 
       {filteredTeamBrands.length > 0 && (
         <div>
