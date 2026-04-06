@@ -112,8 +112,24 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Section 3: Pricing */}
+        {/* Section 3: Live features */}
         <section className="py-24 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-extrabold tracking-tight">Add live features and standardize brand</h2>
+              <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
+                Every slide deck can host custom React components, including SlideNerds components for live polls, Q&A, and more.
+              </p>
+            </div>
+            <div className="max-w-4xl mx-auto">
+              <SlidePreviewPlayer variant="live" />
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: Pricing */}
+        <section className="py-24 px-6 bg-[var(--muted)]">
+
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Pricing for teams of all sizes</h2>
@@ -125,8 +141,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Section 4: Features */}
-        <section className="py-24 px-6 bg-[var(--muted)]">
+        {/* Section 5: Features */}
+        <section className="py-24 px-6">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold tracking-tight">Everything you need</h2>
@@ -158,7 +174,17 @@ export default async function HomePage() {
       </main>
 
       <footer className="border-t border-[var(--border)] py-8 px-6 text-center text-sm text-[var(--muted-foreground)]">
-        Built by Strategic Nerds. Open source on GitHub.
+        <p>Built with &#10084; by Strategic Nerds in Lisbon, Portugal</p>
+        <p className="mt-2">
+          <a
+            href="https://www.strategicnerds.com/picksandshovels"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--foreground)] hover:underline"
+          >
+            Buy the definitive book on technical marketing
+          </a>
+        </p>
       </footer>
     </div>
   )

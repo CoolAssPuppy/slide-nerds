@@ -21,7 +21,17 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       </header>
       <main className="flex-1">{children}</main>
       <footer className="border-t border-[var(--border)] py-8 px-6 text-center text-sm text-[var(--muted-foreground)]">
-        Built by Strategic Nerds. Open source on GitHub.
+        <p>Built with &#10084; by Strategic Nerds in Lisbon, Portugal</p>
+        <p className="mt-2">
+          <a
+            href="https://www.strategicnerds.com/picksandshovels"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--foreground)] hover:underline"
+          >
+            Buy the definitive book on technical marketing
+          </a>
+        </p>
       </footer>
     </div>
   )

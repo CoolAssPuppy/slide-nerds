@@ -3,14 +3,20 @@
 import { Player } from '@remotion/player'
 import { SlideComposition } from './SlideComposition'
 import { AnalyticsComposition } from './AnalyticsComposition'
+import { LivePollComposition } from './LivePollComposition'
 
 type SlidePreviewPlayerProps = {
-  variant: 'build' | 'analytics'
+  variant: 'build' | 'analytics' | 'live'
 }
 
+const VARIANTS = {
+  build: { component: SlideComposition, duration: 150 },
+  analytics: { component: AnalyticsComposition, duration: 180 },
+  live: { component: LivePollComposition, duration: 210 },
+} as const
+
 export function SlidePreviewPlayer({ variant }: SlidePreviewPlayerProps) {
-  const Component = variant === 'build' ? SlideComposition : AnalyticsComposition
-  const durationInFrames = variant === 'build' ? 150 : 180
+  const { component: Component, duration } = VARIANTS[variant]
 
   return (
     <div style={{
@@ -23,7 +29,7 @@ export function SlidePreviewPlayer({ variant }: SlidePreviewPlayerProps) {
         component={Component}
         compositionWidth={960}
         compositionHeight={540}
-        durationInFrames={durationInFrames}
+        durationInFrames={duration}
         fps={30}
         loop
         autoPlay
