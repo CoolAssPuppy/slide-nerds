@@ -9,7 +9,7 @@ const LIVE_API_CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-export const middleware = async (request: NextRequest) => {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (pathname.startsWith('/api/live')) {
