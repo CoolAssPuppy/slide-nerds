@@ -39,19 +39,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Only team owners and admins can invite members.' }, { status: 403 })
   }
 
-  // Check if user is already a member
-  const { data: existingMember } = await supabase
-    .from('team_members')
-    .select('user_id')
-    .eq('team_id', team_id)
-    .eq('user_id', (await supabase.from('profiles').select('id').ilike('display_name', email).single()).data?.id ?? '')
-    .single()
-
-  if (existingMember) {
-    return NextResponse.json({ error: 'This user is already a team member.' }, { status: 409 })
-  }
-
-  // Create the invite
+  // Create the invite (unique constraint on team_id + email prevents duplicates)
   const { data: invite, error } = await supabase
     .from('team_invites')
     .insert({
