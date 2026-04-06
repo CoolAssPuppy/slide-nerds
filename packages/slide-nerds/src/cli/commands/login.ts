@@ -57,12 +57,136 @@ export const loginFlow = async (serviceUrl: string): Promise<boolean> => {
           })
 
           res.writeHead(200, { 'Content-Type': 'text/html' })
-          res.end('<html><body><h1>Logged in to SlideNerds</h1><p>You can close this window.</p></body></html>')
+          res.end(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SlideNerds - Logged In</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(62, 207, 142, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .card {
+    position: relative;
+    text-align: center;
+    padding: 3.5rem 3rem;
+    max-width: 420px;
+    width: 100%;
+  }
+  .check {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(62, 207, 142, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 0 0 12px rgba(62, 207, 142, 0.06), 0 0 0 24px rgba(62, 207, 142, 0.03);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 12px rgba(62, 207, 142, 0.06), 0 0 0 24px rgba(62, 207, 142, 0.03); }
+    50% { box-shadow: 0 0 0 16px rgba(62, 207, 142, 0.1), 0 0 0 32px rgba(62, 207, 142, 0.05); }
+  }
+  .check svg {
+    width: 36px;
+    height: 36px;
+    stroke: #3ECF8E;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+  .hint {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.3);
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .brand {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2rem;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <h1>You're in</h1>
+    <p class="subtitle">Your terminal is now connected to SlideNerds.<br>You can close this window.</p>
+    <p class="hint">Head back to your terminal to continue working.</p>
+    <p class="brand">SlideNerds</p>
+  </div>
+</body>
+</html>`)
 
           finish(true)
         } else {
           res.writeHead(400, { 'Content-Type': 'text/html' })
-          res.end('<html><body><h1>Login failed</h1><p>No token received.</p></body></html>')
+          res.end(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SlideNerds - Login Failed</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .card { text-align: center; padding: 3rem; max-width: 420px; }
+  h1 { font-size: 1.5rem; font-weight: 700; color: #ef4444; margin-bottom: 0.5rem; }
+  p { font-size: 0.95rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Login failed</h1>
+    <p>No token was received. Please try again from your terminal.</p>
+  </div>
+</body>
+</html>`)
 
           finish(false)
         }
