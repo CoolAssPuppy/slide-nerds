@@ -147,60 +147,112 @@ function InitialSlide() {
 }
 
 function MagicMoveSlide() {
-  const [showSecond, setShowSecond] = useState(false)
+  const [moved, setMoved] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setShowSecond(true), 1000)
+    const t = setTimeout(() => setMoved(true), 800)
     return () => clearTimeout(t)
   }, [])
 
   return (
-    <div style={{ padding: '24px 32px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <div style={{ padding: '24px 32px', height: '100%', position: 'relative', overflow: 'hidden' }}>
       <div style={{ fontSize: 8, fontWeight: 600, color: ACCENT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
-        Key metrics
+        {moved ? 'Team' : 'Key metrics'}
       </div>
       <div style={{ fontSize: 18, fontWeight: 700, color: TEXT_COLOR, marginBottom: 12 }}>
-        Performance dashboard
+        {moved ? 'Meet the team' : 'Performance dashboard'}
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {[
-          { label: 'Revenue', value: '$2.4M', delta: '+18%' },
-          { label: 'Users', value: '12,847', delta: '+2,104' },
-          { label: 'NPS', value: '72', delta: '+8' },
-        ].map((m) => (
-          <div key={m.label} style={{ flex: 1, background: SURFACE, borderRadius: 6, padding: '8px 10px', border: `1px solid ${BORDER_COLOR}` }}>
-            <div style={{ fontSize: 7, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: TEXT_COLOR }}>{m.value}</span>
-              {showSecond && (
-                <motion.span
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, type: 'spring', damping: 12 }}
-                  style={{ fontSize: 8, fontWeight: 600, color: ACCENT }}
-                >
-                  {m.delta}
-                </motion.span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+
+      {/* The revenue badge that moves between slides */}
+      <motion.div
+        animate={{
+          top: moved ? 16 : 90,
+          right: moved ? 24 : 'auto',
+          left: moved ? 'auto' : 32,
+          scale: moved ? 0.7 : 1,
+        }}
+        transition={{ type: 'spring', damping: 14, stiffness: 100 }}
+        style={{
+          position: 'absolute',
+          background: SURFACE,
+          borderRadius: 8,
+          padding: '8px 14px',
+          border: `1.5px solid ${ACCENT}`,
+          zIndex: 10,
+        }}
+      >
+        <div style={{ fontSize: 6, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Revenue</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: ACCENT }}>$2.4M</div>
+      </motion.div>
+
+      {/* Background content that changes */}
+      <AnimatePresence mode="wait">
+        {!moved ? (
+          <motion.div key="metrics" exit={{ opacity: 0 }} style={{ marginTop: 50, display: 'flex', gap: 8 }}>
+            {[{ label: 'Users', value: '12,847' }, { label: 'NPS', value: '72' }].map((m) => (
+              <div key={m.label} style={{ flex: 1, background: SURFACE, borderRadius: 6, padding: '8px 10px', border: `1px solid ${BORDER_COLOR}` }}>
+                <div style={{ fontSize: 7, color: MUTED }}>{m.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_COLOR, marginTop: 2 }}>{m.value}</div>
+              </div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div key="team" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+            {['Alice', 'Bob', 'Carol'].map((name, i) => (
+              <motion.div
+                key={name}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + i * 0.1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: SURFACE, borderRadius: 6, padding: '6px 10px', border: `1px solid ${BORDER_COLOR}` }}
+              >
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: `hsl(${160 + i * 40}, 50%, 45%)` }} />
+                <span style={{ fontSize: 9, color: TEXT_COLOR }}>{name}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        style={{ marginTop: 10, fontSize: 7, color: ACCENT, fontWeight: 500 }}
+        animate={{ opacity: moved ? 1 : 0 }}
+        transition={{ delay: 0.8 }}
+        style={{ position: 'absolute', bottom: 8, left: 32, fontSize: 7, color: ACCENT, fontWeight: 500 }}
       >
-        magic move active
+        data-magic-id=&quot;revenue&quot;
       </motion.div>
-      <div style={{ marginTop: 4, fontSize: 7, color: DIM }}>4 / 6 → 5 / 6</div>
+      <div style={{ position: 'absolute', bottom: 8, right: 16, fontSize: 7, color: DIM }}>
+        {moved ? '5 / 6' : '4 / 6'}
+      </div>
     </div>
   )
 }
 
+function MiniThumb({ children, delay }: { children: React.ReactNode; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8, scale: 0.92 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 function LightTableSlide() {
-  const slides = ['Title', 'Problem', 'Solution', 'Metrics', 'Team', 'CTA']
+  const thumbStyle = (active: boolean): React.CSSProperties => ({
+    aspectRatio: '16/9',
+    background: active ? 'rgba(62,207,142,0.08)' : SURFACE,
+    borderRadius: 4,
+    border: active ? `1.5px solid ${ACCENT}` : `1px solid ${BORDER_COLOR}`,
+    padding: '5px 6px',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    position: 'relative',
+  })
 
   return (
     <div style={{ padding: 12, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -208,39 +260,82 @@ function LightTableSlide() {
         Light table
       </div>
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, alignContent: 'center' }}>
-        {slides.map((title, i) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0, y: 8, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: i * 0.07, duration: 0.3 }}
-            style={{
-              aspectRatio: '16/9',
-              background: i === 1 ? 'rgba(62,207,142,0.08)' : SURFACE,
-              borderRadius: 4,
-              border: i === 1 ? `1.5px solid ${ACCENT}` : `1px solid ${BORDER_COLOR}`,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 6,
-              position: 'relative',
-            }}
-          >
-            <span style={{ fontSize: 7, color: i === 1 ? ACCENT : MUTED }}>{title}</span>
-            {i === 1 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                style={{ fontSize: 5, color: ACCENT, marginTop: 2 }}
-              >
-                moved here
-              </motion.div>
-            )}
-            <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 5, color: 'rgba(255,255,255,0.15)' }}>{i + 1}</span>
-          </motion.div>
-        ))}
+        {/* Title slide */}
+        <MiniThumb delay={0}>
+          <div style={thumbStyle(false)}>
+            <div style={{ fontSize: 5, fontWeight: 600, color: ACCENT, marginBottom: 2 }}>Q2</div>
+            <div style={{ fontSize: 7, fontWeight: 700, color: TEXT_COLOR, lineHeight: 1.2 }}>Product Launch</div>
+            <div style={{ fontSize: 4, color: MUTED, marginTop: 2 }}>Ship faster</div>
+            <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 4, color: 'rgba(255,255,255,0.15)' }}>1</span>
+          </div>
+        </MiniThumb>
+
+        {/* Problem slide (reordered here) */}
+        <MiniThumb delay={0.07}>
+          <div style={thumbStyle(true)}>
+            <div style={{ fontSize: 5, color: ACCENT, marginBottom: 2 }}>Problem</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {[70, 40, 15].map((w, j) => (
+                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <div style={{ width: 8, height: 2, borderRadius: 1, background: DIM }} />
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${w}%` }} transition={{ delay: 0.3 + j * 0.1, duration: 0.4 }} style={{ height: 3, borderRadius: 1, background: j === 2 ? '#f59e0b' : '#22c55e' }} />
+                </div>
+              ))}
+            </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} style={{ fontSize: 4, color: ACCENT, marginTop: 'auto' }}>moved</motion.div>
+            <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 4, color: 'rgba(255,255,255,0.15)' }}>2</span>
+          </div>
+        </MiniThumb>
+
+        {/* Solution slide */}
+        <MiniThumb delay={0.14}>
+          <div style={thumbStyle(false)}>
+            <div style={{ fontSize: 5, color: MUTED, marginBottom: 2 }}>Solution</div>
+            <div style={{ display: 'flex', gap: 2 }}>
+              {[0, 1, 2].map((j) => (
+                <motion.div key={j} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 + j * 0.08 }} style={{ flex: 1, height: 14, borderRadius: 2, background: `rgba(62,207,142,${0.15 + j * 0.1})`, border: `1px solid ${BORDER_COLOR}` }} />
+              ))}
+            </div>
+            <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 4, color: 'rgba(255,255,255,0.15)' }}>3</span>
+          </div>
+        </MiniThumb>
+
+        {/* Metrics slide */}
+        <MiniThumb delay={0.21}>
+          <div style={thumbStyle(false)}>
+            <div style={{ fontSize: 5, color: MUTED, marginBottom: 2 }}>Metrics</div>
+            <div style={{ display: 'flex', gap: 2 }}>
+              {[0, 1, 2].map((j) => (
+                <div key={j} style={{ flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: 2, padding: 2, border: `1px solid ${BORDER_COLOR}` }}>
+                  <motion.div initial={{ width: 0 }} animate={{ width: '60%' }} transition={{ delay: 0.5 + j * 0.1, duration: 0.3 }} style={{ height: 3, borderRadius: 1, background: ACCENT }} />
+                </div>
+              ))}
+            </div>
+            <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 4, color: 'rgba(255,255,255,0.15)' }}>4</span>
+          </div>
+        </MiniThumb>
+
+        {/* Team slide */}
+        <MiniThumb delay={0.28}>
+          <div style={thumbStyle(false)}>
+            <div style={{ fontSize: 5, color: MUTED, marginBottom: 2 }}>Team</div>
+            <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {[0, 1, 2, 3].map((j) => (
+                <motion.div key={j} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 + j * 0.06, type: 'spring', damping: 10 }} style={{ width: 8, height: 8, borderRadius: '50%', background: `hsl(${160 + j * 40}, 50%, 45%)` }} />
+              ))}
+            </div>
+            <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 4, color: 'rgba(255,255,255,0.15)' }}>5</span>
+          </div>
+        </MiniThumb>
+
+        {/* CTA slide */}
+        <MiniThumb delay={0.35}>
+          <div style={thumbStyle(false)}>
+            <div style={{ fontSize: 5, color: MUTED, marginBottom: 2 }}>CTA</div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} style={{ width: '70%', height: 8, borderRadius: 3, background: ACCENT, marginTop: 2 }} />
+            <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 4, color: 'rgba(255,255,255,0.15)' }}>6</span>
+          </div>
+        </MiniThumb>
       </div>
     </div>
   )
