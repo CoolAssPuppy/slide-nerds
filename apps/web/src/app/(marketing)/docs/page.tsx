@@ -14,7 +14,7 @@ export default function DocsPage() {
       <section className="mt-16">
         <StepHeader number="1" title="Create your deck" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          The CLI scaffolds a new Next.js project with the SlideNerds runtime, brand config, and 18 skill files pre-installed.
+          The CLI scaffolds a new Next.js project with the SlideNerds runtime, brand config, and 19 skill files pre-installed.
         </p>
         <div className="mt-4">
           <CopyCodeBlock code={`slidenerds create my-talk\ncd my-talk\nnpm install\nnpm run dev`} />
@@ -169,11 +169,51 @@ export default function DocsPage() {
         </div>
       </section>
 
+      {/* Step 9 */}
+      <section className="mt-16">
+        <StepHeader number="9" title="Manage brand configs" />
+        <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
+          Save and reuse brand configurations across decks. Create brands from the web UI or sync from the CLI.
+        </p>
+        <div className="mt-4">
+          <CopyCodeBlock code={`slidenerds brand set "Acme Corp"\nslidenerds brand get "Acme Corp"\nslidenerds brand list`} />
+        </div>
+
+        <div className="mt-6 space-y-4">
+          <FeatureCard title="Save from CLI" description="Run brand set to upload your current brand.config.ts to the service with a name." />
+          <FeatureCard title="Apply from CLI" description="Run brand get to download a saved brand and write it to your local brand.config.ts." />
+          <FeatureCard title="Create from web" description="Use the Brand page in the dashboard to create brands with color pickers and a live preview." />
+          <FeatureCard title="Team brands" description="On the Team plan, brand configs are shared across the workspace so every deck stays on brand." />
+        </div>
+      </section>
+
+      {/* Step 10 */}
+      <section className="mt-16">
+        <StepHeader number="10" title="Add live interaction" />
+        <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
+          Embed live components in your slides for real-time audience interaction during presentations. These require a hosted deck with an active live session.
+        </p>
+        <div className="mt-4">
+          <CopyCodeBlock code={`import { LivePoll, LiveReactions, LiveQA } from '@strategicnerds/slide-nerds'\n\n<section data-slide="">\n  <LivePoll\n    question="What is your biggest challenge?"\n    options={['Speed', 'Reliability', 'Cost']}\n  />\n</section>`} />
+        </div>
+
+        <div className="mt-6 space-y-4">
+          <FeatureCard title="LivePoll" description="Real-time audience polls with clickable options and live bar chart results." />
+          <FeatureCard title="LiveReactions" description="Floating emoji reactions (thumbsup, clap, heart, fire, mind blown)." />
+          <FeatureCard title="LiveQA" description="Question submission with answered badges. Unanswered questions surface first." />
+          <FeatureCard title="LiveWordCloud" description="Audience submits one word. Words display as a cloud sized by frequency." />
+          <FeatureCard title="LiveAudienceCount" description="Pulsing dot showing how many people are watching." />
+        </div>
+        <p className="mt-4 text-sm text-[var(--muted-foreground)]">
+          For local development, pass <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">serviceUrl=&quot;http://localhost:3000&quot;</code> to each component. See the <strong>live</strong> skill for full documentation.
+        </p>
+      </section>
+
       {/* Skills reference */}
       <section className="mt-16">
-        <StepHeader number="9" title="Skills reference" />
+        <StepHeader number="11" title="Skills reference" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Every deck ships with 18 skill files that teach your LLM how to use SlideNerds effectively. Reference them in your prompts to get better results.
+          Every deck ships with 19 skill files that teach your LLM how to use SlideNerds effectively. Reference them in your prompts to get better results.
         </p>
 
         <div className="mt-6 rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden">
