@@ -23,7 +23,11 @@ export const updateSession = async (request: NextRequest) => {
     },
   )
 
-  await supabase.auth.getUser()
+  try {
+    await supabase.auth.getUser()
+  } catch {
+    // Session refresh failed (e.g. stale cookie after DB reset). Continue without auth.
+  }
 
   return supabaseResponse
 }

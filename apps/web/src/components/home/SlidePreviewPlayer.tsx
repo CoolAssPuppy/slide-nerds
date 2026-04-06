@@ -35,6 +35,7 @@ export function SlidePreviewPlayer({ variant }: SlidePreviewPlayerProps) {
         autoPlay
         style={{ width: '100%', aspectRatio: '16/9' }}
         controls={false}
+        acknowledgeRemotionLicense
       />
     </div>
   )
