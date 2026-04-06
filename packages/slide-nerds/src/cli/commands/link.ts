@@ -26,60 +26,226 @@ const isSlidenerdProject = async (dir: string): Promise<boolean> => {
   return false
 }
 
+const provisionTelemetryToken = async (
+  serviceUrl: string,
+  accessToken: string,
+  deckId: string,
+): Promise<string | null> => {
+  const resp = await fetch(`${serviceUrl}/api/decks/${deckId}/telemetry-token`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  if (!resp.ok) return null
+
+  const body = await resp.json()
+  if (typeof body?.token !== 'string') return null
+
+  return body.token
+}
+
+const buildTelemetryClientComponent = (serviceUrl: string, deckId: string, telemetryToken: string): string => {
+  const endpoint = `${serviceUrl.replace(/\/$/, '')}/api/telemetry/slide`
+
+  return `'use client'
+
+import { useEffect, useRef } from 'react'
+
+type SlideNerdsTelemetryProps = {
+  deckId?: string
+  endpoint?: string
+  telemetryToken?: string
+}
+
+const getCurrentSlideIndex = (): number => {
+  if (typeof window === 'undefined') return 0
+  const slideParam = new URLSearchParams(window.location.search).get('slide')
+  if (!slideParam) return 0
+
+  const parsed = Number.parseInt(slideParam, 10)
+  if (Number.isNaN(parsed) || parsed < 1) return 0
+  return parsed - 1
+}
+
+const postTelemetry = async (payload: {
+  deck_id: string
+  slide_index: number
+  dwell_seconds: number
+  telemetry_token: string
+}, endpoint: string): Promise<void> => {
+  await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  })
+}
+
+export function SlideNerdsTelemetry({
+  deckId = '${deckId}',
+  endpoint = '${endpoint}',
+  telemetryToken = '${telemetryToken}',
+}: SlideNerdsTelemetryProps) {
+  const lastSlideRef = useRef(0)
+  const enteredAtRef = useRef(Date.now())
+
+  useEffect(() => {
+    lastSlideRef.current = getCurrentSlideIndex()
+    enteredAtRef.current = Date.now()
+
+    const flushCurrentSlide = () => {
+      const now = Date.now()
+      const dwellSeconds = Math.floor((now - enteredAtRef.current) / 1000)
+      const slideIndex = lastSlideRef.current
+
+      enteredAtRef.current = now
+      if (dwellSeconds < 1) return
+
+      postTelemetry(
+        {
+          deck_id: deckId,
+          slide_index: slideIndex,
+          dwell_seconds: dwellSeconds,
+          telemetry_token: telemetryToken,
+        },
+        endpoint,
+      ).catch(() => {
+        // Never block the presenter on telemetry failures.
+      })
+    }
+
+    const onNavigation = () => {
+      flushCurrentSlide()
+      lastSlideRef.current = getCurrentSlideIndex()
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        flushCurrentSlide()
+      }
+    }
+
+    window.addEventListener('popstate', onNavigation)
+    window.addEventListener('hashchange', onNavigation)
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('beforeunload', flushCurrentSlide)
+
+    return () => {
+      window.removeEventListener('popstate', onNavigation)
+      window.removeEventListener('hashchange', onNavigation)
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('beforeunload', flushCurrentSlide)
+      flushCurrentSlide()
+    }
+  }, [deckId, endpoint, telemetryToken])
+
+  return null
+}
+`
+}
+
+const wireTelemetryIntoLayout = async (projectDir: string): Promise<boolean> => {
+  const layoutPath = path.join(projectDir, 'app', 'layout.tsx')
+  if (!(await fs.pathExists(layoutPath))) return false
+
+  const content = await fs.readFile(layoutPath, 'utf8')
+  if (content.includes('SlideNerdsTelemetry')) return true
+
+  let updated = content
+
+  updated = updated.replace(
+    "import './globals.css'",
+    "import './globals.css'\nimport { SlideNerdsTelemetry } from '../components/slidenerds-telemetry'",
+  )
+
+  if (!updated.includes('SlideNerdsTelemetry')) return false
+
+  updated = updated.replace('<SlideRuntime>{children}</SlideRuntime>', '<SlideRuntime>{children}</SlideRuntime>\n        <SlideNerdsTelemetry />')
+
+  await fs.writeFile(layoutPath, updated, 'utf8')
+  return true
+}
+
+const ensureTelemetryClient = async (
+  projectDir: string,
+  serviceUrl: string,
+  deckId: string,
+  telemetryToken: string,
+): Promise<boolean> => {
+  const componentsDir = path.join(projectDir, 'components')
+  await fs.ensureDir(componentsDir)
+
+  const telemetryComponentPath = path.join(componentsDir, 'slidenerds-telemetry.tsx')
+  const component = buildTelemetryClientComponent(serviceUrl, deckId, telemetryToken)
+  await fs.writeFile(telemetryComponentPath, component, 'utf8')
+
+  return wireTelemetryIntoLayout(projectDir)
+}
+
 export const linkProject = async (options: {
   name?: string
   url: string
   deckId?: string
   serviceUrl: string
   accessToken: string
-}): Promise<{ deckId: string; deckName: string }> => {
+}): Promise<{ deckId: string; deckName: string; telemetryConfigured: boolean }> => {
   const dir = process.cwd()
   const { serviceUrl, accessToken, url } = options
 
-  // If a deck ID is provided, just link to it
+  let deckId: string
+  let deckName: string
+
   if (options.deckId) {
     const resp = await fetch(`${serviceUrl}/api/decks/${options.deckId}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     if (!resp.ok) throw new Error('Deck not found')
+
     const deck = await resp.json()
+    deckId = deck.id
+    deckName = deck.name
+  } else {
+    const name = options.name ?? await detectProjectName(dir)
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
-    await saveProjectConfig({
-      deck_id: deck.id,
-      deck_name: deck.name,
-      service_url: serviceUrl,
-    }, dir)
+    const resp = await fetch(`${serviceUrl}/api/decks`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, slug, url, deployed_url: url, source_type: 'url' }),
+    })
 
-    return { deckId: deck.id, deckName: deck.name }
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Unknown error' }))
+      throw new Error(err.error ?? `Failed to create deck: ${resp.status}`)
+    }
+
+    const deck = await resp.json()
+    deckId = deck.id
+    deckName = deck.name
   }
 
-  // Otherwise, create a new deck with the deployed URL
-  const name = options.name ?? await detectProjectName(dir)
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-
-  const resp = await fetch(`${serviceUrl}/api/decks`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name, slug, url, deployed_url: url, source_type: 'url' }),
-  })
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({ error: 'Unknown error' }))
-    throw new Error(err.error ?? `Failed to create deck: ${resp.status}`)
-  }
-
-  const deck = await resp.json()
+  const telemetryToken = await provisionTelemetryToken(serviceUrl, accessToken, deckId)
 
   await saveProjectConfig({
-    deck_id: deck.id,
-    deck_name: deck.name,
+    deck_id: deckId,
+    deck_name: deckName,
     service_url: serviceUrl,
+    telemetry_token: telemetryToken ?? undefined,
+    telemetry_endpoint: `${serviceUrl.replace(/\/$/, '')}/api/telemetry/slide`,
   }, dir)
 
-  return { deckId: deck.id, deckName: deck.name }
+  const telemetryConfigured = telemetryToken
+    ? await ensureTelemetryClient(dir, serviceUrl, deckId, telemetryToken)
+    : false
+
+  return { deckId, deckName, telemetryConfigured }
 }
 
 export const registerLinkCommand = (program: Command): void => {
@@ -100,8 +266,8 @@ export const registerLinkCommand = (program: Command): void => {
 
       const existing = await getProjectConfig(dir)
       if (existing) {
-        console.log(`Already linked to "${existing.deck_name}" (${existing.deck_id})`)
-        console.log('Delete .slidenerds.json to unlink.')
+        console.info(`Already linked to "${existing.deck_name}" (${existing.deck_id})`)
+        console.info('Delete .slidenerds.json to unlink.')
         return
       }
 
@@ -113,7 +279,7 @@ export const registerLinkCommand = (program: Command): void => {
 
       try {
         const serviceUrl = await getServiceUrl()
-        const { deckId, deckName } = await linkProject({
+        const { deckId, deckName, telemetryConfigured } = await linkProject({
           name: options.name,
           url: options.url,
           deckId: options.deckId,
@@ -121,9 +287,15 @@ export const registerLinkCommand = (program: Command): void => {
           accessToken: creds.access_token,
         })
 
-        console.log(`Linked to "${deckName}" (${deckId})`)
-        console.log(`Deck URL: ${options.url}`)
-        console.log('Your deck is now registered on slidenerds.com.')
+        console.info(`Linked to "${deckName}" (${deckId})`)
+        console.info(`Deck URL: ${options.url}`)
+        console.info('Your deck is now registered on slidenerds.com.')
+
+        if (telemetryConfigured) {
+          console.info('Configured built-in SlideNerds telemetry in app/layout.tsx.')
+        } else {
+          console.info('Telemetry token provisioning skipped or unavailable; you can still add your own analytics.')
+        }
       } catch (err) {
         console.error(`Link failed: ${err instanceof Error ? err.message : err}`)
         process.exit(1)

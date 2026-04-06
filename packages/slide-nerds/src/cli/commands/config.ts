@@ -12,10 +12,12 @@ type Credentials = {
   url: string
 }
 
-type ProjectConfig = {
+export type ProjectConfig = {
   deck_id: string
   deck_name: string
   service_url: string
+  telemetry_token?: string
+  telemetry_endpoint?: string
 }
 
 export const getCredentials = async (): Promise<Credentials | null> => {
