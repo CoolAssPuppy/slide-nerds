@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { TeamMemberList } from '@/components/team/TeamMemberList'
+import { TeamPageHeader } from '@/components/team/TeamPageHeader'
 
 export const metadata = { title: 'Team' }
 
@@ -51,11 +52,8 @@ export default async function TeamPage() {
       }
 
       return (
-        <div className="max-w-3xl">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold">Team</h1>
-            <p className="text-sm text-[var(--muted-foreground)] mt-1">Everyone you&apos;re collaborating with on slides.</p>
-          </div>
+        <div>
+          <TeamPageHeader teamId={newTeam.id} />
           <TeamMemberList teamId={newTeam.id} teammates={[]} canManage={true} />
         </div>
       )
@@ -132,11 +130,8 @@ export default async function TeamPage() {
   }
 
   return (
-    <div className="max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Team</h1>
-        <p className="text-sm text-[var(--muted-foreground)] mt-1">Everyone you&apos;re collaborating with on slides.</p>
-      </div>
+    <div>
+      <TeamPageHeader teamId={teamId} />
 
       <TeamMemberList
         teamId={teamId}

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserPlus, Trash2, X } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 
 type Teammate = {
   id: string
@@ -34,37 +33,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function TeamMemberList({ teamId, teammates, canManage }: TeamMemberListProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviting, setInviting] = useState(false)
-  const [error, setError] = useState('')
   const router = useRouter()
-
-  const handleInvite = async () => {
-    if (!inviteEmail.trim()) return
-    setInviting(true)
-    setError('')
-
-    const resp = await fetch('/api/team/invite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        team_id: teamId,
-        email: inviteEmail.trim(),
-        role: 'member',
-      }),
-    })
-
-    if (resp.ok) {
-      setInviteEmail('')
-      setIsDialogOpen(false)
-      router.refresh()
-    } else {
-      const data = await resp.json()
-      setError(data.error ?? 'Failed to send invite')
-    }
-    setInviting(false)
-  }
 
   const handleDelete = async (teammate: Teammate) => {
     if (teammate.type === 'invite') {
@@ -91,52 +60,20 @@ export function TeamMemberList({ teamId, teammates, canManage }: TeamMemberListP
     })
   }
 
-  const inputClass =
-    'h-9 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] w-full'
 
-  if (teammates.length === 0 && canManage) {
+  if (teammates.length === 0) {
     return (
-      <>
-        <div className="rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)] p-8 text-center">
-          <p className="text-sm text-[var(--muted-foreground)] mb-4">
-            No teammates yet. Invite someone to get started.
-          </p>
-          <button
-            onClick={() => setIsDialogOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90"
-          >
-            <UserPlus className="w-4 h-4" />
-            Invite teammate
-          </button>
-        </div>
-        {isDialogOpen && (
-          <InviteDialog
-            inviteEmail={inviteEmail}
-            setInviteEmail={setInviteEmail}
-            inviting={inviting}
-            error={error}
-            onSubmit={handleInvite}
-            onClose={() => { setIsDialogOpen(false); setError('') }}
-            inputClass={inputClass}
-          />
-        )}
-      </>
+      <div className="mb-8 text-center py-12 rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)]">
+        <p className="text-[var(--muted-foreground)] mb-2">No teammates yet</p>
+        <p className="text-sm text-[var(--muted-foreground)]">
+          Invite someone to share decks, brands, and analytics.
+        </p>
+      </div>
     )
   }
 
   return (
     <>
-      {canManage && (
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => setIsDialogOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90"
-          >
-            <UserPlus className="w-4 h-4" />
-            Invite teammate
-          </button>
-        </div>
-      )}
       <div className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -177,80 +114,6 @@ export function TeamMemberList({ teamId, teammates, canManage }: TeamMemberListP
           </tbody>
         </table>
       </div>
-
-      {isDialogOpen && (
-        <InviteDialog
-          inviteEmail={inviteEmail}
-          setInviteEmail={setInviteEmail}
-          inviting={inviting}
-          error={error}
-          onSubmit={handleInvite}
-          onClose={() => { setIsDialogOpen(false); setError('') }}
-          inputClass={inputClass}
-        />
-      )}
     </>
-  )
-}
-
-type InviteDialogProps = {
-  inviteEmail: string
-  setInviteEmail: (email: string) => void
-  inviting: boolean
-  error: string
-  onSubmit: () => void
-  onClose: () => void
-  inputClass: string
-}
-
-function InviteDialog({
-  inviteEmail,
-  setInviteEmail,
-  inviting,
-  error,
-  onSubmit,
-  onClose,
-  inputClass,
-}: InviteDialogProps) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-sm rounded-[var(--n-radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Invite teammate</h3>
-          <button onClick={onClose} className="p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <label className="block text-sm text-[var(--muted-foreground)] mb-1.5">
-          Email address
-        </label>
-        <input
-          type="email"
-          value={inviteEmail}
-          onChange={(e) => setInviteEmail(e.target.value)}
-          placeholder="teammate@company.com"
-          className={inputClass}
-          autoFocus
-          onKeyDown={(e) => { if (e.key === 'Enter') onSubmit() }}
-        />
-        {error && <p className="text-xs text-[var(--destructive)] mt-2">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-[var(--n-radius-md)] border border-[var(--border)] text-sm font-medium hover:bg-[var(--accent)]"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onSubmit}
-            disabled={inviting || !inviteEmail.trim()}
-            className="px-4 py-2 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 disabled:opacity-50"
-          >
-            {inviting ? 'Sending...' : 'Send invite'}
-          </button>
-        </div>
-      </div>
-    </div>
   )
 }
