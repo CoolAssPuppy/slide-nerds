@@ -117,9 +117,9 @@ export default async function HomePage() {
         <section className="py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-extrabold tracking-tight">Add live features and standardize brand</h2>
+              <h2 className="text-4xl font-extrabold tracking-tight">Go live with your audience</h2>
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                Your slides are React components. Drop in a LivePoll, a Q&A feed, or a word cloud and your audience participates in real time. Build your own interactive components or use ours. Slides are just code now. Brand configs sync across every deck on your team.
+                Every slide is a React component. Import LivePoll and your audience votes during the talk. Import LiveQA and they ask questions. Build your own components or use the ones that ship with the package. Manage brand configs from the CLI so every deck on your team stays consistent.
               </p>
               <div className="mt-6 flex justify-center">
                 <div className="w-full max-w-2xl">
