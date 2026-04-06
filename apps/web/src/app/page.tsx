@@ -17,6 +17,10 @@ const SHARE_CODE = `slidenerds login
 slidenerds link --name my-talk
 slidenerds push`
 
+const BRAND_CODE = `slidenerds brand set "Acme Corp"
+slidenerds brand get "Acme Corp"
+slidenerds brand list`
+
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -125,6 +129,11 @@ export default async function HomePage() {
               <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
                 Your slides are React components. Drop in a LivePoll, a Q&A feed, or a word cloud and your audience participates in real time. Build your own interactive components or use ours. Slides are just code now. Brand configs sync across every deck on your team.
               </p>
+              <div className="mt-6 flex justify-center">
+                <div className="w-full max-w-2xl">
+                  <CopyCodeBlock code={BRAND_CODE} />
+                </div>
+              </div>
             </div>
             <div className="max-w-4xl mx-auto">
               <SlidePreviewPlayer variant="live" />
