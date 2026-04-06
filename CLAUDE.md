@@ -25,7 +25,7 @@ The single published package is `packages/slide-nerds/`. The `packages/runtime/`
 ## Commands
 
 ```bash
-npm test              # Run all 131 tests (Vitest)
+npm test              # Run all 249 tests (Vitest)
 npm run build         # Build all packages
 npm run lint          # ESLint
 npm run format        # Prettier

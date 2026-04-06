@@ -17,8 +17,8 @@ const PLAN_LABELS: Record<Plan, string> = {
 }
 const PLAN_PRICES: Record<Plan, string> = {
   free: '$0/month',
-  pro: '$12/month',
-  team: '$29/seat/month',
+  pro: '$4/month',
+  team: '$9/seat/month',
 }
 
 export function SubscriptionManager({

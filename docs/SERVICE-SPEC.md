@@ -12,7 +12,7 @@ The relationship is Git to GitHub. You build locally, you push to the service wh
 
 - Build slides with an LLM (Claude Code, Cursor, etc.)
 - Runtime: navigate, animate, Magic Move, shapes, speaker notes, Light Table
-- Brand system, 18 skills, shape system
+- Brand system, 19 skills, shape system
 - `npm run dev` for local preview
 - Deploys to Vercel/Netlify as a standard Next.js app
 - Export as PDF (alpha, client-side)
@@ -608,9 +608,9 @@ The audience opens `slidenerds.com/live/:sessionId` which shows:
 
 | Tier | Price | Limits |
 |------|-------|--------|
-| Free | $0 | 3 hosted decks, public sharing only, 5 exports/month, no live features |
-| Pro | $12/month | Unlimited decks, restricted sharing (email/domain/password), unlimited exports, analytics, live presentations |
-| Team | $29/month per seat | Everything in Pro + team workspace, shared brand configs, custom domain, priority export |
+| Free | $0 (limited time) | Unlimited public decks, public sharing only, unlimited exports, basic analytics |
+| Pro | $4/month | Unlimited decks, restricted sharing (email/domain/password), unlimited exports, full analytics, live presentations |
+| Team | $9/month per seat | Everything in Pro + team workspace, shared brand configs, custom domain, priority export |
 
 ### Stripe integration
 
