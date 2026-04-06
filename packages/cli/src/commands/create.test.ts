@@ -34,6 +34,7 @@ describe('scaffoldProject', () => {
     expect(files).toContain('README.md')
     expect(files).toContain('app/layout.tsx')
     expect(files).toContain('app/page.tsx')
+    expect(files).toContain('app/slides/01-title.tsx')
     expect(files).toContain('app/globals.css')
     expect(files).toContain('tsconfig.json')
   })
@@ -79,16 +80,22 @@ describe('scaffoldProject', () => {
     expect(layout).toContain("import { SlideRuntime } from '@slidenerds/runtime'")
   })
 
-  it('should create page with example slides using data conventions', async () => {
+  it('should create manifest and slide files using data conventions', async () => {
     const tempDir = await createTempDir()
     tempDirs.push(tempDir)
     const targetDir = path.join(tempDir, 'test-deck')
 
     await scaffoldProject('test-deck', targetDir)
 
-    const page = await fs.readFile(path.join(targetDir, 'app', 'page.tsx'), 'utf-8')
-    expect(page).toContain('data-slide')
-    expect(page).toContain('data-step')
-    expect(page).toContain('data-notes')
+    const manifest = await fs.readFile(path.join(targetDir, 'app', 'page.tsx'), 'utf-8')
+    expect(manifest).toContain("from './slides/01-title'")
+    expect(manifest).toContain('<Title />')
+
+    const title = await fs.readFile(path.join(targetDir, 'app', 'slides', '01-title.tsx'), 'utf-8')
+    expect(title).toContain('data-slide')
+
+    const gettingStarted = await fs.readFile(path.join(targetDir, 'app', 'slides', '02-getting-started.tsx'), 'utf-8')
+    expect(gettingStarted).toContain('data-step')
+    expect(gettingStarted).toContain('data-notes')
   })
 })

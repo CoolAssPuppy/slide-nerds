@@ -1,0 +1,18 @@
+export default function GettingStarted() {
+  return (
+    <section data-slide="">
+      <div style={{ padding: 'var(--slide-padding, 4rem)' }}>
+        <h2 style={{ fontSize: '2rem', fontWeight: 600 }}>Getting started</h2>
+        <ul style={{ marginTop: '1rem', fontSize: '1.125rem', lineHeight: 2 }}>
+          <li data-step="">Open another terminal and start talking to Claude Code</li>
+          <li data-step="">Use arrow keys or space to navigate</li>
+          <li data-step="">Press P for presenter mode, L for light table</li>
+        </ul>
+        <div data-notes="">
+          This slide demonstrates the data-step progressive reveal convention.
+          Each bullet appears on click or keypress.
+        </div>
+      </div>
+    </section>
+  )
+}

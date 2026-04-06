@@ -4,7 +4,7 @@ A presentation runtime for Next.js, a skill library that teaches LLMs to build g
 
 **The runtime** turns any Next.js app into a full presentation environment. Navigation, speaker notes, Light Table, Magic Move transitions, step animations, SVG shapes, fullscreen, keyboard controls.
 
-**The skill library** gives LLMs the procedural knowledge to build slides correctly. 19 skills covering layout, animation, data visualization, strategic frameworks, narrative structure, diagrams, live presentation components, accessibility, and more.
+**The skill library** gives LLMs the procedural knowledge to build slides correctly. 20 skills covering layout, animation, data visualization, strategic frameworks, narrative structure, diagrams, live presentation components, accessibility, and more.
 
 **The CLI** scaffolds new decks, pushes them to slidenerds.com, manages brand configs, and exports to PDF and PPTX.
 
@@ -42,12 +42,16 @@ When you run `create`, you get:
 my-talk/
   app/
     layout.tsx          # Root layout with SlideRuntime + brand wiring
-    page.tsx            # Your slides
+    page.tsx            # Slide manifest (imports and orders slides)
+    slides/
+      01-title.tsx      # One file per slide
+      02-getting-started.tsx
+      03-big-stat.tsx
     globals.css         # Slide engine CSS, animations, utility classes
   brand.config.ts       # Colors, fonts, spacing (single source of truth)
   CLAUDE.md             # Complete slide authoring guide for LLMs
   .slidenerds/
-    skills/             # 19 LLM skill files installed locally
+    skills/             # 20 LLM skill files installed locally
 ```
 
 ## The runtime
@@ -87,33 +91,42 @@ export default function RootLayout({ children }) {
 }
 ```
 
-Write slides:
+Write slides as separate files, one per slide:
 
 ```tsx
-export default function Home() {
+// app/slides/01-title.tsx
+export default function Title() {
+  return (
+    <section data-slide="">
+      <div style={{ padding: 'var(--slide-padding)' }}>
+        <h1 className="text-6xl font-bold">My talk</h1>
+        <p className="mt-4 text-xl opacity-60">Subtitle</p>
+      </div>
+    </section>
+  )
+}
+```
+
+Import them in `page.tsx` to control order:
+
+```tsx
+// app/page.tsx
+import Title from './slides/01-title'
+import KeyPoint from './slides/02-key-point'
+import Close from './slides/03-close'
+
+export default function Deck() {
   return (
     <main>
-      <section data-slide="">
-        <div style={{ padding: 'var(--slide-padding)' }}>
-          <h1 className="text-6xl font-bold">My talk</h1>
-          <p className="mt-4 text-xl opacity-60">Subtitle</p>
-        </div>
-      </section>
-
-      <section data-slide="">
-        <div style={{ padding: 'var(--slide-padding)' }}>
-          <h2 className="text-4xl font-bold mb-10">Key point</h2>
-          <ul>
-            <li data-step="" className="step-fade">First thing</li>
-            <li data-step="" className="step-fade">Second thing</li>
-          </ul>
-          <div data-notes="">Speaker notes go here.</div>
-        </div>
-      </section>
+      <Title />
+      <KeyPoint />
+      <Close />
     </main>
   )
 }
 ```
+
+Reordering slides means moving one line. Adding a slide means creating a file and adding one import.
 
 ### Data attributes
 
@@ -222,7 +235,7 @@ slidenerds brand list              # List all saved brands
 
 ## The skill library
 
-19 skills installed to `.slidenerds/skills/` when you create a deck:
+20 skills installed to `.slidenerds/skills/` when you create a deck:
 
 | Skill | What it covers |
 |-------|---------------|
@@ -239,6 +252,7 @@ slidenerds brand list              # List all saved brands
 | `narrative-frameworks` | SCQA, Minto Pyramid, PAS, BAB, Sparkline |
 | `react-component-embeds` | Embedding React components in slides |
 | `slide-types` | Title, big stat, quote, code, table, chart, timeline |
+| `slide-organization` | Multi-file deck structure and slide ordering |
 | `slidenerds-runtime` | Runtime API and data attributes |
 | `speaker-notes` | Speaker notes conventions |
 | `strategic-frameworks` | SWOT, 2x2 matrix, TAM/SAM/SOM, process chevrons |
@@ -294,7 +308,7 @@ slide-nerds/
         runtime/           # React components + live components
         cli/               # CLI (slidenerds command)
       templates/           # Scaffold templates
-      skills/              # 19 SKILL.md files (bundled in package)
+      skills/              # 20 SKILL.md files (bundled in package)
   skills/                  # Source skills (development copies)
   apps/
     web/                   # slidenerds.com (Next.js 15, Supabase, Vercel)

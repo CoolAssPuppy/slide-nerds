@@ -13,7 +13,7 @@
     "build": "npm run build --workspaces",
     "test": "npx vitest run",
     "test:watch": "vitest",
-    "lint": "eslint 'packages/**/*.{ts,tsx}' 'apps/**/*.{ts,tsx}' 'skills/**/*.ts'",
+    "lint": "eslint 'packages/**/src/**/*.{ts,tsx}' 'apps/web/src/**/*.{ts,tsx}' 'skills/**/*.ts' --ignore-pattern '**/database.types.ts'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --build packages/runtime packages/cli",

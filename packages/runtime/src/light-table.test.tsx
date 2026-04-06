@@ -73,11 +73,15 @@ describe('LightTable', () => {
     expect(within(table).getByText('Slide 2 content')).toBeInTheDocument()
   })
 
-  it('should navigate to clicked slide', () => {
+  it('should preview on first click and navigate on second click', () => {
     createSlideDOM(3)
     const { ctx } = renderLightTable({ totalSlides: 3 })
 
-    fireEvent.click(screen.getByTestId('light-table-slide-2'))
+    const slide2 = screen.getByTestId('light-table-slide-2')
+    fireEvent.click(slide2)
+    expect(ctx.goToSlide).not.toHaveBeenCalled()
+
+    fireEvent.click(slide2)
     expect(ctx.goToSlide).toHaveBeenCalledWith(2)
   })
 

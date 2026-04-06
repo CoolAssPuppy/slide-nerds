@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react'
 
-import { useLiveApi, usePolling } from './use-live-session.js'
+import { useLiveApi, usePolling, useHasMounted } from './use-live-session.js'
 import type { LiveComponentProps, AudienceInfo } from './types.js'
 
 const styles = {
@@ -54,9 +54,12 @@ const injectStyles = () => {
   document.head.appendChild(style)
 }
 
-export const LiveAudienceCount: React.FC<LiveComponentProps> = ({ sessionId, serviceUrl }) => {
+export const LiveAudienceCount: React.FC<LiveComponentProps> = ({ sessionId, sessionName, deckId, serviceUrl }) => {
+  const mounted = useHasMounted()
   const { post, get, sessionId: resolvedSessionId, serviceUrl: resolvedServiceUrl } = useLiveApi({
     sessionId,
+    sessionName,
+    deckId,
     serviceUrl,
   })
   const hasJoinedRef = useRef(false)
@@ -94,8 +97,8 @@ export const LiveAudienceCount: React.FC<LiveComponentProps> = ({ sessionId, ser
 
   const { data: audience } = usePolling(fetchAudience)
 
-  if (!resolvedSessionId) {
-    return <span style={styles.noSession}>No live session</span>
+  if (!mounted || !resolvedSessionId) {
+    return mounted ? <span style={styles.noSession}>No live session</span> : null
   }
 
   const count = audience?.count ?? 0

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 
-import { useLiveApi, usePolling } from './use-live-session.js'
+import { useLiveApi, usePolling, useHasMounted } from './use-live-session.js'
 import type { LiveComponentProps, QAQuestion } from './types.js'
 
 const styles = {
@@ -100,8 +100,9 @@ const styles = {
   } as React.CSSProperties,
 }
 
-export const LiveQA: React.FC<LiveComponentProps> = ({ sessionId, serviceUrl }) => {
-  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, serviceUrl })
+export const LiveQA: React.FC<LiveComponentProps> = ({ sessionId, sessionName, deckId, serviceUrl }) => {
+  const mounted = useHasMounted()
+  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, sessionName, deckId, serviceUrl })
   const [inputValue, setInputValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -126,10 +127,10 @@ export const LiveQA: React.FC<LiveComponentProps> = ({ sessionId, serviceUrl }) 
     setIsSubmitting(false)
   }
 
-  if (!resolvedSessionId) {
+  if (!mounted || !resolvedSessionId) {
     return (
       <div style={styles.container}>
-        <p style={styles.noSession}>No live session active</p>
+        <p style={styles.noSession}>{mounted ? 'No live session active' : ''}</p>
       </div>
     )
   }

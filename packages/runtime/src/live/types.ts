@@ -2,6 +2,8 @@ export type ReactionType = 'thumbsup' | 'clap' | 'heart' | 'fire' | 'mind_blown'
 
 export type LiveComponentProps = {
   sessionId?: string
+  sessionName?: string
+  deckId?: string
   serviceUrl?: string
 }
 

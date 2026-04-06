@@ -13,14 +13,33 @@ const THUMB_WIDTH = 280
 const THUMB_HEIGHT = Math.round(THUMB_WIDTH * (9 / 16))
 const SCALE = THUMB_WIDTH / 1920
 
+const CLONE_STYLE = [
+  'position: absolute',
+  'inset: auto',
+  'top: 0',
+  'left: 0',
+  'right: auto',
+  'bottom: auto',
+  'width: 1920px',
+  'height: 1080px',
+  `transform: scale(${SCALE})`,
+  'transform-origin: top left',
+  'pointer-events: none',
+  'display: flex',
+  'overflow: hidden',
+].join('; ')
+
 const SlideThumbnail: React.FC<{
   slideIndex: number
   isActive: boolean
   isPreviewing: boolean
 }> = ({ slideIndex, isActive, isPreviewing }) => {
   const containerRef = useRef<HTMLDivElement>(null)
+  const cloneRef = useRef<HTMLElement | null>(null)
+  const stepsRef = useRef<NodeListOf<Element> | null>(null)
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Clone once on mount
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -30,39 +49,41 @@ const SlideThumbnail: React.FC<{
 
     const clone = slideEl.cloneNode(true) as HTMLElement
     clone.classList.add('active')
-    clone.style.position = 'absolute'
-    clone.style.top = '0'
-    clone.style.left = '0'
-    clone.style.width = '1920px'
-    clone.style.height = '1080px'
-    clone.style.transform = `scale(${SCALE})`
-    clone.style.transformOrigin = 'top left'
-    clone.style.pointerEvents = 'none'
-    clone.style.display = 'flex'
-
-    const steps = clone.querySelectorAll('[data-step], [data-auto-step]')
-
-    if (isPreviewing) {
-      steps.forEach((step) => {
-        step.classList.remove('step-visible')
-      })
-    } else {
-      steps.forEach((step) => {
-        step.classList.add('step-visible')
-      })
-    }
+    clone.style.cssText = CLONE_STYLE
 
     clone.querySelectorAll('[data-notes]').forEach((note) => {
       (note as HTMLElement).style.display = 'none'
     })
+
+    const steps = clone.querySelectorAll('[data-step], [data-auto-step]')
+    steps.forEach((step) => step.classList.add('step-visible'))
 
     while (container.firstChild) {
       container.removeChild(container.firstChild)
     }
     container.appendChild(clone)
 
-    if (isPreviewing && steps.length > 0) {
-      if (animTimerRef.current !== null) clearTimeout(animTimerRef.current)
+    cloneRef.current = clone
+    stepsRef.current = steps
+
+    return () => {
+      cloneRef.current = null
+      stepsRef.current = null
+    }
+  }, [slideIndex])
+
+  // Handle preview animation separately
+  useEffect(() => {
+    const steps = stepsRef.current
+    if (!steps || steps.length === 0) return
+
+    if (animTimerRef.current !== null) {
+      clearTimeout(animTimerRef.current)
+      animTimerRef.current = null
+    }
+
+    if (isPreviewing) {
+      steps.forEach((step) => step.classList.remove('step-visible'))
 
       let stepIndex = 0
       const revealNext = () => {
@@ -72,12 +93,17 @@ const SlideThumbnail: React.FC<{
         animTimerRef.current = setTimeout(revealNext, 400)
       }
       animTimerRef.current = setTimeout(revealNext, 300)
+    } else {
+      steps.forEach((step) => step.classList.add('step-visible'))
     }
 
     return () => {
-      if (animTimerRef.current !== null) clearTimeout(animTimerRef.current)
+      if (animTimerRef.current !== null) {
+        clearTimeout(animTimerRef.current)
+        animTimerRef.current = null
+      }
     }
-  }, [slideIndex, isPreviewing])
+  }, [isPreviewing])
 
   return (
     <div
@@ -122,10 +148,14 @@ export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) 
 
   const handleSlideClick = useCallback(
     (index: number) => {
-      setPreviewIndex(index)
-      goToSlide(index)
+      if (previewIndex === index) {
+        goToSlide(index)
+        setPreviewIndex(null)
+      } else {
+        setPreviewIndex(index)
+      }
     },
-    [goToSlide],
+    [goToSlide, previewIndex],
   )
 
   const handleDragStart = useCallback((index: number) => {

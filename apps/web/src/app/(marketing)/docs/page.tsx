@@ -15,7 +15,7 @@ export default function DocsPage() {
       <section className="mt-16">
         <StepHeader number="1" title="Create your deck" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          The CLI scaffolds a new Next.js project with the SlideNerds runtime, brand config, and 19 skill files pre-installed.
+          The CLI scaffolds a new Next.js project with the SlideNerds runtime, brand config, and 20 skill files pre-installed.
         </p>
         <div className="mt-4">
           <CopyCodeBlock code={`slidenerds create my-talk\ncd my-talk\nnpm install\nnpm run dev`} />
@@ -29,9 +29,26 @@ export default function DocsPage() {
         </p>
       </section>
 
-      {/* Step 2 */}
+      {/* Slides are code */}
       <section className="mt-16">
-        <StepHeader number="2" title="Build slides with an LLM" />
+        <StepHeader number="2" title="Slides are code" />
+        <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
+          Each slide is a React component in its own file. The deck&apos;s <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">page.tsx</code> is a manifest that imports slides and controls their order.
+        </p>
+        <div className="mt-4">
+          <CopyCodeBlock code={`// app/slides/01-title.tsx\nexport default function Title() {\n  return (\n    <section data-slide="">\n      <h1>My talk</h1>\n    </section>\n  )\n}`} />
+        </div>
+        <div className="mt-4">
+          <CopyCodeBlock code={`// app/page.tsx\nimport Title from './slides/01-title'\nimport Problem from './slides/02-problem'\nimport Solution from './slides/03-solution'\n\nexport default function Deck() {\n  return (\n    <main>\n      <Title />\n      <Problem />\n      <Solution />\n    </main>\n  )\n}`} />
+        </div>
+        <p className="mt-4 text-sm text-[var(--muted-foreground)]">
+          Reorder slides by moving one line in the manifest. Add a slide by creating a file and adding one import. The runtime discovers slides by their <code className="text-xs bg-[var(--muted)] px-1.5 py-0.5 rounded">data-slide</code> attribute in DOM order, so file structure is for human ergonomics only.
+        </p>
+      </section>
+
+      {/* Step 3 */}
+      <section className="mt-16">
+        <StepHeader number="3" title="Build slides with an LLM" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Open Claude Code (or any LLM with file access) in the same directory. Give it a prompt and watch it build your slides.
         </p>
@@ -64,9 +81,9 @@ export default function DocsPage() {
         />
       </section>
 
-      {/* Step 3 */}
+      {/* Step 4 */}
       <section className="mt-16">
-        <StepHeader number="3" title="Navigate and present" />
+        <StepHeader number="4" title="Navigate and present" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Your deck runs in the browser with keyboard navigation built in.
         </p>
@@ -100,9 +117,9 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Step 4 */}
+      {/* Step 5 */}
       <section className="mt-16">
-        <StepHeader number="4" title="Link your deployed deck" />
+        <StepHeader number="5" title="Link your deployed deck" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Deploy your deck anywhere, then link it to SlideNerds for Pro analytics, sharing controls, and live services.
         </p>
@@ -114,9 +131,9 @@ export default function DocsPage() {
         </p>
       </section>
 
-      {/* Step 5 */}
+      {/* Step 6 */}
       <section className="mt-16">
-        <StepHeader number="5" title="Share and control access" />
+        <StepHeader number="6" title="Share and control access" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Decks are private by default. Share them with specific people or make them public.
         </p>
@@ -130,9 +147,9 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Step 6 */}
+      {/* Step 7 */}
       <section className="mt-16">
-        <StepHeader number="6" title="Use Pro analytics dashboards" />
+        <StepHeader number="7" title="Use Pro analytics dashboards" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           On Pro, open the deck analytics panel to inspect granular slide telemetry while the deck itself stays hosted on your own infrastructure.
         </p>
@@ -144,9 +161,9 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Step 7 */}
+      {/* Step 8 */}
       <section className="mt-16">
-        <StepHeader number="7" title="Export to PDF or PowerPoint" />
+        <StepHeader number="8" title="Export to PDF or PowerPoint" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Export from the deck detail page or from the CLI.
         </p>
@@ -158,9 +175,9 @@ export default function DocsPage() {
         </p>
       </section>
 
-      {/* Step 8 */}
+      {/* Step 9 */}
       <section className="mt-16">
-        <StepHeader number="8" title="Collaborate with your team" />
+        <StepHeader number="9" title="Collaborate with your team" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           On the Team plan, create a workspace where members share decks, brand configs, and analytics.
         </p>
@@ -174,9 +191,9 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Step 9 */}
+      {/* Step 10 */}
       <section className="mt-16">
-        <StepHeader number="9" title="Manage brand configs" />
+        <StepHeader number="10" title="Manage brand configs" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Save and reuse brand configurations across decks. Create brands from the web UI or sync from the CLI.
         </p>
@@ -192,9 +209,9 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Step 10 */}
+      {/* Step 11 */}
       <section className="mt-16">
-        <StepHeader number="10" title="Add live interaction" />
+        <StepHeader number="11" title="Add live interaction" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
           Embed live components in your slides for real-time audience interaction during presentations. These use SlideNerds live APIs and an active live session while your deck remains hosted externally.
         </p>
@@ -216,9 +233,9 @@ export default function DocsPage() {
 
       {/* Skills reference */}
       <section className="mt-16">
-        <StepHeader number="11" title="Skills reference" />
+        <StepHeader number="12" title="Skills reference" />
         <p className="mt-3 text-[var(--muted-foreground)] leading-relaxed">
-          Every deck ships with 19 skill files that teach your LLM how to use SlideNerds effectively. Reference them in your prompts to get better results.
+          Every deck ships with 20 skill files that teach your LLM how to use SlideNerds effectively. Reference them in your prompts to get better results.
         </p>
 
         <div className="mt-6 rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden">
@@ -242,6 +259,7 @@ export default function DocsPage() {
                 ['interactive', 'Interactive elements and live demos'],
                 ['narrative-frameworks', 'Story structures and presentation flow'],
                 ['react-component-embeds', 'Embedding React components in slides'],
+                ['slide-organization', 'Multi-file deck structure and ordering'],
                 ['slide-types', 'Title, content, comparison, quote slides'],
                 ['slidenerds-runtime', 'Runtime API and data attributes'],
                 ['speaker-notes', 'Adding and formatting speaker notes'],

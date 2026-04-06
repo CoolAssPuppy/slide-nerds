@@ -83,8 +83,11 @@ export const verifyTelemetryToken = (
 
 export const getTelemetrySecret = (): string => {
   const secret = process.env.SLIDENERDS_TELEMETRY_SECRET ?? process.env.NEXTAUTH_SECRET
-  if (!secret) {
-    throw new Error('Missing SLIDENERDS_TELEMETRY_SECRET (or NEXTAUTH_SECRET fallback)')
+  if (secret) return secret
+
+  if (process.env.NODE_ENV === 'development') {
+    return 'slidenerds-local-dev-telemetry-secret'
   }
-  return secret
+
+  throw new Error('Missing SLIDENERDS_TELEMETRY_SECRET environment variable')
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 
-import { useLiveApi, usePolling } from './use-live-session.js'
+import { useLiveApi, usePolling, useHasMounted } from './use-live-session.js'
 import type { LiveComponentProps, Reaction, ReactionType } from './types.js'
 
 const REACTION_EMOJI: Record<ReactionType, string> = {
@@ -77,8 +77,9 @@ const styles = {
   } as React.CSSProperties,
 }
 
-export const LiveReactions: React.FC<LiveComponentProps> = ({ sessionId, serviceUrl }) => {
-  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, serviceUrl })
+export const LiveReactions: React.FC<LiveComponentProps> = ({ sessionId, sessionName, deckId, serviceUrl }) => {
+  const mounted = useHasMounted()
+  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, sessionName, deckId, serviceUrl })
   const [floating, setFloating] = useState<FloatingReaction[]>([])
   const lastFetchRef = useRef<string | null>(null)
   const frameRef = useRef<number>(0)
@@ -136,8 +137,8 @@ export const LiveReactions: React.FC<LiveComponentProps> = ({ sessionId, service
     ])
   }
 
-  if (!resolvedSessionId) {
-    return <p style={styles.noSession}>No live session active</p>
+  if (!mounted || !resolvedSessionId) {
+    return mounted ? <p style={styles.noSession}>No live session active</p> : null
   }
 
   return (

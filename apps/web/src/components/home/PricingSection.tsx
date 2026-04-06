@@ -9,7 +9,7 @@ const PLANS = [
     period: 'forever',
     features: [
       'Create decks locally',
-      'Full runtime + 19 skills',
+      'Full runtime + 20 skills',
       'Presenter mode + Light Table',
       'Embed any React component',
       'CLI export to PDF and PPTX',

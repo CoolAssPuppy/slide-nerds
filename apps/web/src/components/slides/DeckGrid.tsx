@@ -45,13 +45,13 @@ function DeckCard({ deck, viewers }: { deck: Deck; viewers: number }) {
         <div className="aspect-video bg-[var(--muted)] relative overflow-hidden">
           {deck.thumbnail_url ? (
             <img src={deck.thumbnail_url} alt="" className="w-full h-full object-cover" />
-          ) : deck.bundle_path ? (
+          ) : (deck.bundle_path || deck.deployed_url) ? (
             <iframe
-              src={`/api/hosted/${deck.id}/index.html`}
+              src={deck.bundle_path ? `/api/hosted/${deck.id}/index.html` : deck.deployed_url!}
               title={deck.name}
               className="absolute top-0 left-0 border-none pointer-events-none"
               style={{ width: '1920px', height: '1080px', transform: 'scale(var(--preview-scale))', transformOrigin: 'top left', '--preview-scale': '0.22' } as React.CSSProperties}
-              sandbox="allow-scripts allow-same-origin"
+              sandbox={deck.bundle_path ? 'allow-scripts allow-same-origin' : undefined}
               tabIndex={-1}
             />
           ) : (

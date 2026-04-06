@@ -1,3 +1,5 @@
+Using workdir /Users/prashant/Developer/utils/slide-nerds/apps
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -325,6 +327,7 @@ export type Database = {
           deck_id: string
           ended_at: string | null
           id: string
+          name: string | null
           presenter_id: string
           started_at: string
           status: string
@@ -336,6 +339,7 @@ export type Database = {
           deck_id: string
           ended_at?: string | null
           id?: string
+          name?: string | null
           presenter_id: string
           started_at?: string
           status?: string
@@ -347,6 +351,7 @@ export type Database = {
           deck_id?: string
           ended_at?: string | null
           id?: string
+          name?: string | null
           presenter_id?: string
           started_at?: string
           status?: string

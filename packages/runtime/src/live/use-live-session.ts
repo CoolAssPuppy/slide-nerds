@@ -1,10 +1,20 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react'
 
 const DEFAULT_SERVICE_URL = 'https://slidenerds.com'
 const POLL_INTERVAL_MS = 5000
 
+const subscribe = () => () => {}
+const getSnapshot = () => true
+const getServerSnapshot = () => false
+
+export const useHasMounted = (): boolean => {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+}
+
 type UseLiveSessionOptions = {
   sessionId?: string
+  sessionName?: string
+  deckId?: string
   serviceUrl?: string
 }
 
@@ -12,6 +22,12 @@ const getSessionIdFromUrl = (): string | null => {
   if (typeof window === 'undefined') return null
   const params = new URLSearchParams(window.location.search)
   return params.get('session')
+}
+
+const getSessionNameFromUrl = (): string | null => {
+  if (typeof window === 'undefined') return null
+  const params = new URLSearchParams(window.location.search)
+  return params.get('session-name')
 }
 
 const resolveSessionId = (propSessionId?: string): string | null => {
@@ -28,8 +44,33 @@ const buildUrl = (serviceUrl: string, sessionId: string, path: string): string =
 }
 
 export const useLiveApi = (options: UseLiveSessionOptions) => {
-  const sessionId = resolveSessionId(options.sessionId)
+  const directSessionId = resolveSessionId(options.sessionId)
   const serviceUrl = resolveServiceUrl(options.serviceUrl)
+  const [resolvedSessionId, setResolvedSessionId] = useState<string | null>(directSessionId)
+
+  useEffect(() => {
+    if (directSessionId) {
+      setResolvedSessionId(directSessionId)
+      return
+    }
+
+    const sessionName = options.sessionName ?? getSessionNameFromUrl()
+    const deckId = options.deckId
+    if (!sessionName || !deckId) return
+
+    const resolve = async () => {
+      const resp = await fetch(
+        `${serviceUrl}/api/live/resolve?deck_id=${encodeURIComponent(deckId)}&name=${encodeURIComponent(sessionName)}`,
+      )
+      if (resp.ok) {
+        const data = await resp.json()
+        setResolvedSessionId(data.session_id)
+      }
+    }
+    resolve()
+  }, [directSessionId, options.sessionName, options.deckId, serviceUrl])
+
+  const sessionId = resolvedSessionId
 
   const post = useCallback(
     async (path: string, body: Record<string, unknown>) => {

@@ -1,25 +1,91 @@
 ---
 name: live
-description: SlideNerds live presentation components -- polls, reactions, Q&A, audience count, word clouds. Requires slidenerds.com hosting.
+description: SlideNerds live presentation components -- polls, reactions, Q&A, audience count, word clouds
 ---
 
 # Live presentation components
 
-Use this skill when slides need real-time audience interaction during a live presentation. These components connect to the slidenerds.com service and only work when the deck is hosted there and a live session is active.
+Use this skill when slides need real-time audience interaction during a live presentation. These components connect to the slidenerds.com service and require an active live session.
 
 ## Prerequisites
 
-1. The deck must be pushed to slidenerds.com (`slidenerds push`)
-2. The presenter starts a live session from the deck detail page
-3. The audience joins via the live URL
+1. The deck must be linked to slidenerds.com (`slidenerds link --url <deployed-url>`)
+2. The presenter creates a live session from the deck settings page on slidenerds.com (Settings > Live sessions > Create)
+3. The audience opens the deck URL with the session parameter
 
 All components are exported from `@strategicnerds/slide-nerds`. Import them directly.
+
+## Connecting to a session
+
+There are three ways to connect live components to a session. Pick one.
+
+### Option 1: URL parameter (recommended for flexibility)
+
+Pass the session ID as a URL parameter when sharing with the audience. No code changes needed per session.
+
+```
+https://my-deck.vercel.app?session=SESSION_ID
+```
+
+Components auto-detect `?session=` from the URL. No props needed:
+
+```tsx
+<LivePoll question="Your question" options={['A', 'B', 'C']} />
+```
+
+### Option 2: Embed session ID in code
+
+Hardcode the session ID in the component props. Good when a deck is always used with the same session.
+
+```tsx
+<LivePoll
+  question="Your question"
+  options={['A', 'B', 'C']}
+  sessionId="SESSION_ID"
+/>
+```
+
+Get the session ID from the deck settings page on slidenerds.com after creating a session.
+
+### Option 3: Embed session name in code
+
+Use a human-readable session name instead of a UUID. Requires the deck ID (from `.slidenerds.json`) so the runtime can resolve the name to an active session.
+
+```tsx
+<LivePoll
+  question="Your question"
+  options={['A', 'B', 'C']}
+  sessionName="Q2 All-Hands"
+  deckId="DECK_ID"
+/>
+```
+
+The deck ID is in `.slidenerds.json` after running `slidenerds link`. You can also pass the session name as a URL parameter:
+
+```
+https://my-deck.vercel.app?session-name=Q2-All-Hands
+```
+
+When using `session-name` in the URL, you still need `deckId` as a prop so the runtime knows which deck to resolve against.
+
+## All live component props
+
+Every live component accepts these props:
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `sessionId` | `string` | No | Direct session ID. Auto-detected from `?session=` URL param |
+| `sessionName` | `string` | No | Session name to resolve. Requires `deckId`. Also reads `?session-name=` from URL |
+| `deckId` | `string` | No | Deck ID for name resolution. Found in `.slidenerds.json` |
+| `serviceUrl` | `string` | No | Defaults to `https://slidenerds.com`. Use `http://localhost:3000` for local dev |
+
+Resolution priority: `sessionId` prop > `?session=` URL param > `sessionName` + `deckId` resolution.
 
 ## Components
 
 ### LivePoll
 
-Real-time audience poll. Audience votes by clicking an option. Results update live as votes come in.
+Real-time audience poll. Audience votes by clicking an option. Results update live.
 
 ```tsx
 import { LivePoll } from '@strategicnerds/slide-nerds'
@@ -36,14 +102,12 @@ import { LivePoll } from '@strategicnerds/slide-nerds'
 </section>
 ```
 
-**Props:**
+**Additional props:**
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `question` | `string` | Yes | The poll question displayed to the audience |
 | `options` | `string[]` | Yes | Array of answer choices |
-| `sessionId` | `string` | No | Live session ID. Auto-detected from `?session=` URL param |
-| `serviceUrl` | `string` | No | SlideNerds service URL. Defaults to `https://slidenerds.com`. Use `http://localhost:3000` for local dev |
 
 **Behavior:**
 - Shows clickable option buttons before voting
@@ -62,20 +126,10 @@ import { LiveReactions } from '@strategicnerds/slide-nerds'
   <div style={{ padding: 'var(--slide-padding)' }}
     className="flex flex-col items-center justify-center min-h-screen">
     <h2 className="text-[2.5rem] font-bold mb-4">What do you think?</h2>
-    <p className="text-lg mb-8" style={{ color: 'var(--color-text-secondary)' }}>
-      React to let us know
-    </p>
     <LiveReactions />
   </div>
 </section>
 ```
-
-**Props:**
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `sessionId` | `string` | No | Live session ID |
-| `serviceUrl` | `string` | No | Service URL |
 
 **Available reactions:** thumbsup, clap, heart, fire, mind_blown
 
@@ -96,20 +150,10 @@ import { LiveQA } from '@strategicnerds/slide-nerds'
   <div style={{ padding: 'var(--slide-padding)' }}
     className="flex flex-col items-center justify-center min-h-screen">
     <h2 className="text-[2.5rem] font-bold mb-4">Questions?</h2>
-    <p className="text-lg mb-8" style={{ color: 'var(--color-text-secondary)' }}>
-      Submit your questions below
-    </p>
     <LiveQA />
   </div>
 </section>
 ```
-
-**Props:**
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `sessionId` | `string` | No | Live session ID |
-| `serviceUrl` | `string` | No | Service URL |
 
 **Behavior:**
 - Text input for submitting questions (with optional name)
@@ -134,13 +178,6 @@ import { LiveAudienceCount } from '@strategicnerds/slide-nerds'
 </section>
 ```
 
-**Props:**
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `sessionId` | `string` | No | Live session ID |
-| `serviceUrl` | `string` | No | Service URL |
-
 **Behavior:**
 - Shows "X watching" with a pulsing green dot
 - Automatically joins on mount, leaves on unmount
@@ -148,7 +185,7 @@ import { LiveAudienceCount } from '@strategicnerds/slide-nerds'
 
 ### LiveWordCloud
 
-Audience submits one word or short phrase. Words appear as a growing cloud with size proportional to frequency.
+Audience submits one word or short phrase. Words appear as a cloud sized by frequency.
 
 ```tsx
 import { LiveWordCloud } from '@strategicnerds/slide-nerds'
@@ -162,13 +199,11 @@ import { LiveWordCloud } from '@strategicnerds/slide-nerds'
 </section>
 ```
 
-**Props:**
+**Additional props:**
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `prompt` | `string` | Yes | The prompt shown above the input |
-| `sessionId` | `string` | No | Live session ID |
-| `serviceUrl` | `string` | No | Service URL |
 
 **Behavior:**
 - Text input for submitting a word (max 50 characters)
@@ -178,7 +213,7 @@ import { LiveWordCloud } from '@strategicnerds/slide-nerds'
 
 ## Local development
 
-For local development, pass `serviceUrl` to each component:
+For local dev, pass `serviceUrl` to each component:
 
 ```tsx
 <LivePoll
@@ -188,7 +223,9 @@ For local development, pass `serviceUrl` to each component:
 />
 ```
 
-You need a running live session. Start one from the deck detail page on localhost:3000, then add `?session=SESSION_ID` to your deck's local dev URL.
+Create a live session from the deck settings page at localhost:3000 (Settings > Live sessions), then either:
+- Pass the session ID in the URL: `http://localhost:3001?session=SESSION_ID`
+- Embed it in the component: `sessionId="SESSION_ID"`
 
 ## Combining components
 
@@ -214,9 +251,9 @@ You can put multiple live components on a single slide:
 </section>
 ```
 
-## Slide with reactions always visible
+## Reactions on every slide
 
-To keep reactions available across all slides (not just one), add the component to your layout instead of a specific slide:
+To keep reactions available across all slides, add the component to your layout:
 
 ```tsx
 // app/layout.tsx
@@ -238,7 +275,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ## When not to use these components
 
 - **Static presentations** that won't be presented live. The components show "No active session" without a live session.
-- **Self-hosted decks** not pushed to slidenerds.com. The components call the slidenerds.com API.
-- **Offline presentations**. The components require an internet connection.
+- **Offline presentations**. The components require an internet connection to reach the slidenerds.com API.
 
 For static audience interaction patterns (QR codes, feedback links), use the interactive skill instead.

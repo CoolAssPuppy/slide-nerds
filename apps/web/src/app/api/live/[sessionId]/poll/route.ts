@@ -8,10 +8,16 @@ type RouteContext = {
 export async function POST(request: Request, { params }: RouteContext) {
   const { sessionId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: session } = await supabase
+    .from('live_sessions')
+    .select('id, status')
+    .eq('id', sessionId)
+    .eq('status', 'active')
+    .single()
+
+  if (!session) {
+    return NextResponse.json({ error: 'No active session' }, { status: 404 })
   }
 
   const body = await request.json()
@@ -23,6 +29,17 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   if (!question || !options || options.length < 2) {
     return NextResponse.json({ error: 'Question and at least 2 options required' }, { status: 400 })
+  }
+
+  const { data: existing } = await supabase
+    .from('polls')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('question', question)
+    .single()
+
+  if (existing) {
+    return NextResponse.json(existing, { status: 200 })
   }
 
   const { data, error } = await supabase

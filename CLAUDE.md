@@ -12,7 +12,7 @@ slide-nerds/
         runtime/       # React components (SlideRuntime, SlideShape, etc.)
         cli/           # CLI commands (create, analytics, export)
       templates/       # Scaffold templates (.tmpl files)
-      skills/          # 19 SKILL.md files (bundled in package, copied on create)
+      skills/          # 20 SKILL.md files (bundled in package, copied on create)
   skills/              # Source skills (development copies, changes sync to packages/slide-nerds/skills/)
   apps/
     web/               # slidenerds.com (Next.js 15, Supabase, Vercel)
@@ -42,7 +42,7 @@ npm run typecheck     # TypeScript strict mode check
 - Data attributes: `data-slide`, `data-step`, `data-notes`, `data-magic-id`
 - Brand tokens via CSS custom properties from `brand.config.ts`
 - Skills follow skills.sh SKILL.md format (YAML frontmatter + markdown)
-- 19 skills covering layout, animation, data viz, frameworks, diagrams, accessibility, and more
+- 20 skills covering layout, animation, data viz, frameworks, diagrams, accessibility, and more
 
 ## Boundaries for parallel work
 

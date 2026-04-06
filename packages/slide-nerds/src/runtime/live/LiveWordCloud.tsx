@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 
-import { useLiveApi, usePolling } from './use-live-session.js'
+import { useLiveApi, usePolling, useHasMounted } from './use-live-session.js'
 import type { LiveComponentProps, WordCloudEntry } from './types.js'
 
 type LiveWordCloudProps = LiveComponentProps & {
@@ -116,9 +116,12 @@ const styles = {
 export const LiveWordCloud: React.FC<LiveWordCloudProps> = ({
   prompt,
   sessionId,
+  sessionName,
+  deckId,
   serviceUrl,
 }) => {
-  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, serviceUrl })
+  const mounted = useHasMounted()
+  const { post, get, sessionId: resolvedSessionId } = useLiveApi({ sessionId, sessionName, deckId, serviceUrl })
   const [inputValue, setInputValue] = useState('')
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -145,10 +148,10 @@ export const LiveWordCloud: React.FC<LiveWordCloudProps> = ({
     setIsSubmitting(false)
   }
 
-  if (!resolvedSessionId) {
+  if (!mounted || !resolvedSessionId) {
     return (
       <div style={styles.container}>
-        <p style={styles.noSession}>No live session active</p>
+        <p style={styles.noSession}>{mounted ? 'No live session active' : ''}</p>
       </div>
     )
   }

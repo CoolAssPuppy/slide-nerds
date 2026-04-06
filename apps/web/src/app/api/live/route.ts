@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 const CreateSessionSchema = z.object({
   deck_id: z.string().min(1),
+  name: z.string().min(1).max(100).optional(),
 })
 
 export async function POST(request: Request) {
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
     .insert({
       deck_id,
       presenter_id: user.id,
+      name: body.name ?? null,
       status: 'active',
       current_slide: 0,
       current_step: 0,

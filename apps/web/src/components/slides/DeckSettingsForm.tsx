@@ -1,9 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Deck } from '@/lib/supabase/types'
+
+type LiveSession = {
+  id: string
+  name: string | null
+  status: string
+  audience_count: number | null
+  started_at: string
+  ended_at: string | null
+}
 
 export function DeckSettingsForm({ deck }: { deck: Deck }) {
   const [name, setName] = useState(deck.name)
@@ -14,8 +23,56 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [sessions, setSessions] = useState<LiveSession[]>([])
+  const [newSessionName, setNewSessionName] = useState('')
+  const [creatingSession, setCreatingSession] = useState(false)
+  const [sessionError, setSessionError] = useState('')
+  const [createdSessionId, setCreatedSessionId] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  const fetchSessions = useCallback(async () => {
+    const resp = await fetch(`/api/decks/${deck.id}/live-sessions`)
+    if (resp.ok) {
+      const data = await resp.json()
+      setSessions(data)
+    }
+  }, [deck.id])
+
+  useEffect(() => {
+    fetchSessions()
+  }, [fetchSessions])
+
+  const handleCreateSession = async () => {
+    if (!newSessionName.trim()) return
+    setCreatingSession(true)
+    setSessionError('')
+    setCreatedSessionId(null)
+
+    const resp = await fetch(`/api/decks/${deck.id}/live-sessions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newSessionName.trim() }),
+    })
+
+    if (resp.ok) {
+      const session = await resp.json()
+      setCreatedSessionId(session.id)
+      setNewSessionName('')
+      await fetchSessions()
+    } else {
+      const err = await resp.json().catch(() => ({ error: 'Failed to create session' }))
+      setSessionError(err.error)
+    }
+
+    setCreatingSession(false)
+  }
+
+  const handleDeleteSession = async (sessionId: string) => {
+    await fetch(`/api/decks/${deck.id}/live-sessions/${sessionId}`, { method: 'DELETE' })
+    if (createdSessionId === sessionId) setCreatedSessionId(null)
+    await fetchSessions()
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -135,6 +192,87 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
         )}
       </section>
 
+      <section className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
+          Live sessions
+        </h2>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newSessionName}
+            onChange={(e) => setNewSessionName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateSession()}
+            placeholder="Session name (e.g. Q2 All-Hands)"
+            className="flex-1 h-10 px-3 rounded-[var(--n-radius-md)] border border-[var(--input)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+          />
+          <button
+            onClick={handleCreateSession}
+            disabled={creatingSession || !newSessionName.trim()}
+            className="px-4 h-10 rounded-[var(--n-radius-md)] bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity shrink-0"
+          >
+            {creatingSession ? 'Creating...' : 'Create'}
+          </button>
+        </div>
+
+        {sessionError && (
+          <p className="text-sm text-[var(--destructive)]">{sessionError}</p>
+        )}
+
+        {createdSessionId && (
+          <div className="rounded-[var(--n-radius-md)] border border-[var(--primary)]/30 bg-[var(--primary)]/5 p-4 space-y-3">
+            <p className="text-sm font-medium">Session created. Use it in your deck:</p>
+            <CopyBlock value={`<LivePoll
+  question="Your question"
+  options={['A', 'B', 'C']}
+  sessionId="${createdSessionId}"
+  serviceUrl="${window.location.origin}"
+/>`} />
+            <p className="text-xs text-[var(--muted-foreground)] mt-2">Or share this URL with your audience:</p>
+            <CopyBlock value={`${deck.deployed_url || deck.url || 'https://your-deck.example.com'}?session=${createdSessionId}`} />
+          </div>
+        )}
+
+        {sessions.length > 0 ? (
+          <div className="divide-y divide-[var(--border)] rounded-[var(--n-radius-md)] border border-[var(--border)] overflow-hidden">
+            {sessions.map((session) => (
+              <div key={session.id} className="flex items-center gap-3 px-4 py-3 bg-[var(--background)]">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {session.name ?? 'Unnamed session'}
+                  </p>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {new Date(session.started_at).toLocaleDateString(undefined, {
+                      month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  session.status === 'active'
+                    ? 'bg-green-500/10 text-green-400'
+                    : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
+                }`}>
+                  {session.status}
+                </span>
+                <button
+                  onClick={() => handleDeleteSession(session.id)}
+                  className="text-[var(--muted-foreground)] hover:text-[var(--destructive)] transition-colors p-1"
+                  title="Delete session"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--muted-foreground)]">
+            No live sessions yet. Create one to enable polls, reactions, and Q&A in your deck.
+          </p>
+        )}
+      </section>
+
       <div className="flex justify-end">
         <button
           onClick={handleSave}
@@ -171,6 +309,30 @@ export function DeckSettingsForm({ deck }: { deck: Deck }) {
           </div>
         </div>
       </section>
+    </div>
+  )
+}
+
+function CopyBlock({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  return (
+    <div className="relative group">
+      <div className="rounded-[var(--n-radius-md)] bg-[var(--muted)] p-3 pr-16 text-xs font-mono overflow-x-auto whitespace-pre">
+        {value}
+      </div>
+      <button
+        onClick={handleCopy}
+        className="absolute top-2 right-2 px-2 py-1 rounded-[var(--n-radius-sm)] text-xs bg-[var(--background)] border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+      >
+        {copied ? 'Copied' : 'Copy'}
+      </button>
     </div>
   )
 }

@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 
-import { useLiveApi, usePolling } from './use-live-session.js'
+import { useLiveApi, usePolling, useHasMounted } from './use-live-session.js'
 import type { LiveComponentProps, PollResult } from './types.js'
 
 type LivePollProps = LiveComponentProps & {
@@ -33,13 +33,15 @@ const styles = {
     padding: '12px 16px',
     marginBottom: '8px',
     borderRadius: '8px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     background: 'rgba(255, 255, 255, 0.05)',
     color: '#fff',
     fontSize: '15px',
     cursor: 'pointer',
     textAlign: 'left' as const,
-    transition: 'background 0.15s ease',
+    transition: 'background 0.15s ease, border-color 0.15s ease',
   } as React.CSSProperties,
   optionButtonHover: {
     background: 'rgba(62, 207, 142, 0.2)',
@@ -91,22 +93,49 @@ export const LivePoll: React.FC<LivePollProps> = ({
   question,
   options,
   sessionId,
+  sessionName,
+  deckId,
   serviceUrl,
 }) => {
-  const { post, get } = useLiveApi({ sessionId, serviceUrl })
+  const mounted = useHasMounted()
+  const { post, get } = useLiveApi({ sessionId, sessionName, deckId, serviceUrl })
   const [hasVoted, setHasVoted] = useState(false)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  const fetchResults = useCallback(async (): Promise<PollResult | null> => {
+  const hasCreatedRef = useRef(false)
+
+  const ensurePollExists = useCallback(async (): Promise<PollResult | null> => {
     const response = await get('/poll/results')
     if (!response || !response.ok) return null
 
     const results: PollResult[] = await response.json()
     const match = results.find((r) => r.question === question)
-    return match ?? null
-  }, [get, question])
+    if (match) return match
 
-  const { data: pollResult } = usePolling(fetchResults)
+    if (!hasCreatedRef.current) {
+      hasCreatedRef.current = true
+      const createResp = await post('/poll', {
+        question,
+        options,
+        slide_index: 0,
+      })
+      if (createResp && createResp.ok) {
+        const created = await createResp.json()
+        return {
+          id: created.id,
+          question,
+          slide_index: 0,
+          is_active: true,
+          total_votes: 0,
+          options: options.map((label, index) => ({ label, index, votes: 0 })),
+        }
+      }
+    }
+
+    return null
+  }, [get, post, question, options])
+
+  const { data: pollResult } = usePolling(ensurePollExists)
 
   const handleVote = async (optionIndex: number) => {
     if (hasVoted) return
@@ -124,11 +153,11 @@ export const LivePoll: React.FC<LivePollProps> = ({
     }
   }
 
-  const resolvedSessionId = useLiveApi({ sessionId, serviceUrl }).sessionId
-  if (!resolvedSessionId) {
+  const resolvedSessionId = useLiveApi({ sessionId, sessionName, deckId, serviceUrl }).sessionId
+  if (!mounted || !resolvedSessionId) {
     return (
       <div style={styles.container}>
-        <p style={styles.noSession}>No live session active</p>
+        <p style={styles.noSession}>{mounted ? 'No live session active' : ''}</p>
       </div>
     )
   }

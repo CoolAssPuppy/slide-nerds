@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { DeckListRealtime } from '@/components/slides/DeckListRealtime'
 import { DeckGrid } from '@/components/slides/DeckGrid'
 import { PageHeader } from '@/components/shared/PageHeader'
 import type { Deck } from '@/lib/supabase/types'
@@ -9,7 +10,6 @@ export default async function SlidesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Own decks
   const { data: ownData } = await supabase
     .from('decks')
     .select('*')
@@ -17,7 +17,6 @@ export default async function SlidesPage() {
     .order('updated_at', { ascending: false })
   const ownDecks = (ownData ?? []) as Deck[]
 
-  // Fetch viewer counts for own decks
   const deckIds = ownDecks.map((d) => d.id)
   const viewerCounts: Record<string, number> = {}
   if (deckIds.length > 0) {
@@ -39,8 +38,6 @@ export default async function SlidesPage() {
     }
   }
 
-  // Shared with me (public decks from share links where I'm an allowed email)
-  // For now, show decks that are public and not owned by me
   const { data: sharedData } = await supabase
     .from('decks')
     .select('*')
@@ -58,14 +55,11 @@ export default async function SlidesPage() {
         showNewDeck
       />
 
-      {ownDecks.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
-            My decks
-          </h2>
-          <DeckGrid decks={ownDecks} viewerCounts={viewerCounts} />
-        </div>
-      )}
+      <DeckListRealtime
+        initialDecks={ownDecks}
+        viewerCounts={viewerCounts}
+        userId={user!.id}
+      />
 
       {ownDecks.length === 0 && (
         <div className="mb-8 text-center py-12 rounded-[var(--n-radius-lg)] border border-dashed border-[var(--border)]">
