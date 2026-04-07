@@ -3,19 +3,26 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { BarChart3, Download, Settings } from 'lucide-react'
-import type { Deck } from '@/lib/supabase/types'
+import type { Deck, Tag } from '@/lib/supabase/types'
 import { SlideOverPanel } from './SlideOverPanel'
 import { ExportDropdown } from './ExportDropdown'
 import { AnalyticsPanel } from './AnalyticsPanel'
 import { DeckSettingsForm } from './DeckSettingsForm'
+import { DeckTagEditor } from './DeckTagEditor'
+import { TagPill } from './TagPill'
 
 type DeckDetailClientProps = {
   deck: Deck
+  initialTags: Tag[]
+  initialDeckTags: Tag[]
+  canEditTags: boolean
 }
 
-export function DeckDetailClient({ deck }: DeckDetailClientProps) {
+export function DeckDetailClient({ deck, initialTags, initialDeckTags, canEditTags }: DeckDetailClientProps) {
   const [activePanel, setActivePanel] = useState<'analytics' | 'settings' | null>(null)
   const [showExport, setShowExport] = useState(false)
+  const [tags, setTags] = useState(initialTags)
+  const [deckTags, setDeckTags] = useState(initialDeckTags)
 
   const viewerUrl = deck.bundle_path
     ? `/api/hosted/${deck.id}/index.html`
@@ -108,6 +115,25 @@ export function DeckDetailClient({ deck }: DeckDetailClientProps) {
       {deck.description && (
         <p className="mt-4 text-sm text-[var(--muted-foreground)]">{deck.description}</p>
       )}
+
+      <div className="mt-4 rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-medium">Tags</p>
+          {canEditTags && (
+            <DeckTagEditor
+              deckId={deck.id}
+              deckTags={deckTags}
+              allTags={tags}
+              onTagsChange={setDeckTags}
+              onTagLibraryChange={setTags}
+            />
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {deckTags.map((tag) => <TagPill key={tag.id} tag={tag} />)}
+          {deckTags.length === 0 && <p className="text-xs text-[var(--muted-foreground)]">No tags yet</p>}
+        </div>
+      </div>
 
       <SlideOverPanel
         title="Analytics"

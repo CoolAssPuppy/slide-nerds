@@ -4,7 +4,8 @@ import { DeckListRealtime } from '@/components/slides/DeckListRealtime'
 import { DeckGrid } from '@/components/slides/DeckGrid'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/PageHeader'
-import type { Deck } from '@/lib/supabase/types'
+import { buildDeckTagsByDeckId } from '@/components/slides/tag-utils'
+import type { Deck, DeckTag, Tag } from '@/lib/supabase/types'
 
 export const metadata = { title: 'Slides' }
 
@@ -48,6 +49,21 @@ export default async function SlidesPage() {
     .order('updated_at', { ascending: false })
     .limit(20)
   const sharedDecks = (sharedData ?? []) as Deck[]
+  const allDeckIds = [...ownDecks, ...sharedDecks].map((deck) => deck.id)
+
+  const { data: tagsData } = await supabase
+    .from('tags')
+    .select('*')
+    .eq('owner_id', user!.id)
+    .order('name', { ascending: true })
+
+  const { data: deckTagsData } = allDeckIds.length > 0
+    ? await supabase.from('deck_tags').select('*').in('deck_id', allDeckIds)
+    : { data: [] }
+
+  const tags = (tagsData ?? []) as Tag[]
+  const deckTags = (deckTagsData ?? []) as DeckTag[]
+  const deckTagsByDeckId = buildDeckTagsByDeckId({ deckTags, tags })
 
   return (
     <div>
@@ -61,6 +77,8 @@ export default async function SlidesPage() {
         initialDecks={ownDecks}
         viewerCounts={viewerCounts}
         userId={user!.id}
+        initialTags={tags}
+        initialDeckTagsByDeckId={deckTagsByDeckId}
       />
 
       {ownDecks.length === 0 && (
@@ -76,7 +94,7 @@ export default async function SlidesPage() {
           <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
             Shared with me
           </h2>
-          <DeckGrid decks={sharedDecks} />
+          <DeckGrid decks={sharedDecks} deckTagsByDeckId={deckTagsByDeckId} />
         </div>
       )}
     </div>

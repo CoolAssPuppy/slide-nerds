@@ -25,3 +25,5 @@ export type CustomDomain = Tables<'custom_domains'>
 export type DeckComment = Tables<'deck_comments'>
 export type ExportCount = Tables<'export_counts'>
 export type TeamInvite = Tables<'team_invites'>
+export type Tag = Tables<'tags'>
+export type DeckTag = Tables<'deck_tags'>
