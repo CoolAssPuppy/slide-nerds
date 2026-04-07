@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CopyCodeBlock } from '@/components/home/CopyCodeBlock'
-import { TerminalBrowserDemo } from '@/components/home/TerminalBrowserDemo'
+import { TerminalDemoPlayer } from '@/components/home/TerminalDemoPlayer'
 import { SlidePreviewPlayer } from '@/components/home/SlidePreviewPlayer'
 import { FeatureGrid } from '@/components/home/FeatureGrid'
 import { PricingSection } from '@/components/home/PricingSection'
@@ -88,7 +88,7 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
-            <TerminalBrowserDemo />
+            <TerminalDemoPlayer />
           </div>
         </section>
 
