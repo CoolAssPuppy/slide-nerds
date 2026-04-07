@@ -510,19 +510,18 @@ export function TerminalBrowserDemo() {
     : phase === 'cmd-claude' ? [] : INTERACTIONS.slice(0, 0)
 
   return (
-    <div ref={containerRef} className="w-full max-w-5xl mx-auto min-h-[420px]">
+    <div ref={containerRef} className="w-full max-w-5xl mx-auto h-[480px]">
       <AnimatePresence>
         {showTerminal && (
-          <div className="flex flex-col md:flex-row gap-4 items-start">
+          <div className="flex flex-col md:flex-row gap-4 items-start h-full">
             <motion.div
-              className={showSplit ? 'w-full md:w-1/2' : 'w-full'}
+              className={showSplit ? 'w-full md:w-1/2 h-full' : 'w-full h-full'}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              layout
             >
               <TerminalWindow>
-                <div className="space-y-1 min-h-[320px] max-h-[400px] overflow-y-auto">
+                <div className="space-y-1 h-full overflow-y-auto">
                   {pastCommands.map((cmd) => (
                     <CompletedLine key={cmd} text={cmd} />
                   ))}
@@ -604,7 +603,7 @@ export function TerminalBrowserDemo() {
             <AnimatePresence>
               {showSplit && (
                 <motion.div
-                  className="w-full md:w-1/2"
+                  className="w-full md:w-1/2 h-full"
                   initial={{ opacity: 0, x: 40, scale: 0.97 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   transition={{ duration: 0.6, ease: 'easeOut' }}
