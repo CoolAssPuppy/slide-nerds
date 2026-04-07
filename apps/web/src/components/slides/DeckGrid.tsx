@@ -5,14 +5,29 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import type { Deck } from '@/lib/supabase/types'
+import type { Deck, Tag } from '@/lib/supabase/types'
+import { DeckTagEditor } from './DeckTagEditor'
+import { TagPill } from './TagPill'
 
 type DeckGridProps = {
   decks: Deck[]
   viewerCounts?: Record<string, number>
+  deckTagsByDeckId?: Record<string, Tag[]>
+  allTags?: Tag[]
+  onDeckTagsChange?: (deckId: string, tags: Tag[]) => void
+  onTagLibraryChange?: (tags: Tag[]) => void
+  allowTagEdit?: boolean
 }
 
-export function DeckGrid({ decks, viewerCounts = {} }: DeckGridProps) {
+export function DeckGrid({
+  decks,
+  viewerCounts = {},
+  deckTagsByDeckId = {},
+  allTags = [],
+  onDeckTagsChange,
+  onTagLibraryChange,
+  allowTagEdit = false,
+}: DeckGridProps) {
   if (decks.length === 0) {
     return <EmptyState />
   }
@@ -20,13 +35,38 @@ export function DeckGrid({ decks, viewerCounts = {} }: DeckGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {decks.map((deck) => (
-        <DeckCard key={deck.id} deck={deck} viewers={viewerCounts[deck.id] ?? 0} />
+        <DeckCard
+          key={deck.id}
+          deck={deck}
+          viewers={viewerCounts[deck.id] ?? 0}
+          tags={deckTagsByDeckId[deck.id] ?? []}
+          allTags={allTags}
+          onTagsChange={(tags) => onDeckTagsChange?.(deck.id, tags)}
+          onTagLibraryChange={onTagLibraryChange}
+          allowTagEdit={allowTagEdit}
+        />
       ))}
     </div>
   )
 }
 
-function DeckCard({ deck, viewers }: { deck: Deck; viewers: number }) {
+function DeckCard({
+  deck,
+  viewers,
+  tags,
+  allTags,
+  onTagsChange,
+  onTagLibraryChange,
+  allowTagEdit,
+}: {
+  deck: Deck
+  viewers: number
+  tags: Tag[]
+  allTags: Tag[]
+  onTagsChange: (tags: Tag[]) => void
+  onTagLibraryChange?: (tags: Tag[]) => void
+  allowTagEdit: boolean
+}) {
   const [showMenu, setShowMenu] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -71,12 +111,26 @@ function DeckCard({ deck, viewers }: { deck: Deck; viewers: number }) {
               {deck.is_public ? 'Public' : 'Private'}
             </span>
           </div>
-          <div className="flex items-center justify-between mt-1.5">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {tags.map((tag) => <TagPill key={tag.id} tag={tag} />)}
+          </div>
+          <div className="flex items-center justify-between mt-2">
             <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
               <Users className="w-3 h-3" />
               {viewers}
             </span>
-            <span className="text-xs text-[var(--muted-foreground)]">{timeAgo}</span>
+            <div className="flex items-center gap-2">
+              {allowTagEdit && onTagLibraryChange && (
+                <DeckTagEditor
+                  deckId={deck.id}
+                  deckTags={tags}
+                  allTags={allTags}
+                  onTagsChange={onTagsChange}
+                  onTagLibraryChange={onTagLibraryChange}
+                />
+              )}
+              <span className="text-xs text-[var(--muted-foreground)]">{timeAgo}</span>
+            </div>
           </div>
         </div>
       </Link>
