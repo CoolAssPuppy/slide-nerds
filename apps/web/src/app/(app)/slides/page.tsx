@@ -1,9 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { Presentation } from 'lucide-react'
-import { DeckListRealtime } from '@/components/slides/DeckListRealtime'
-import { DeckGrid } from '@/components/slides/DeckGrid'
-import { EmptyState } from '@/components/shared/EmptyState'
-import { PageHeader } from '@/components/shared/PageHeader'
+import { SlidesContent } from '@/components/slides/SlidesContent'
 import { buildDeckTagsByDeckId } from '@/components/slides/tag-utils'
 import type { Deck, DeckTag, Tag } from '@/lib/supabase/types'
 
@@ -44,11 +40,11 @@ export default async function SlidesPage() {
   const { data: sharedData } = await supabase
     .from('decks')
     .select('*')
-    .eq('is_public', true)
     .neq('owner_id', user!.id)
     .order('updated_at', { ascending: false })
     .limit(20)
   const sharedDecks = (sharedData ?? []) as Deck[]
+
   const allDeckIds = [...ownDecks, ...sharedDecks].map((deck) => deck.id)
 
   const { data: tagsData } = await supabase
@@ -66,37 +62,13 @@ export default async function SlidesPage() {
   const deckTagsByDeckId = buildDeckTagsByDeckId({ deckTags, tags })
 
   return (
-    <div>
-      <PageHeader
-        title="Slides"
-        description="All your presentation decks in one place."
-        showNewDeck
-      />
-
-      <DeckListRealtime
-        initialDecks={ownDecks}
-        viewerCounts={viewerCounts}
-        userId={user!.id}
-        initialTags={tags}
-        initialDeckTagsByDeckId={deckTagsByDeckId}
-      />
-
-      {ownDecks.length === 0 && (
-        <EmptyState
-          icon={Presentation}
-          title="No decks yet"
-          description="Deploy your deck and register it with slidenerds link --url"
-        />
-      )}
-
-      {sharedDecks.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
-            Shared with me
-          </h2>
-          <DeckGrid decks={sharedDecks} deckTagsByDeckId={deckTagsByDeckId} />
-        </div>
-      )}
-    </div>
+    <SlidesContent
+      ownDecks={ownDecks}
+      sharedDecks={sharedDecks}
+      viewerCounts={viewerCounts}
+      userId={user!.id}
+      initialTags={tags}
+      initialDeckTagsByDeckId={deckTagsByDeckId}
+    />
   )
 }

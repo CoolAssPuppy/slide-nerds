@@ -10,7 +10,7 @@ type BrandCardProps = {
 
 export function BrandCard({ brand }: BrandCardProps) {
   const config = parseBrandConfig(brand.config)
-  const { colors, fonts } = config
+  const { colors, fonts, spacing } = config
 
   const timeAgo = getTimeAgo(brand.updated_at)
 
@@ -21,64 +21,89 @@ export function BrandCard({ brand }: BrandCardProps) {
     >
       <div
         className="relative aspect-video overflow-hidden"
-        style={{ backgroundColor: colors.background }}
+        style={{
+          backgroundColor: colors.background,
+          padding: `${Math.round(spacing.slide * 0.35)}px`,
+        }}
       >
-        <div className="absolute inset-4 flex flex-col justify-between">
-          <div className="flex items-start justify-between">
+        <div
+          className="h-full flex flex-col justify-between"
+          style={{ gap: `${Math.round(spacing.section * 0.3)}px` }}
+        >
+          <div className="flex flex-col" style={{ gap: `${Math.round(spacing.element * 0.25)}px` }}>
+            <h3
+              className="text-[11px] font-bold leading-tight truncate"
+              style={{ color: colors.text, fontFamily: fonts.heading }}
+            >
+              {brand.name || 'Brand name'}
+            </h3>
+            <p
+              className="text-[7px] leading-relaxed line-clamp-2"
+              style={{ color: colors.text, fontFamily: fonts.body, opacity: 0.7 }}
+            >
+              A sample slide with your brand colors and typography applied to headings, body text, and accents.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5">
             <div
-              className="rounded-[6px] px-3 py-1.5"
+              className="rounded-[3px] px-1.5 py-0.5"
               style={{ backgroundColor: colors.primary }}
             >
               <span
-                className="text-[10px] font-bold tracking-wide uppercase"
-                style={{ color: colors.background, fontFamily: fonts.heading }}
+                className="text-[6px] font-semibold"
+                style={{ color: colors.background, fontFamily: fonts.body }}
               >
-                Heading
+                Primary
               </span>
             </div>
             <div
-              className="w-8 h-8 rounded-full"
-              style={{ backgroundColor: colors.accent }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div
-              className="h-2 rounded-full w-3/4"
-              style={{ backgroundColor: colors.text, opacity: 0.8 }}
-            />
-            <div
-              className="h-1.5 rounded-full w-1/2"
-              style={{ backgroundColor: colors.text, opacity: 0.4 }}
-            />
-            <div
-              className="h-1.5 rounded-full w-2/3"
-              style={{ backgroundColor: colors.text, opacity: 0.4 }}
-            />
-          </div>
-
-          <div className="flex items-end justify-between">
-            <div
-              className="rounded-[4px] px-2 py-1"
-              style={{ backgroundColor: colors.surface }}
+              className="rounded-[3px] px-1.5 py-0.5 border"
+              style={{ borderColor: colors.accent }}
             >
               <span
-                className="text-[8px]"
-                style={{ color: colors.text, fontFamily: fonts.body }}
+                className="text-[6px] font-semibold"
+                style={{ color: colors.accent, fontFamily: fonts.body }}
               >
-                Body text
+                Accent
               </span>
             </div>
+          </div>
+
+          <div
+            className="rounded-[3px] px-1.5 py-1"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <pre
+              className="text-[5px] leading-relaxed"
+              style={{ color: colors.text, fontFamily: fonts.mono, opacity: 0.8 }}
+            >
+              {'const brand = { primary: "' + colors.primary + '" }'}
+            </pre>
+          </div>
+
+          <div className="flex items-center justify-between">
             <div className="flex gap-1">
               {Object.entries(colors).map(([key, value]) => (
                 <div
                   key={key}
-                  className="w-4 h-4 rounded-full border border-black/10 shadow-sm"
+                  className="w-3 h-3 rounded-full border border-black/10 shadow-sm"
                   style={{ backgroundColor: value }}
                   title={key}
                 />
               ))}
             </div>
+            {config.logo?.src && (
+              <img
+                src={config.logo.src}
+                alt=""
+                className="object-contain"
+                style={{
+                  width: Math.min(config.logo.width ?? 16, 20),
+                  height: Math.min(config.logo.height ?? 16, 20),
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -90,22 +115,18 @@ export function BrandCard({ brand }: BrandCardProps) {
             {timeAgo}
           </span>
         </div>
-        <div className="flex items-center gap-3 mt-1.5">
-          <span
-            className="text-xs text-[var(--muted-foreground)] truncate"
-            title={fonts.heading}
-          >
-            {fonts.heading}
-          </span>
+        <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[var(--muted-foreground)]">
+          <span className="truncate" style={{ fontFamily: fonts.heading }}>{fonts.heading}</span>
           {fonts.heading !== fonts.body && (
             <>
               <span className="text-[var(--border)]">/</span>
-              <span
-                className="text-xs text-[var(--muted-foreground)] truncate"
-                title={fonts.body}
-              >
-                {fonts.body}
-              </span>
+              <span className="truncate" style={{ fontFamily: fonts.body }}>{fonts.body}</span>
+            </>
+          )}
+          {fonts.mono !== 'JetBrains Mono' && (
+            <>
+              <span className="text-[var(--border)]">/</span>
+              <span className="truncate" style={{ fontFamily: fonts.mono }}>{fonts.mono}</span>
             </>
           )}
         </div>

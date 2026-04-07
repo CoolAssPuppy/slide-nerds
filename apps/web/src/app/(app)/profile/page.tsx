@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { ProfileForm } from '@/components/profile/ProfileForm'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
 import { DangerZone } from '@/components/profile/DangerZone'
-import type { Profile, Subscription } from '@/lib/supabase/types'
+import { TagManager } from '@/components/profile/TagManager'
+import type { Profile, Subscription, Tag } from '@/lib/supabase/types'
 import type { Plan } from '@/lib/stripe/config'
 
 export const metadata = { title: 'Profile' }
@@ -26,6 +27,13 @@ export default async function ProfilePage() {
   const subscription = subData as Pick<Subscription, 'plan'> | null
 
   const currentPlan = (subscription?.plan ?? 'free') as Plan
+
+  const { data: tagsData } = await supabase
+    .from('tags')
+    .select('*')
+    .eq('owner_id', user!.id)
+    .order('name', { ascending: true })
+  const tags = (tagsData ?? []) as Tag[]
 
   return (
     <div className="max-w-2xl">
@@ -54,6 +62,13 @@ export default async function ProfilePage() {
             email={user!.email ?? ''}
             plan={currentPlan}
           />
+        </section>
+
+        <section className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">
+          <h2 className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-4">
+            Tag management
+          </h2>
+          <TagManager initialTags={tags} />
         </section>
 
         <section className="rounded-[var(--n-radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">

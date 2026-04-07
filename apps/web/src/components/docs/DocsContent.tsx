@@ -307,6 +307,7 @@ export function DocsContent({ variant = 'marketing' }: DocsContentProps) {
           <FeatureCard title="Domain-restricted links" description="Allow anyone with a company email domain (e.g. @acme.com) to view." />
           <FeatureCard title="Password-protected links" description="Set a password on a share link. Recipients enter it before viewing." />
           <FeatureCard title="Expiring links" description="Set an expiration date on any share link." />
+          <FeatureCard title="Tags" description="Organize your decks with color-coded tags. Tags are personal -- only you see your tags, even on shared decks. Create and manage tags from your Profile page, then filter your dashboard by tag to find what you need fast." />
         </div>
       </section>
 
