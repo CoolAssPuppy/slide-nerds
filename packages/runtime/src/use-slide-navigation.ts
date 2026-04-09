@@ -59,11 +59,43 @@ const applyStepVisibility = (slideIndex: number, visibleSteps: number): void => 
   }
 }
 
+const resetSlideVisualState = (slide: Element): void => {
+  slide.classList.remove('exiting', 'entering')
+  slide.querySelectorAll('.step-visible').forEach((el) => {
+    el.classList.remove('step-visible')
+  })
+  slide.querySelectorAll('.exit-visible').forEach((el) => {
+    el.classList.remove('exit-visible')
+  })
+  slide.querySelectorAll('.emphasis-active').forEach((el) => {
+    el.classList.remove('emphasis-active')
+  })
+}
+
+const resetVideoElements = (slide: Element): void => {
+  slide.querySelectorAll('video').forEach((video) => {
+    try {
+      video.currentTime = 0
+      const playback = video.play()
+      if (playback && typeof playback.catch === 'function') {
+        playback.catch(() => {
+          // Autoplay can be blocked by the browser; that is expected.
+        })
+      }
+    } catch {
+      // Some browsers throw when setting currentTime before metadata loads.
+    }
+  })
+}
+
 const setActiveSlide = (slides: NodeListOf<Element>, targetIndex: number): void => {
   slides.forEach((slide, index) => {
-    slide.classList.toggle('active', index === targetIndex)
-    if (index !== targetIndex) {
-      slide.classList.remove('exiting', 'entering')
+    const isTarget = index === targetIndex
+    slide.classList.toggle('active', isTarget)
+    if (!isTarget) {
+      resetSlideVisualState(slide)
+    } else {
+      resetVideoElements(slide)
     }
   })
 }
@@ -87,10 +119,12 @@ const applySlideTransitionClasses = (
   const transitionClass = `transition-${transitionName}`
   currentSlide.classList.add('active', 'exiting', transitionClass)
   targetSlide.classList.add('active', 'entering', transitionClass)
+  resetVideoElements(targetSlide)
 
   return setTimeout(() => {
     currentSlide.classList.remove('active', 'exiting', transitionClass)
     targetSlide.classList.remove('entering', transitionClass)
+    resetSlideVisualState(currentSlide)
   }, SLIDE_TRANSITION_DURATION)
 }
 

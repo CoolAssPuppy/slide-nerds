@@ -29,17 +29,21 @@ const CLONE_STYLE = [
   'overflow: hidden',
 ].join('; ')
 
+const ACCENT_COLOR = 'var(--color-accent, #f59e0b)'
+
+const getBorder = (isActive: boolean, isSelected: boolean): string => {
+  if (isActive) return `2px solid ${ACCENT_COLOR}`
+  if (isSelected) return `2px solid rgba(255,255,255,0.85)`
+  return '1px solid rgba(255,255,255,0.1)'
+}
+
 const SlideThumbnail: React.FC<{
   slideIndex: number
   isActive: boolean
-  isPreviewing: boolean
-}> = ({ slideIndex, isActive, isPreviewing }) => {
+  isSelected: boolean
+}> = ({ slideIndex, isActive, isSelected }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const cloneRef = useRef<HTMLElement | null>(null)
-  const stepsRef = useRef<NodeListOf<Element> | null>(null)
-  const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Clone once on mount
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -49,69 +53,34 @@ const SlideThumbnail: React.FC<{
 
     const clone = slideEl.cloneNode(true) as HTMLElement
     clone.classList.add('active')
+    clone.classList.remove('exiting', 'entering')
     clone.style.cssText = CLONE_STYLE
 
     clone.querySelectorAll('[data-notes]').forEach((note) => {
-      (note as HTMLElement).style.display = 'none'
+      ;(note as HTMLElement).style.display = 'none'
     })
 
-    const steps = clone.querySelectorAll('[data-step], [data-auto-step]')
-    steps.forEach((step) => step.classList.add('step-visible'))
+    clone
+      .querySelectorAll('[data-step], [data-auto-step], [data-exit-step]')
+      .forEach((step) => {
+        step.classList.add('step-visible')
+        step.classList.remove('exit-visible')
+      })
 
     while (container.firstChild) {
       container.removeChild(container.firstChild)
     }
     container.appendChild(clone)
-
-    cloneRef.current = clone
-    stepsRef.current = steps
-
-    return () => {
-      cloneRef.current = null
-      stepsRef.current = null
-    }
   }, [slideIndex])
-
-  // Handle preview animation separately
-  useEffect(() => {
-    const steps = stepsRef.current
-    if (!steps || steps.length === 0) return
-
-    if (animTimerRef.current !== null) {
-      clearTimeout(animTimerRef.current)
-      animTimerRef.current = null
-    }
-
-    if (isPreviewing) {
-      steps.forEach((step) => step.classList.remove('step-visible'))
-
-      let stepIndex = 0
-      const revealNext = () => {
-        if (stepIndex >= steps.length) return
-        steps[stepIndex].classList.add('step-visible')
-        stepIndex++
-        animTimerRef.current = setTimeout(revealNext, 400)
-      }
-      animTimerRef.current = setTimeout(revealNext, 300)
-    } else {
-      steps.forEach((step) => step.classList.add('step-visible'))
-    }
-
-    return () => {
-      if (animTimerRef.current !== null) {
-        clearTimeout(animTimerRef.current)
-        animTimerRef.current = null
-      }
-    }
-  }, [isPreviewing])
 
   return (
     <div
       style={{
         borderRadius: '8px',
         overflow: 'hidden',
-        border: isActive ? '2px solid #f59e0b' : '1px solid rgba(255,255,255,0.1)',
-        transition: 'border-color 150ms ease',
+        border: getBorder(isActive, isSelected),
+        transition: 'border-color 150ms ease, box-shadow 150ms ease',
+        boxShadow: isSelected && !isActive ? '0 0 0 4px rgba(255,255,255,0.08)' : 'none',
       }}
     >
       <div
@@ -124,15 +93,17 @@ const SlideThumbnail: React.FC<{
           background: '#111114',
         }}
       />
-      <div style={{
-        padding: '0.5rem 0.75rem',
-        background: 'rgba(255,255,255,0.03)',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        fontSize: '0.7rem',
-        fontWeight: 600,
-        color: isActive ? '#f59e0b' : 'rgba(255,255,255,0.35)',
-        letterSpacing: '0.05em',
-      }}>
+      <div
+        style={{
+          padding: '0.5rem 0.75rem',
+          background: 'rgba(255,255,255,0.03)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          fontSize: '0.7rem',
+          fontWeight: 600,
+          color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.35)',
+          letterSpacing: '0.05em',
+        }}
+      >
         Slide {slideIndex + 1}
       </div>
     </div>
@@ -140,22 +111,37 @@ const SlideThumbnail: React.FC<{
 }
 
 export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) => {
-  const { currentSlide, goToSlide } = useSlideState()
+  const { currentSlide, goToSlide, toggleLightTable } = useSlideState()
   const [dragSource, setDragSource] = useState<number | null>(null)
-  const [previewIndex, setPreviewIndex] = useState<number | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
   const slides = useMemo(() => getSlidesInfo(), [])
 
-  const handleSlideClick = useCallback(
+  useEffect(() => {
+    setSelectedIndex(currentSlide)
+  }, [currentSlide])
+
+  const handleSlideClick = useCallback((index: number) => {
+    setSelectedIndex(index)
+  }, [])
+
+  const handleSlideDoubleClick = useCallback(
     (index: number) => {
-      if (previewIndex === index) {
+      goToSlide(index)
+      toggleLightTable()
+    },
+    [goToSlide, toggleLightTable],
+  )
+
+  const handleSlideKeyDown = useCallback(
+    (event: React.KeyboardEvent, index: number) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
         goToSlide(index)
-        setPreviewIndex(null)
-      } else {
-        setPreviewIndex(index)
+        toggleLightTable()
       }
     },
-    [goToSlide, previewIndex],
+    [goToSlide, toggleLightTable],
   )
 
   const handleDragStart = useCallback((index: number) => {
@@ -203,9 +189,12 @@ export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) 
         <div
           key={slide.index}
           role="gridcell"
+          tabIndex={0}
           data-testid={`light-table-slide-${slide.index}`}
           draggable
           onClick={() => handleSlideClick(slide.index)}
+          onDoubleClick={() => handleSlideDoubleClick(slide.index)}
+          onKeyDown={(event) => handleSlideKeyDown(event, slide.index)}
           onDragStart={() => handleDragStart(slide.index)}
           onDragOver={handleDragOver}
           onDrop={() => handleDrop(slide.index)}
@@ -213,12 +202,13 @@ export const LightTable: React.FC<LightTableProps> = ({ className, onReorder }) 
           style={{
             opacity: dragSource === slide.index ? 0.5 : 1,
             cursor: 'pointer',
+            outline: 'none',
           }}
         >
           <SlideThumbnail
             slideIndex={slide.index}
             isActive={slide.index === currentSlide}
-            isPreviewing={previewIndex === slide.index}
+            isSelected={slide.index === selectedIndex}
           />
         </div>
       ))}

@@ -227,6 +227,72 @@ describe('useSlideNavigation', () => {
     expect(c.classList.contains('step-visible')).toBe(false)
   })
 
+  it('should reset step-visible classes on slides that become inactive', () => {
+    vi.useFakeTimers()
+    try {
+      createSlideDOM(3, [2, 0, 0])
+      const { result } = renderHook(() => useSlideNavigation())
+
+      act(() => {
+        result.current.nextStep()
+      })
+      act(() => {
+        result.current.nextStep()
+      })
+
+      const slide0 = document.querySelectorAll('[data-slide]')[0]
+      const steps = slide0.querySelectorAll('[data-step]')
+      expect(steps[0].classList.contains('step-visible')).toBe(true)
+
+      act(() => {
+        result.current.goToSlide(2)
+      })
+
+      act(() => {
+        vi.advanceTimersByTime(1000)
+      })
+
+      expect(slide0.classList.contains('active')).toBe(false)
+      expect(slide0.classList.contains('exiting')).toBe(false)
+      expect(steps[0].classList.contains('step-visible')).toBe(false)
+      expect(steps[1].classList.contains('step-visible')).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('should restart videos when a slide becomes active', () => {
+    clearDOM()
+    const container = document.createElement('div')
+    const slideOne = document.createElement('section')
+    slideOne.setAttribute('data-slide', '')
+    const slideTwo = document.createElement('section')
+    slideTwo.setAttribute('data-slide', '')
+    const video = document.createElement('video')
+    slideTwo.appendChild(video)
+
+    container.append(slideOne, slideTwo)
+    document.body.appendChild(container)
+
+    const playSpy = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(video, 'play', { value: playSpy, writable: true })
+    const currentTimeSetter = vi.fn()
+    Object.defineProperty(video, 'currentTime', {
+      get: () => 0,
+      set: currentTimeSetter,
+      configurable: true,
+    })
+
+    const { result } = renderHook(() => useSlideNavigation())
+
+    act(() => {
+      result.current.goToSlide(1)
+    })
+
+    expect(currentTimeSetter).toHaveBeenCalledWith(0)
+    expect(playSpy).toHaveBeenCalled()
+  })
+
   it('should animate matching magic move elements without FLIP measurements', () => {
     clearDOM()
     const container = document.createElement('div')

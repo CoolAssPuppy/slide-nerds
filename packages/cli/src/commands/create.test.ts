@@ -98,4 +98,20 @@ describe('scaffoldProject', () => {
     expect(gettingStarted).toContain('data-step')
     expect(gettingStarted).toContain('data-notes')
   })
+
+  it('should create a .gitignore from the underscore-prefixed template', async () => {
+    const tempDir = await createTempDir()
+    tempDirs.push(tempDir)
+    const targetDir = path.join(tempDir, 'test-deck')
+
+    const files = await scaffoldProject('test-deck', targetDir)
+
+    expect(files).toContain('.gitignore')
+    expect(files).not.toContain('_gitignore')
+
+    const gitignore = await fs.readFile(path.join(targetDir, '.gitignore'), 'utf-8')
+    expect(gitignore).toContain('node_modules')
+    expect(gitignore).toContain('.next')
+    expect(gitignore).toContain('.env')
+  })
 })

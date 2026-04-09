@@ -94,10 +94,10 @@ export const SlideRuntime: React.FC<SlideRuntimeProps> = ({ children }) => {
   ])
 
   useEffect(() => {
-    if (isPresenter) return
+    if (isPresenter || isLightTable) return
     window.addEventListener('dblclick', navigation.previousStep)
     return () => window.removeEventListener('dblclick', navigation.previousStep)
-  }, [navigation.previousStep, isPresenter])
+  }, [navigation.previousStep, isPresenter, isLightTable])
 
   useEffect(() => {
     registerExportApi()

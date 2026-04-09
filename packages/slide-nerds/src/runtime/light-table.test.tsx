@@ -73,16 +73,40 @@ describe('LightTable', () => {
     expect(within(table).getByText('Slide 2 content')).toBeInTheDocument()
   })
 
-  it('should preview on first click and navigate on second click', () => {
+  it('should highlight a slide on single click without navigating', () => {
     createSlideDOM(3)
     const { ctx } = renderLightTable({ totalSlides: 3 })
 
     const slide2 = screen.getByTestId('light-table-slide-2')
     fireEvent.click(slide2)
-    expect(ctx.goToSlide).not.toHaveBeenCalled()
 
-    fireEvent.click(slide2)
+    expect(ctx.goToSlide).not.toHaveBeenCalled()
+    expect(ctx.toggleLightTable).not.toHaveBeenCalled()
+
+    const thumbnail = slide2.querySelector('div')
+    expect(thumbnail?.style.border).toContain('2px solid')
+  })
+
+  it('should navigate and close light table on double click', () => {
+    createSlideDOM(3)
+    const { ctx } = renderLightTable({ totalSlides: 3 })
+
+    const slide2 = screen.getByTestId('light-table-slide-2')
+    fireEvent.doubleClick(slide2)
+
     expect(ctx.goToSlide).toHaveBeenCalledWith(2)
+    expect(ctx.toggleLightTable).toHaveBeenCalled()
+  })
+
+  it('should navigate and close light table when pressing Enter on a focused slide', () => {
+    createSlideDOM(3)
+    const { ctx } = renderLightTable({ totalSlides: 3 })
+
+    const slide1 = screen.getByTestId('light-table-slide-1')
+    fireEvent.keyDown(slide1, { key: 'Enter' })
+
+    expect(ctx.goToSlide).toHaveBeenCalledWith(1)
+    expect(ctx.toggleLightTable).toHaveBeenCalled()
   })
 
   it('should highlight current slide', () => {

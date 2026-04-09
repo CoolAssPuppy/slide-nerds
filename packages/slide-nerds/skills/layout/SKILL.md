@@ -7,9 +7,61 @@ description: Alignment, grid, and arrangement patterns for slidenerds slides usi
 
 Alignment and arrangement primitives for slide content. Use these patterns instead of guessing at Tailwind classes.
 
+## The default recipe: centered composition
+
+This is the recipe to reach for first. Use `SlideFrame` from `@strategicnerds/slide-nerds` — it encodes the right padding, max-width, header block, and gaps for a vertically and horizontally centered slide:
+
+```tsx
+import { SlideFrame } from '@strategicnerds/slide-nerds'
+
+<section data-slide="">
+  <SlideFrame
+    sectionLabel="The mental model"
+    title="AI is a thinking partner."
+    subtitle="Four things to internalize before you type anything."
+    background="mesh-warm"
+  >
+    <div className="grid grid-cols-3 gap-6">
+      {/* content cards */}
+    </div>
+  </SlideFrame>
+</section>
+```
+
+When you need full control, the equivalent raw composition is:
+
+```tsx
+<section data-slide="">
+  <div
+    className="bg-mesh-warm relative flex flex-col items-center justify-center w-full"
+    style={{ padding: '5rem 6rem' }}
+  >
+    <div
+      className="flex flex-col items-center w-full"
+      style={{ maxWidth: '1400px', gap: '4.5rem' }}
+    >
+      <div className="flex flex-col items-center text-center" style={{ gap: '1.5rem' }}>
+        <p className="section-label">Section</p>
+        <h2 className="text-[3.25rem] font-bold">Slide title.</h2>
+        <p className="text-xl" style={{ color: 'var(--color-text-secondary)', maxWidth: '66ch' }}>
+          Subtitle at reading length.
+        </p>
+      </div>
+      <div className="grid grid-cols-3 w-full" style={{ gap: '1.75rem' }}>
+        {/* content */}
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+Reach for top-left anchored layouts only when the content is genuinely dense (tables with many rows, multi-column comparisons, dashboards with six or more tiles). See the "opt-in" patterns later in this file.
+
 ## Alignment
 
 ### Center content (horizontal and vertical)
+
+The one-off primitive if you don't want `SlideFrame`:
 
 ```tsx
 <section data-slide="">

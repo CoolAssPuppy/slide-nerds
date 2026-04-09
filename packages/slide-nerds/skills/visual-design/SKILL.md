@@ -28,57 +28,130 @@ For slidenerds, `--slide-padding` controls the outer margin. Set it to 5-8% of t
 +-------------------------------------------+
 ```
 
-## The default layout is top-left anchored
+## The default layout is centered
 
-This is the most important layout rule. The majority of slides in any professional deck anchor content to the top-left corner, with the title at a fixed position and content flowing downward. The bottom portion of the slide is breathing room.
+Centered composition is the starting point for every content slide. Section label, title, subtitle, and content block all sit on a single vertical stack that centers horizontally and vertically in the slide.
 
-**Do NOT vertically center content on most slides.** Vertically centered content is only appropriate for these specific slide types:
+This is a change from earlier versions of this skill. Top-left anchored layouts look great on a fully-packed slide, but they fight every iteration. Content looks cramped to the corner until you have filled the whole slide, and every new deck needs the same "center this properly" pass before it is presentable. Centering as the default gets you to "looks intentional" on the first render, and you opt into top-left only when dense content justifies it.
 
-- **Big stat**: A single number that dominates the slide
-- **Section divider**: A section name between major parts of the deck
-- **Quote**: A blockquote with attribution
-- **Closing**: Contact info or "Questions?"
+**Default (centered):** every slide ships as a vertical stack with the header block (section label, title, subtitle) on top and the content block below. Gaps are generous. Both blocks center on the same axis.
 
-Every other slide type -- charts, tables, text, timelines, dashboards, diagrams, team slides, process flows, comparisons, icon grids -- uses top-left anchored layout. The title starts near the top of the slide at a consistent Y position across all content slides. This consistency is what makes a deck feel like a designed system rather than a collection of individual slides.
+**Opt-in (top-left anchored):** reserve this for dense content that fills the slide. Good candidates: long tables, multi-column comparisons, dashboards with six or more tiles, dense KPI grids.
 
 ```
-WRONG (everything centered -- looks like a default template):
+RIGHT (default -- centered composition):
 +-------------------------------------------+
 |                                           |
+|               SECTION LABEL               |
+|               Slide title.                |
+|               Short subtitle here.        |
 |                                           |
-|           Title                           |
-|           Content here                    |
-|                                           |
+|         [ content block centered ]        |
 |                                           |
 +-------------------------------------------+
 
-RIGHT for text/bullets/tables (anchored below title):
+RIGHT (opt-in -- top-left for dense tables / dashboards):
++-------------------------------------------+
+|  SECTION LABEL                            |
+|  Dense comparison title                   |
+|                                           |
+|  | Col A | Col B | Col C | Col D | Col E |
+|  | ...   | ...   | ...   | ...   | ...   |
+|  | ...   | ...   | ...   | ...   | ...   |
+|  | ...   | ...   | ...   | ...   | ...   |
++-------------------------------------------+
+
+WRONG (top-left with thin content -- feels cramped):
 +-------------------------------------------+
 |  SECTION LABEL                            |
 |  Title                                    |
+|  - One short bullet                       |
 |                                           |
-|  - Bullet point one                       |
-|  - Bullet point two                       |
-|  - Bullet point three                     |
 |                                           |
-|                    [breathing room]       |
-+-------------------------------------------+
-
-RIGHT for diagrams/charts/shapes (title top-left, visual centered):
-+-------------------------------------------+
-|  SECTION LABEL                            |
-|  Title                                    |
-|                                           |
-|         [diagram or chart centered        |
-|          in the remaining space]          |
+|                 [empty]                   |
 |                                           |
 +-------------------------------------------+
 ```
 
-There are two sub-patterns for top-left anchored slides:
+### Primary (centered) pattern
 
-1. **Text content** (bullets, numbered lists, tables, KPI grids): Content flows directly below the title, anchored to the left. The bottom is breathing room.
-2. **Visual content** (diagrams, charts, shapes, process flows, icon grids, team avatars): Title stays top-left. The visual centers both horizontally and vertically in the remaining space below the title. Use `flex-1 flex items-center justify-center` on the visual container.
+Use `SlideFrame` from `@strategicnerds/slide-nerds` — it encodes this scaffold with the right gaps, max-width, padding, and header block defaults:
+
+```tsx
+import { SlideFrame } from '@strategicnerds/slide-nerds'
+
+<section data-slide="">
+  <SlideFrame
+    sectionLabel="The mental model"
+    title="AI is a thinking partner, not a magic button."
+    subtitle="Four things to internalize before you type anything."
+    background="mesh-warm"
+  >
+    <div className="grid grid-cols-2 gap-6">
+      {/* cards */}
+    </div>
+  </SlideFrame>
+</section>
+```
+
+If you need more control, here is the raw composition that `SlideFrame` generates. Copy this when `SlideFrame` cannot express what you need, but prefer `SlideFrame` for 90% of slides:
+
+```tsx
+<section data-slide="">
+  <div
+    className="bg-mesh-warm relative flex flex-col items-center justify-center w-full"
+    style={{ padding: '5rem 6rem' }}
+  >
+    <div
+      className="flex flex-col items-center w-full"
+      style={{ maxWidth: '1400px', gap: '4.5rem' }}
+    >
+      <div className="flex flex-col items-center text-center" style={{ gap: '1.5rem' }}>
+        <p className="section-label">Section</p>
+        <h2 className="text-[3.25rem] font-bold">Slide title goes here.</h2>
+        <p className="text-xl" style={{ color: 'var(--color-text-secondary)', maxWidth: '66ch' }}>
+          Optional subtitle at a reading length.
+        </p>
+      </div>
+      <div className="grid grid-cols-3 w-full" style={{ gap: '1.75rem' }}>
+        {/* cards, charts, diagrams */}
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+Key numbers this pattern enshrines:
+
+| Token | Value | Purpose |
+|---|---|---|
+| Outer slide padding | `5rem 6rem` (`5rem 7rem` on dense slides) | Default for `--slide-padding` |
+| Inner stack max-width | `1280–1560px` | Keeps content readable on wide screens |
+| Header-to-content gap | `4.5rem` (or `5rem` for 4-card grids) | Tighter than this feels cramped |
+| Header internal gap | `1.5rem` | Between label / title / subtitle |
+| Subtitle max-width | `60–68ch` | Reading-length wrapping |
+| Card padding | `2.25rem–2.75rem` | `p-8` was too tight |
+| Card-to-card gap | `1.5rem–2rem` | `gap-4` was too tight |
+| Card min-height | `11–13rem` | Prevents ragged rows |
+
+### Opt-in (top-left) pattern
+
+Reach for this only when the content is genuinely dense. Title stays at the top-left, content fills the remaining space. The bottom should feel packed, not empty.
+
+## Use Lucide icons by default, emoji only when asked
+
+Use Lucide icons as the default decorative glyph source. Emoji are acceptable only when the author explicitly asks for them (e.g., a poll slide where emoji hand-raising is the content).
+
+The runtime ships an `Icon` wrapper with slide-appropriate defaults (`strokeWidth={1.75}`, `size={20}`, `color="currentColor"`). Pair it with any Lucide icon:
+
+```tsx
+import { Target } from 'lucide-react'
+import { Icon } from '@strategicnerds/slide-nerds'
+
+<Icon as={Target} size={28} />
+```
+
+The runtime also ships `<McpLogo>` and `<BotIcon>` as first-class components for AI-themed decks.
 
 ## The one-thing rule
 
@@ -120,9 +193,11 @@ Never set text smaller than 16pt. At projection distance, anything below that di
 
 ### Line height
 
-- Titles: `leading-none` to `leading-tight` (1.0-1.15). Tight title spacing is a core differentiator between polished and amateur decks.
+- Titles: `leading-tight` (1.15) is the safe default and the minimum. `leading-none` clips descenders on "g", "y", "p", "q" unless you visually verify the specific heading has none. Opt into `leading-none` only after inspection.
 - Body: `leading-relaxed` (1.35-1.5). Open enough for distance reading.
 - Labels and captions: `leading-snug` (1.2-1.3).
+
+The template globals.css adds `padding-bottom: 0.14em` to every heading as a safety margin for descenders at tight line heights. Keep that in mind if you override heading styles.
 
 ### Letter spacing
 

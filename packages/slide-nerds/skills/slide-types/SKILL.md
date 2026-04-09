@@ -7,6 +7,27 @@ description: Individual slide type patterns with Tailwind structure and data att
 
 Reusable slide patterns. Use these instead of inventing layout from scratch.
 
+## Default scaffold: `SlideFrame`
+
+Every recipe in this file can be wrapped in `SlideFrame` from `@strategicnerds/slide-nerds`. `SlideFrame` handles the centered composition (section label, title, subtitle, content block, padding, max-width, gaps) so you can focus on the content specific to the slide type:
+
+```tsx
+import { SlideFrame } from '@strategicnerds/slide-nerds'
+
+<section data-slide="">
+  <SlideFrame
+    sectionLabel="Revenue"
+    title="$4.2M ARR"
+    subtitle="Up 142% from last year"
+    background="mesh-warm"
+  >
+    {/* content specific to this slide */}
+  </SlideFrame>
+</section>
+```
+
+Use `SlideFrame` as the default for every centered recipe below. Only drop down to the raw Tailwind when the layout is genuinely unusual (e.g. a full-bleed hero image with overlay text).
+
 ## Title slide
 
 The opening slide. Large heading, optional subtitle.

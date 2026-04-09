@@ -256,22 +256,27 @@ Auto-build animations trigger when a slide loads, with no click required. Use th
 |-------|--------|----------|
 | `auto-fade` | Fade in | 350ms |
 | `auto-pop` | Scale up with overshoot bounce | 400ms |
+| `auto-pop-pulse` | Scale in with overshoot, settle with a subtle pulse. Default for hero cards and feature tiles | 720ms |
 | `auto-wipe-right` | Clip-path reveal left to right | 500ms |
 | `auto-slide-down` | Slide down from above + fade | 500ms |
 | `auto-slide-up` | Slide up from below + fade | 500ms |
 
 ### Staggering
 
-Control stagger with inline `animationDelay`:
+Use the `stagger()` helper. It sets the `--stagger` CSS custom property, which the template wires into both `transition-delay` and `animation-delay` so it works for every `auto-*` class uniformly:
 
 ```tsx
+import { stagger } from '@strategicnerds/slide-nerds'
+
 {items.map((item, i) => (
-  <div key={item.id} className="auto-pop card-surface p-5"
-    style={{ animationDelay: `${200 + i * 100}ms` }}>
+  <div key={item.id} className="auto-pop-pulse card-surface p-5"
+    style={stagger(200 + i * 100)}>
     {item.content}
   </div>
 ))}
 ```
+
+Do not use inline `animationDelay` directly -- it only affects animation-based `auto-*` classes, not transition-based ones. `stagger()` covers both.
 
 ### Directional grid pattern
 
@@ -318,14 +323,56 @@ Use `data-exit-step` for sequenced exits. After all entrance steps are revealed,
 <div data-exit-step="" className="exit-slide-up">This slides up after the h2 fades</div>
 ```
 
-## Auto-step sequencing
+## Three reveal mechanisms: pick the right one
 
-Use `data-auto-step="300ms"` for steps that reveal automatically on a timer. The value is the delay before revealing. Mix with `data-step` for hybrid sequences.
+The runtime has three distinct reveal mechanisms. Pick the right one for the job before writing markup. Getting this wrong is the most common source of navigation bugs.
+
+```
+Do you want the presenter to click to reveal?
+  YES -> data-step + step-*
+  NO  -> Does the reveal need to auto-fire on a timer after slide load?
+    YES -> data-auto-step + step-* (+ data-step-group to collapse)
+    NO  -> auto-* + stagger(ms)   <-- 90% of cases
+```
+
+### 1. Entrance animations (no step cost)
+
+For "reveal on slide load" with optional stagger, use plain `auto-*` classes with the `stagger()` helper. These do NOT register as navigation steps, so the presenter does not have to press left N times to rewind through the reveals.
 
 ```tsx
-<div data-auto-step="200ms" className="step-fade">Reveals after 200ms</div>
-<div data-auto-step="300ms" className="step-fade">Reveals 300ms after previous</div>
-<div data-step="" className="step-move-up">Waits for click</div>
+import { stagger } from '@strategicnerds/slide-nerds'
+
+<div className="grid grid-cols-3 gap-6">
+  <div className="card-surface auto-pop-pulse" style={stagger(0)}>First card</div>
+  <div className="card-surface auto-pop-pulse" style={stagger(150)}>Second card</div>
+  <div className="card-surface auto-pop-pulse" style={stagger(300)}>Third card</div>
+</div>
+```
+
+The `--stagger` CSS variable set by `stagger()` is wired into both `transition-delay` and `animation-delay`, so it works for every `auto-*` class (fade, slide, pop, bounce, spin, flip -- all of them).
+
+### 2. Click-to-reveal (each click equals one step)
+
+When the presenter controls pacing, use `data-step` with `step-*` classes. Each element becomes a step in the navigation tracker.
+
+```tsx
+<ul>
+  <li data-step="" className="step-fade">First bullet (click 1)</li>
+  <li data-step="" className="step-fade">Second bullet (click 2)</li>
+  <li data-step="" className="step-fade">Third bullet (click 3)</li>
+</ul>
+```
+
+### 3. Timed sequential reveals (auto-fires, still counts as steps)
+
+For things like a terminal replay or a multi-stage chart build where you want timed auto-advance but still want the presenter to pause the slide, use `data-auto-step="delayMs"`. The runtime reveals them in order on a timer.
+
+> WARNING: `data-auto-step` registers every element as a step in the navigation tracker. A slide with 10 staggered items will take 10 presses of the left arrow to exit backward. Do NOT use `data-auto-step` for simple entrance animations -- use `auto-*` plus `stagger()` (mechanism 1) instead. If you need auto-fired reveals to share a single back-arrow press, collapse them with `data-step-group="name"`.
+
+```tsx
+<div data-auto-step="200" data-step-group="terminal" className="step-fade">$ curl ...</div>
+<div data-auto-step="300" data-step-group="terminal" className="step-fade">HTTP/1.1 200 OK</div>
+<div data-auto-step="400" data-step-group="terminal" className="step-fade">{"ok": true}</div>
 ```
 
 ## Step groups

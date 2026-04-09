@@ -32,6 +32,35 @@ body {
   perspective: 1600px;
 }
 
+/* Room for descenders (g, y, p, q) so tight line-heights don't clip them. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+  padding-bottom: 0.14em;
+}
+
+/* Safe minimum line-height for slide headings. Authors can override with
+   leading-none when they know the heading has no descenders. */
+[data-slide] h1,
+[data-slide] h2 {
+  line-height: 1.15;
+}
+
+/* Kill default margins and list styling inside slides. */
+[data-slide] h1,
+[data-slide] h2,
+[data-slide] h3,
+[data-slide] p,
+[data-slide] ul,
+[data-slide] ol {
+  margin: 0;
+}
+[data-slide] ul,
+[data-slide] ol {
+  list-style: none;
+  padding: 0;
+}
+
 [data-slide].active,
 [data-slide].entering,
 [data-slide].exiting {
@@ -380,21 +409,47 @@ body {
   filter: blur(0);
   clip-path: inset(0 0 0 0);
   transition:
-    opacity var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-    transform var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-    filter var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-    clip-path var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    opacity var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)) var(--stagger, 0ms),
+    transform var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)) var(--stagger, 0ms),
+    filter var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)) var(--stagger, 0ms),
+    clip-path var(--anim-duration) var(--anim-ease, cubic-bezier(0.4, 0, 0.2, 1)) var(--stagger, 0ms);
 }
 
 .auto-bounce,
 .auto-spin-in,
-.auto-flip-x {
+.auto-flip-x,
+.auto-pop-pulse {
   opacity: 0;
 }
 
-[data-slide].active .auto-bounce { animation: step-bounce-in 600ms both; }
-[data-slide].active .auto-spin-in { animation: step-spin-in-key 600ms both; }
-[data-slide].active .auto-flip-x { animation: step-flip-x-in 500ms both; }
+[data-slide].active .auto-bounce {
+  animation: step-bounce-in 600ms both;
+  animation-delay: var(--stagger, 0ms);
+}
+[data-slide].active .auto-spin-in {
+  animation: step-spin-in-key 600ms both;
+  animation-delay: var(--stagger, 0ms);
+}
+[data-slide].active .auto-flip-x {
+  animation: step-flip-x-in 500ms both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+/* Pop-and-pulse entrance: scale in with overshoot, then a subtle settle.
+   Good default for hero cards and feature tiles. */
+.auto-pop-pulse { transform: scale(0.5); }
+[data-slide].active .auto-pop-pulse {
+  animation: auto-pop-pulse-key 720ms cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  animation-delay: var(--stagger, 0ms);
+  visibility: visible;
+}
+@keyframes auto-pop-pulse-key {
+  0%   { opacity: 0; transform: scale(0.5); }
+  50%  { opacity: 1; transform: scale(1.08); }
+  70%  { transform: scale(0.96); }
+  85%  { transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
+}
 
 /* ==========================================================================
    SLIDE TRANSITIONS (data-transition)
@@ -756,4 +811,158 @@ body {
   z-index: 10;
   opacity: 0.25;
   pointer-events: none;
+}
+
+/* ==========================================================================
+   SLIDE FURNITURE
+   Shipped defaults so every new deck has a coherent vocabulary of pills,
+   labels, cards, mesh backgrounds, and slide tables without the author
+   having to invent them per project.
+   ========================================================================== */
+
+:root {
+  --color-accent-dim: rgba(var(--color-accent-rgb, 245, 158, 11), 0.12);
+  --color-accent-glow: rgba(var(--color-accent-rgb, 245, 158, 11), 0.35);
+  --color-text-secondary: rgba(var(--color-text-rgb, 232, 230, 227), 0.62);
+  --color-text-tertiary: rgba(var(--color-text-rgb, 232, 230, 227), 0.38);
+  --color-border: rgba(var(--color-text-rgb, 232, 230, 227), 0.08);
+  --color-surface-elevated: color-mix(
+    in srgb,
+    var(--color-surface) 92%,
+    white 8%
+  );
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+}
+
+.accent-line {
+  width: 40px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+.stat-glow {
+  text-shadow: 0 0 40px var(--color-accent-glow);
+}
+
+.card-surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-accent-dim);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  letter-spacing: 0.03em;
+}
+
+.bg-mesh-warm {
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 15% 10%,
+      rgba(var(--color-accent-rgb, 245, 158, 11), 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 90% 90%,
+      rgba(var(--color-accent-rgb, 245, 158, 11), 0.05),
+      transparent 60%
+    ),
+    var(--color-background);
+}
+
+.bg-mesh-cool {
+  background:
+    radial-gradient(
+      ellipse 55% 45% at 85% 20%,
+      rgba(var(--color-accent-rgb, 245, 158, 11), 0.06),
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 10% 80%,
+      rgba(var(--color-accent-rgb, 245, 158, 11), 0.04),
+      transparent 60%
+    ),
+    var(--color-background);
+}
+
+.bg-section {
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      rgba(var(--color-accent-rgb, 245, 158, 11), 0.12),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-primary) 0%,
+      var(--color-background) 100%
+    );
+}
+
+.slide-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.slide-table th {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--color-text-tertiary);
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+}
+.slide-table td {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+
+.timeline-track {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    var(--color-border) 100%
+  );
+  border-radius: 2px;
+}
+.timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow:
+    0 0 0 6px rgba(var(--color-accent-rgb, 245, 158, 11), 0.15),
+    0 0 24px var(--color-accent-glow);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
