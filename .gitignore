@@ -7,6 +7,9 @@ build/
 .next/
 *.tsbuildinfo
 
+# npm pack output
+*.tgz
+
 # Environment and secrets
 .env
 .env.local
