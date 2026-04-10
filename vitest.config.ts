@@ -5,6 +5,7 @@ export default defineConfig({
     projects: [
       'packages/runtime',
       'packages/cli',
+      'packages/slide-nerds',
       'apps/web',
       {
         test: {
