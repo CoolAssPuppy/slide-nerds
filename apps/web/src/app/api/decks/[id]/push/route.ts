@@ -14,6 +14,19 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('push_enabled')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.push_enabled) {
+    return NextResponse.json(
+      { error: 'push not enabled. To apply for push access go to your slidenerds.com dashboard and make a request.' },
+      { status: 403 }
+    )
+  }
+
   const { id: deckId } = await context.params
 
   // Verify deck ownership
